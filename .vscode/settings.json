@@ -1,0 +1,6 @@
+{
+  "npm.packageManager": "pnpm",
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.suggest.enabled": true,
+  "terminal.integrated.suggest.quickSuggestions": true
+}

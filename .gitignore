@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Caches and coverage
+.eslintcache
+.cache/
+coverage/
+.nyc_output/
+*.cpuprofile
+*.heapprofile
+
+# Editors: keep the shared VS Code config, ignore personal files
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+.idea/
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
