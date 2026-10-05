@@ -1,0 +1,9 @@
+{
+  "name": "tutorial05",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start:classic": "node --env-file-if-exists=.env classic-server.ts",
+    "start:effect": "node --env-file-if-exists=.env effect-server.ts"
+  }
+}
