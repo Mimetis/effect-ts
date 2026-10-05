@@ -6,6 +6,9 @@
     "start": "pnpm -r --workspace-concurrency=1 --if-present start",
     "start:tutorial01": "pnpm --filter tutorial01 start",
     "start:tutorial02": "pnpm --filter tutorial02 start",
+    "start:tutorial03": "pnpm --filter tutorial03 start",
+    "start:tutorial03:config": "pnpm --filter tutorial03 start:config",
+    "start:tutorial04": "pnpm --filter tutorial04 start",
     "typecheck": "tsc -p .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -20,7 +23,8 @@
     "typescript-eslint": "^8.71.0"
   },
   "dependencies": {
-    "effect": "^4.0.0",
+    "@effect/sql-pg": "4.0.0",
+    "effect": "4.0.0",
     "neverthrow": "^8.2.0"
   }
 }

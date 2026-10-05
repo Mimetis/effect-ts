@@ -88,7 +88,7 @@ const getUserCountryEffect = (user: User): Effect.Effect<User, UserCountryNotFou
     if (user.id > 0) {
         return Effect.succeed({ country: "Belgium", ...user });
     }
-    return Effect.fail(new UserCountryNotFound({ id }));
+    return Effect.fail(new UserCountryNotFound({ id: user.id }));
 };
 
 // Remember map
@@ -174,6 +174,6 @@ const program = completeUserEffectInstance.pipe(
 
 const result = await Effect.runPromise(program);
 
-console.log(result);
+Console.log(result);
 
 
