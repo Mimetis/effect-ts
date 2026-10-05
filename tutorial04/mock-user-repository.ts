@@ -37,7 +37,13 @@ const userService: UserRepositoryService = {
         }),
 };
 
+/**
+ * Fournit une implémentation mock du service UserRepository.
+ * Un Layer est une recette qui explique comment fournir une implémentation d'un service.
+ * Dans notre cas, le Layer fournit simplement l'implémentation mock définie ci-dessus.
+ */
 export const MockUserRepositoryLayer = Layer.succeed(
     UserRepository,
     userService,
 );
+
