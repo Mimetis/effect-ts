@@ -11,6 +11,9 @@
     "start:tutorial04": "pnpm --filter tutorial04 start",
     "start:tutorial05:classic": "pnpm --filter tutorial05 start:classic",
     "start:tutorial05:effect": "pnpm --filter tutorial05 start:effect",
+    "slides": "pnpm --filter slides dev",
+    "slides:build": "pnpm --filter slides build",
+    "slides:export": "pnpm --filter slides export",
     "typecheck": "tsc -p .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

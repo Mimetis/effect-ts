@@ -40,7 +40,9 @@ const UserRepository = Context.Service<IUserRepository>("UserRepository")
 
 
 // implémentation du service Random
-const userService : IUserRepository = {
+const userService: IUserRepository = {
+
+
     getById: (id: number) => {
 
         if (id > 500) {
@@ -54,6 +56,67 @@ const userService : IUserRepository = {
         return Effect.fail(new UserInvalidUserId({ id }));
     }
 };
+
+
+// To create a new service, you need:
+// - A unique identifier
+// - A type describing the operations of the service
+
+// class UserRepositoryClass extends Context.Service<UserRepositoryClass, {
+//     readonly getById: (
+//         id: number
+//     ) => Effect.Effect<User, UserInvalidUserId | UserNotFound>
+// }
+// >()("UserRepositoryClass") { }
+
+
+// type UserRepositoryShape = Context.Service.Shape<typeof UserRepositoryClass>
+
+// const uOf = UserRepositoryClass.of({
+//     getById: (id: number) => {
+//         if (id > 500) {
+//             return Effect.fail(new UserNotFound({ id }));
+//         }
+
+//         if (id > 0) {
+//             return Effect.succeed({ id, name: `User ${id}` });
+//         }
+
+//         return Effect.fail(new UserInvalidUserId({ id }));
+//     }
+// })
+
+// class UserRepositoryImpl {
+//     private readonly id: number;
+
+//     constructor(id: number) { 
+//         this.id = id;
+//     }
+//     getById(
+//         id: number
+//     ): Effect.Effect<User, UserInvalidUserId | UserNotFound> {
+
+//         if (id > 500) {
+//             return Effect.fail(new UserNotFound({ id }))
+//         }
+
+//         if (id > 0) {
+//             return Effect.succeed({
+//                 id,
+//                 name: `User ${id}`
+//             })
+//         }
+
+//         return Effect.fail(
+//             new UserInvalidUserId({ id })
+//         )
+//     }
+// }
+
+
+
+const user: User = { id, name: `User ${id}` };
+
 
 const program = Effect.gen(function* () {
     yield* Effect.promise(() => wait(1000));

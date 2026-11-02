@@ -1,0 +1,14 @@
+/* Global styles, loaded automatically by Slidev */
+
+/* Let wide code blocks scroll inside their column instead of stretching the grid */
+.two-cols .col-left,
+.two-cols .col-right,
+.two-cols-header .col-left,
+.two-cols-header .col-right {
+  min-width: 0;
+}
+
+/* Keep the line breaks of multi-line messages (e.g. Schema errors) in runner outputs */
+.slidev-runner-output .output-line span {
+  white-space: pre-wrap;
+}
