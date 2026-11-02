@@ -13,7 +13,7 @@ lineNumbers: false
 transition: slide-left
 mdc: true
 monacoTypesSource: local
-colorSchema: dark
+colorSchema: auto
 drawings:
   persist: false
 class: text-center
@@ -147,28 +147,6 @@ Effect garde le "typé" de Result et ajoute ce qui manquait.
 
 ---
 
-# Les deux règles
-
-<v-clicks>
-
-> Tout système d'erreurs qui repose sur la **discipline des développeurs** échouera : des erreurs seront oubliées.
-
-> Tout système qui traite **toutes les erreurs de la même façon** échouera : certaines se rattrapent, d'autres jamais… et ça dépend du projet.
-
-</v-clicks>
-
-<v-click>
-
-👉 Avec Effect : le **compilateur** fait la discipline (les erreurs sont dans le type), et **vous** choisissez quoi traiter (erreurs attendues vs défauts).
-
-</v-click>
-
-<!--
-Les deux règles viennent du README du repo.
-On les retrouvera : la 1re avec le canal E, la 2e avec la distinction erreur attendue / défaut (section 5).
--->
-
----
 
 # Le problème
 
@@ -235,6 +213,18 @@ zoom: 0.85
 ---
 
 # Première idée : des tuples `[data, error]`
+
+```ts 
+export async function catchErrorTyped<T, E extends readonly BaseError[]>(promise: Promise<T>, errors: E) {
+    try {
+        return [await promise, null];
+    } catch (error) {
+        if (errors.some(e => error instanceof e)) 
+            return [null, error as InstanceType<E[number]>];
+        throw error;
+    }
+}
+```
 
 ```ts
 // tutorial01/functions.ts : seules les erreurs listées sont attrapées, les autres sont relancées
@@ -346,14 +336,100 @@ layout: section
 zoom: 0.85
 ---
 
+# ▶ Premier Effect
+
+<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div>
+
+- `Effect.succeed(v)` : un Effect qui **réussit**
+- `Effect.fail(e)` : un Effect qui **échoue**
+- L'erreur est **dans le type** : survolez `hello` et `boom`
+- Un Effect est une **description** : rien ne s'exécute avant `run*`
+- `runSyncExit` renvoie un `Exit` : **Success** ou **Failure**
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Effect } from "effect"
+
+const hello = Effect.succeed("Hello DevFest") // 👈 survolez : Effect<string, never, never>
+const boom = Effect.fail("Oups")              // 👈 survolez : Effect<never, string, never>
+
+console.log("— rien n'a encore été exécuté —")
+
+console.log(Effect.runSync(hello))
+console.log(Effect.runSyncExit(hello))
+console.log(Effect.runSyncExit(boom))
+```
+
+</div>
+</div>
+
+<!--
+Effect<A, E, R> : A = ce qu'on obtient, E = ce qui peut échouer, R = les dépendances (on y revient plus tard).
+E vaut never quand rien ne peut échouer ; A vaut never quand rien ne peut réussir.
+Essayer Effect.runSync(boom) : ça lève une exception, d'où runSyncExit.
+-->
+
+---
+zoom: 0.85
+---
+
+# ▶ Composer : `pipe`, `map` et `flatMap`
+
+<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div>
+
+- `x.pipe(f, g)` = `g(f(x))` : on enchaîne des étapes
+- `map` : **transforme** la valeur de succès
+- `flatMap` : **enchaîne** un autre Effect… et **ajoute** ses erreurs au type
+- Survolez `length` puis `checked` : `E` passe de `never` à `string`
+
+👉 Essayez `n > 5`
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Effect } from "effect"
+
+const hello = Effect.succeed("Hello DevFest")
+
+// map : transformer la valeur de succès
+const length = hello.pipe( // 👈 survolez : Effect<number, never, never>
+  Effect.map((msg) => msg.length),
+)
+
+// flatMap : enchaîner un autre Effect… qui peut échouer
+const checked = length.pipe( // 👈 survolez : Effect<number, string, never>
+  Effect.flatMap((n) => n > 20 ? Effect.succeed(n) : Effect.fail(`Trop court : ${n}`)),
+)
+
+console.log(Effect.runSyncExit(length))
+console.log(Effect.runSyncExit(checked))
+```
+
+</div>
+</div>
+
+<!--
+Analogie : map / flatMap sur un tableau, ou then sur une Promise… mais l'erreur reste typée.
+Si une étape échoue, les suivantes ne s'exécutent pas : l'erreur court-circuite la chaîne.
+-->
+
+---
+zoom: 0.8
+---
+
 # ▶ Le même `getUser`, avec Effect
 
 <div class="grid grid-cols-[1fr_2.2fr] gap-6">
 <div>
 
 - Le **même exemple** qu'avec `try/catch` et neverthrow
-- Les erreurs sont **dans la signature**, comme avec `Result`
-- Échouer = `yield*` une **erreur typée**
+- Deux petites fonctions, chacune avec **son** erreur
+- `flatMap` les enchaîne : survolez `getUser`, les **deux** erreurs sont dans le type
 - `catchTags` : chaque erreur traitée par son `_tag`
 
 👉 Essayez les ids `1`, `0`, `999`… et survolez `program`
@@ -368,17 +444,21 @@ class InvalidUserId extends Data.TaggedError("InvalidUserId")<{ id: number }> {}
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 type User = { id: number; name: string }
 
-// ✅ Les erreurs sont dans la signature… comme avec Result
-const getUser = (id: number): Effect.Effect<User, InvalidUserId | UserNotFound> =>
-  Effect.gen(function* () {
-    if (id <= 0) return yield* new InvalidUserId({ id })
-    if (id > 100) return yield* new UserNotFound({ id })
-    return { id, name: `User ${id}` }
-  })
+// 1. Valider l'id
+const validateId = (id: number): Effect.Effect<number, InvalidUserId> =>
+  id > 0 ? Effect.succeed(id) : Effect.fail(new InvalidUserId({ id }))
+
+// 2. Chercher l'utilisateur
+const findUser = (id: number): Effect.Effect<User, UserNotFound> =>
+  id <= 100 ? Effect.succeed({ id, name: `User ${id}` }) : Effect.fail(new UserNotFound({ id }))
+
+// 3. Enchaîner : les deux erreurs s'additionnent dans le type
+const getUser = (id: number) => // 👈 survolez getUser
+  validateId(id).pipe(Effect.flatMap(findUser))
 
 const program = getUser(999).pipe( // 👈 survolez program
   Effect.map((user) => `✅ ${user.name}`),
-  Effect.catchTags({ // chaque erreur traitée par son _tag
+  Effect.catchTags({
     InvalidUserId: (e) => Effect.succeed(`⚠️ id ${e.id} invalide`),
     UserNotFound: (e) => Effect.succeed(`🔍 User ${e.id} introuvable`),
   }),
@@ -392,7 +472,7 @@ console.log(Effect.runSync(program))
 
 <!--
 3e version du même getUser : même comportement que les slides try/catch et neverthrow.
-Comme avec Result, l'erreur est dans le type. Mais c'est un Effect : on pourra lui ajouter retry, timeout, concurrence… sans toucher à son code (section 4).
+getUser vaut Effect<User, InvalidUserId | UserNotFound, never> sans l'avoir écrit : flatMap a additionné les erreurs.
 Au survol, program vaut Effect<string, never, never> : E = never, toutes les erreurs ont été traitées.
 -->
 
@@ -430,26 +510,6 @@ Effect<User, InvalidUserId | UserNotFound, never>  // Effect      : les erreurs 
 <!--
 Analogie : une recette vs le plat.
 R = never ici ; on verra en section 7 un getUser qui dépend d'un UserRepository.
--->
----
-
-# Premier Effect
-
-```ts twoslash
-import { Effect } from "effect"
-
-const hello = Effect.succeed("Hello DevFest")
-
-const boom = Effect.fail("Oups" as const)
-
-const program = Effect.gen(function* () {
-  const msg = yield* hello // yield* ≈ await
-  return msg.length
-})
-```
-
-<!--
-Survoler les types en direct (Twoslash). E vaut never quand rien ne peut échouer.
 -->
 ---
 zoom: 0.85

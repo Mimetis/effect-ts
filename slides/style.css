@@ -1,5 +1,40 @@
 /* Global styles, loaded automatically by Slidev */
 
+/* Fonts are bundled locally (no network needed on stage) */
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/jetbrains-mono";
+
+/* Variables used by the status bar, the cover prompt and the timeline (slide 5) */
+:root {
+  --tech-font-sans: "Space Grotesk Variable", system-ui, sans-serif;
+  --tech-font-mono: "JetBrains Mono Variable", "Fira Code", ui-monospace, monospace;
+  --tech-gradient: linear-gradient(90deg, var(--tech-cyan), var(--tech-blue) 45%, var(--tech-violet));
+
+  --tech-code-bg: #f6f7fb;
+  --tech-border: #dfe3ee;
+  --tech-fg: #343b58;
+  --tech-fg-strong: #1a1b26;
+  --tech-muted: #6b7394;
+  --tech-blue: #2e5bd8;
+  --tech-cyan: #0f7c99;
+  --tech-violet: #7a3ec2;
+  --tech-green: #3f7d1b;
+  --tech-red: #c4324f;
+}
+
+html.dark {
+  --tech-code-bg: #1a1b26;
+  --tech-border: #2a2f45;
+  --tech-fg: #c0caf5;
+  --tech-fg-strong: #e9edff;
+  --tech-muted: #7c84ad;
+  --tech-blue: #7aa2f7;
+  --tech-cyan: #7dcfff;
+  --tech-violet: #bb9af7;
+  --tech-green: #9ece6a;
+  --tech-red: #f7768e;
+}
+
 /* Let wide code blocks scroll inside their column instead of stretching the grid */
 .two-cols .col-left,
 .two-cols .col-right,
@@ -12,3 +47,150 @@
 .slidev-runner-output .output-line span {
   white-space: pre-wrap;
 }
+
+
+
+/* Status bar rendered by slide-bottom.vue (counter-scaled against `zoom`) */
+.tech-statusbar {
+  --tech-zoom: var(--slidev-slide-zoom-scale, 1);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: calc(6px / var(--tech-zoom)) calc(18px / var(--tech-zoom));
+  font-family: var(--tech-font-mono);
+  font-size: calc(10px / var(--tech-zoom));
+  color: var(--tech-muted, #888);
+  pointer-events: none;
+  /* Behind the slide content: dense slides keep priority over the bar */
+  z-index: -1;
+}
+
+.tech-statusbar__page {
+  color: var(--tech-fg, inherit);
+}
+
+.tech-statusbar__dot {
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--tech-green, #2e7d32);
+  box-shadow: 0 0 6px var(--tech-green, #2e7d32);
+}
+
+/* Cover: a terminal prompt with a blinking caret */
+.tech-prompt {
+  display: inline-block;
+  font-family: var(--tech-font-mono);
+  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--tech-border, #ddd);
+  background: var(--tech-code-bg, #f5f5f5);
+  color: var(--tech-fg, inherit);
+}
+
+.tech-prompt::before {
+  content: "$ ";
+  color: var(--tech-green, #2e7d32);
+}
+
+.tech-prompt::after {
+  content: "▋";
+  margin-left: 0.3em;
+  color: var(--tech-blue, #3ab9d5);
+  animation: tech-blink 1.1s steps(1) infinite;
+}
+
+@keyframes tech-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Timeline table (slide "Gérer les erreurs") */
+.tl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.tl-row {
+  display: grid;
+  grid-template-columns: 10.5rem 14.5rem 1fr 1.25fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--tech-border, #e5e5e5);
+  border-radius: 8px;
+  background: var(--tech-code-bg, #fafafa);
+}
+
+.tl-head {
+  padding-block: 0.2rem;
+  border: none;
+  background: none;
+  font-family: var(--tech-font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tech-cyan, #0e7490);
+}
+
+.tl-name {
+  font-weight: 650;
+  color: var(--tech-fg-strong, inherit);
+}
+
+.tl-name small {
+  display: block;
+  font-family: var(--tech-font-mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--tech-muted, #888);
+}
+
+.slidev-layout .tl code {
+  white-space: nowrap;
+}
+
+.slidev-layout .tl-row > code {
+  justify-self: start;
+  font-size: 0.78rem;
+}
+
+.tl-row > span:nth-child(3) {
+  color: var(--tech-green, #2e7d32);
+}
+
+.tl-row > span:nth-child(4) {
+  color: var(--tech-red, #c62828);
+}
+
+.tl-head > span:nth-child(n) {
+  color: inherit;
+}
+
+.tl-row b {
+  font-weight: 700;
+}
+
+.tl-effect {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--tech-code-bg, #fafafa), var(--tech-code-bg, #fafafa)) padding-box,
+    var(--tech-gradient, linear-gradient(90deg, #3ab9d5, #7c3aed)) border-box;
+  box-shadow: 0 0 24px -8px rgba(122, 162, 247, 0.5);
+}
+
+.tl-effect > span:nth-child(4) {
+  color: var(--tech-green, #2e7d32);
+}
+
