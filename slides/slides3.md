@@ -42,21 +42,51 @@ Accroche : "Qui a déjà eu un `undefined is not a function` en prod un vendredi
 
 ---
 layout: two-cols
+layoutClass: gap-10
 ---
 
 # Qui suis-je ?
 
-- Sébastien Pertus
-- Senior Software Engineer @ Microsoft
-- [https://github.com/mimetis](https://github.com/mimetis)
-- [https://www.linkedin.com/in/sebastienpertus](https://www.linkedin.com/in/sebastienpertus)
+<div class="flex items-center gap-5 mb-3">
+  <div class="flex-none rounded-full overflow-hidden shadow-lg ring-2 ring-gray-400/30" style="width: 6rem; height: 6rem">
+    <img src="./images/sebastien_pertus.jpg" alt="Sébastien Pertus" style="width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; transform: scale(1.5); transform-origin: 50% 32%" />
+  </div>
+  <div>
+    <div class="text-2xl font-bold">Sébastien Pertus</div>
+    <div class="opacity-80">Senior Software Engineer @ <b>Microsoft Frontier Company</b></div>
+  </div>
+</div>
+
+Des ingénieurs Microsoft **intégrés chez nos clients** pour concevoir, déployer et faire tourner l'IA en production.
+
+<div class="flex gap-5 text-sm mt-2">
+  <a href="https://github.com/mimetis" class="flex items-center gap-1"><div class="i-carbon-logo-github" /> mimetis</a>
+  <a href="https://www.linkedin.com/in/sebastienpertus" class="flex items-center gap-1"><div class="i-carbon-logo-linkedin" /> sebastienpertus</a>
+</div>
+
+<div class="mt-5 text-xs uppercase tracking-widest opacity-60">Ces dernières années, aux côtés de</div>
+<div class="grid grid-cols-3 gap-3 mt-2">
+  <div class="h-11 flex items-center justify-center rounded-md bg-white px-3 py-2 shadow-sm"><img src="./images/logos/kuka.svg" alt="KUKA" class="max-h-full max-w-full object-contain" /></div>
+  <div class="h-11 flex items-center justify-center rounded-md bg-white px-3 py-2 shadow-sm"><img src="./images/logos/coca-cola.svg" alt="Coca-Cola" class="max-h-full max-w-full object-contain" /></div>
+  <div class="h-11 flex items-center justify-center rounded-md bg-white px-3 py-1 shadow-sm"><img src="./images/logos/pg.svg" alt="P&amp;G" class="max-h-full max-w-full object-contain" /></div>
+  <div class="h-11 flex items-center justify-center rounded-md bg-white px-3 py-2 shadow-sm"><img src="./images/logos/cdiscount.png" alt="Cdiscount" class="max-h-full max-w-full object-contain" /></div>
+  <div class="h-11 flex items-center justify-center rounded-md bg-white px-3 py-2 shadow-sm"><span class="text-gray-800 font-bold tracking-[0.2em] text-sm">MULLIEZ</span></div>
+  <div class="h-11 flex items-center justify-center rounded-md bg-white px-3 py-2 shadow-sm"><img src="./images/logos/lvmh.svg" alt="LVMH" class="max-h-full max-w-full object-contain" /></div>
+</div>
 
 ::right::
 
-<!-- [Ajouter : photo ou QR code vers les slides] -->
+<div class="h-full flex flex-col justify-center">
+  <img src="./images/microsoft_frontier.png" alt="Microsoft Frontier Company : AI engineering that amplifies and protects your intelligence" class="rounded-lg shadow-xl" />
+  <div class="mt-3 text-xs opacity-60 text-center">
+    <a href="https://www.microsoft.com/en-us/frontier-company">microsoft.com/frontier-company</a>
+  </div>
+</div>
 
 <!--
 Rester très court.
+Frontier Company : modèle « Forward Deployed Engineering », des ingénieurs Microsoft embarqués chez le client, orientés résultats mesurables.
+Annonce : « Microsoft Frontier Company: AI engineering that amplifies and protects your intelligence », Judson Althoff, 2 juillet 2026.
 -->
 ---
 
@@ -227,7 +257,9 @@ export async function catchErrorTyped<T, E extends readonly BaseError[]>(promise
 ```
 
 ```ts
-// tutorial01/functions.ts : seules les erreurs listées sont attrapées, les autres sont relancées
+class UserInvalidUserId extends Error { readonly name = "UserInvalidUserId"}
+class UserNotFound extends Error { readonly name = "UserNotFound" }
+
 const [user, error] = await catchErrorTyped(getUser(id), [UserInvalidUserId, UserNotFound])
 
 if (error) {
@@ -241,10 +273,8 @@ if (error) {
 <v-click>
 
 Ça marche, mais :
-
 - il faut **déclarer les erreurs à chaque appel**
 - si `getUser()` ajoute demain un `UnauthorizedError`, **rien ne le signale**
-- la liste des erreurs est **dupliquée** entre l'implémentation et l'appelant
 
 </v-click>
 
@@ -333,19 +363,51 @@ layout: section
 ### Un type qui dit enfin la vérité
 
 ---
+zoom: 0.9
+---
+
+# Trois paramètres, trois vérités
+
+Effect: Décrire le résultat, les erreurs, les dépendances
+
+# `Effect<A, E, R>`
+```ts
+const UserEffect:Effect<User, InvalidUserId | UserNotFound, never>  // Effect      : les erreurs ✅ les dépendances ✅
+```
+
+<v-click>
+
+| | Signification | Pour `getUser` |
+|---|---|---|
+| **A** | Ce que ça produit en cas de succès | `User` |
+| **E** | Les erreurs **attendues**, typées | `InvalidUserId \| UserNotFound` |
+| **R** | Les dépendances nécessaires | `never` : aucune… pour l'instant (section 7) |
+
+> Un `Effect` est une **description** d'un programme : rien ne s'exécute tant qu'on ne le lance pas.
+ 
+> 👉 Donc on peut le **rejouer** (retry), l'**interrompre**, le **limiter**… sans toucher à son code.
+
+</v-click>
+
+<!--
+Analogie : une recette vs le plat.
+R = never ici ; on verra en section 7 un getUser qui dépend d'un UserRepository.
+-->
+
+---
 zoom: 0.85
 ---
 
 # ▶ Premier Effect
 
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div class="grid grid-cols-[1fr_1fr] gap-6">
 <div>
 
 - `Effect.succeed(v)` : un Effect qui **réussit**
 - `Effect.fail(e)` : un Effect qui **échoue**
 - L'erreur est **dans le type** : survolez `hello` et `boom`
 - Un Effect est une **description** : rien ne s'exécute avant `run*`
-- `runSyncExit` renvoie un `Exit` : **Success** ou **Failure**
+
 
 </div>
 <div>
@@ -353,8 +415,8 @@ zoom: 0.85
 ```ts {monaco-run} {autorun: false}
 import { Effect } from "effect"
 
-const hello = Effect.succeed("Hello DevFest") // 👈 survolez : Effect<string, never, never>
-const boom = Effect.fail("Oups")              // 👈 survolez : Effect<never, string, never>
+const hello = Effect.succeed("Hello DevFest") 
+const boom = Effect.fail("Oups")              
 
 console.log("— rien n'a encore été exécuté —")
 
@@ -476,41 +538,6 @@ getUser vaut Effect<User, InvalidUserId | UserNotFound, never> sans l'avoir écr
 Au survol, program vaut Effect<string, never, never> : E = never, toutes les erreurs ont été traitées.
 -->
 
----
-zoom: 0.9
----
-
-# Trois paramètres, trois vérités
-
-Le même `getUser`, trois signatures
-
-```ts
-Promise<User>                                      // try / catch : et les erreurs ? 🤷
-Result<User, InvalidUserId | UserNotFound>         // neverthrow  : les erreurs ✅
-Effect<User, InvalidUserId | UserNotFound, never>  // Effect      : les erreurs ✅ les dépendances ✅
-```
-
-<v-click>
-
-| | Signification | Pour `getUser` |
-|---|---|---|
-| **A** | Ce que ça produit en cas de succès | `User` |
-| **E** | Les erreurs **attendues**, typées | `InvalidUserId \| UserNotFound` |
-| **R** | Les dépendances nécessaires | `never` : aucune… pour l'instant (section 7) |
-
-</v-click>
-
-<v-click>
-
-> Un `Effect` est une **description** d'un programme : rien ne s'exécute tant qu'on ne le lance pas.
-> 👉 Donc on peut le **rejouer** (retry), l'**interrompre**, le **limiter**… sans toucher à son code.
-
-</v-click>
-
-<!--
-Analogie : une recette vs le plat.
-R = never ici ; on verra en section 7 un getUser qui dépend d'un UserRepository.
--->
 ---
 zoom: 0.85
 ---
