@@ -1117,12 +1117,12 @@ layout: section
 ### `Schema` et `Config`
 
 ---
-zoom: 0.72
+zoom: 0.8
 ---
 
-# ⑨ Valider la réponse de l'API : `Schema`
+# ▶ Valider la réponse de l'API : `Schema`
 
-<div class="grid grid-cols-[1fr_2fr] gap-6">
+<div class="grid grid-cols-[1fr_1.8fr] gap-6">
 <div>
 
 ### Classique
@@ -1135,7 +1135,10 @@ const user = (await res.json()) as User
 
 <v-click>
 
-Avec zod ou valibot : un `safeParse` à brancher, et une erreur de plus noyée dans le `unknown`.
+Avec zod ou valibot, deux options… et aucune ne rejoint le type :
+
+- `parse` : **lève une exception**, retour au `catch (e: unknown)`
+- `safeParse` : renvoie un objet `{ success, … }`, à **tester à la main** à chaque appel
 
 </v-click>
 
@@ -1144,98 +1147,45 @@ Avec zod ou valibot : un `safeParse` à brancher, et une erreur de plus noyée d
 
 ### Effect
 
-```ts
-import { Schema } from "effect"
-
-const User = Schema.Struct({
-  id: Schema.String,
-  name: Schema.String,
-  createdAt: Schema.DateFromString, // string ISO → Date, automatiquement
-})
-type User = typeof User.Type
-
-const getUser = (id: string) =>
-  Effect.gen(function* () {
-    const res = yield* Effect.tryPromise({ /* ... inchangé ... */ })
-    if (res.status === 404) return yield* new UserNotFound({ id })
-    if (!res.ok) return yield* new HttpError({ status: res.status })
-    const body = yield* Effect.tryPromise({
-      try: () => res.json(),
-      catch: (cause) => new NetworkError({ cause }),
-    })
-    return yield* Schema.decodeUnknownEffect(User)(body)
-  }).pipe(
-    Effect.retry({
-      schedule: Schedule.exponential("100 millis"),
-      times: 3,
-      while: (e) => e._tag === "HttpError" || e._tag === "NetworkError",
-    })
-  )
-// Effect<User, UserNotFound | HttpError | NetworkError | SchemaError, never>
-```
-
-</div>
-</div>
-
-<!--
-Un JSON inattendu n'est plus un défaut caché : c'est une SchemaError typée, avec un message précis (chemin du champ fautif).
-Et on ne relance pas une SchemaError : retry uniquement sur HttpError / NetworkError.
-Bonus : Schema transforme aussi (string ISO → Date).
--->
----
-zoom: 0.69
----
-
-# ▶ `Schema` : un type qui existe à l'exécution
-
-<div class="grid grid-cols-[1fr_2.4fr] gap-6">
-<div>
-
-- Un type TypeScript **disparaît** à l'exécution, un `Schema` **reste**
-- Il **valide** et **transforme** (`string` → `Date`)
-- Le type est **déduit** du schéma : survolez `User`
-- `errors: "all"` : toutes les erreurs, avec leur chemin
-
-</div>
-<div>
-
 ```ts {monaco-run} {autorun: false}
-import { Effect, Schema } from "effect"
+import { Data, Effect, Schema } from "effect"
+
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 
 const User = Schema.Struct({
-  id: Schema.Int.check(Schema.isGreaterThan(0)),
-  name: Schema.NonEmptyString,
-  email: Schema.NonEmptyString,
+  id: Schema.Number,
+  name: Schema.String,
   createdAt: Schema.DateFromString, // string ISO → Date
 })
-type User = typeof User.Type // 👈 le type est déduit du schéma
 
-// Ce que renvoie la base de données : du unknown
-const rows: ReadonlyArray<unknown> = [
-  { id: 1, name: "Ada Lovelace", email: "ada@example.com", createdAt: "1815-12-10" },
-  { id: "2", name: "", email: null, createdAt: "hier" },
-]
-
-const decodeUser = Schema.decodeUnknownEffect(User, { errors: "all" })
-
-for (const row of rows) {
-  const message = await Effect.runPromise(
-    decodeUser(row).pipe(
-      Effect.match({
-        onSuccess: (user) => `✅ ${user.name} (${user.createdAt.getFullYear()})`,
-        onFailure: (error) => `❌ ${error.message}`, // SchemaError typée
-      }),
-    ),
-  )
-  console.log(message)
+// Ce que renvoie l'API : du JSON… donc du unknown
+const api: Record<number, unknown> = {
+  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
+  2: { id: "2", name: "Grace", createdAt: "hier" }, // 👈 données invalides
 }
+
+const getUser = (id: number) => // 👈 survolez : SchemaError a rejoint le type
+  Effect.gen(function* () {
+    const row = api[id]
+    if (row === undefined) return yield* new UserNotFound({ id })
+    return yield* Schema.decodeUnknownEffect(User)(row)
+  })
+// Effect<User, UserNotFound | SchemaError, never>
+
+for (const id of [1, 2, 3]) Effect.runSync(getUser(id).pipe(Effect.match({
+  onSuccess: (user) => console.log("✅", user.name, user.createdAt.getFullYear()),
+  onFailure: (error) => console.log("❌", error._tag, error.message),
+})))
 ```
 
 </div>
 </div>
 
 <!--
-Les deux lignes sont celles de tutorial04 / tutorial05 : la ligne 2 passe avec `as User`… et casse plus loin.
+Lancer : 1 → succès (createdAt est devenu une vraie Date), 2 → SchemaError avec le chemin du champ fautif, 3 → UserNotFound.
+Le point clé : en ajoutant une ligne (decodeUnknownEffect), SchemaError rejoint le type de getUser. Survoler getUser.
+Corriger les données de 2 en direct : l'erreur disparaît.
+📁 tutorial04 / tutorial05 : cette ligne invalide passe avec `as User`… et casse plus loin ; avec Schema, elle est rejetée dès la lecture.
 -->
 
 ---
