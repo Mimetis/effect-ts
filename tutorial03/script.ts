@@ -25,6 +25,7 @@ class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> { }
 class UserCountryNotFound extends Data.TaggedError("UserCountryNotFound")<{ id: number }> { }
 class UserFromToulouseIsInvalid extends Data.TaggedError("UserFromToulouseIsInvalid")<{ id: number }> { }
 
+type UserEffect = Effect.Effect<User, UserInvalidUserId | UserNotFound, never>
 
 //To create a new service, you need two things:
 // A unique identifier.

@@ -372,7 +372,7 @@ Effect: Décrire le résultat, les erreurs, les dépendances
 
 # `Effect<A, E, R>`
 ```ts
-const UserEffect:Effect<User, InvalidUserId | UserNotFound, never>  // Effect      : les erreurs ✅ les dépendances ✅
+type UserEffect=Effect<User, InvalidUserId | UserNotFound, never>  // Effect      : les erreurs ✅ les dépendances ✅
 ```
 
 <v-click>
@@ -381,7 +381,7 @@ const UserEffect:Effect<User, InvalidUserId | UserNotFound, never>  // Effect   
 |---|---|---|
 | **A** | Ce que ça produit en cas de succès | `User` |
 | **E** | Les erreurs **attendues**, typées | `InvalidUserId \| UserNotFound` |
-| **R** | Les dépendances nécessaires | `never` : aucune… pour l'instant (section 7) |
+| **R** | Les dépendances nécessaires | `never` : Aucune… pour l'instant |
 
 > Un `Effect` est une **description** d'un programme : rien ne s'exécute tant qu'on ne le lance pas.
  
@@ -400,29 +400,39 @@ zoom: 0.85
 
 # ▶ Premier Effect
 
-<div class="grid grid-cols-[1fr_1fr] gap-6">
+<div class="grid grid-cols-[1fr_1.7fr] gap-6">
 <div>
 
 - `Effect.succeed(v)` : un Effect qui **réussit**
 - `Effect.fail(e)` : un Effect qui **échoue**
 - L'erreur est **dans le type** : survolez `hello` et `boom`
+- `Effect<number, DivisionByZero>` : **ce que ça renvoie** + **comment ça peut échouer**
 - Un Effect est une **description** : rien ne s'exécute avant `run*`
-
 
 </div>
 <div>
 
 ```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
+import { Data, Effect } from "effect"
 
-const hello = Effect.succeed("Hello DevFest") 
-const boom = Effect.fail("Oups")              
+// Un effect qui ne peut echouer
+const hello = Effect.succeed("Hello DevFest")
+
+// un effect qui échoue toujours et ne renvoie jamais de valeur
+const boom = Effect.fail("Oups")
+
+// Un résultat (number) ET une erreur possible (DivisionByZero)
+class DivisionByZero extends Data.TaggedError("DivisionByZero") {}
+
+const divide = (a: number, b: number): Effect.Effect<number, DivisionByZero> =>
+  b === 0 ? Effect.fail(new DivisionByZero()) : Effect.succeed(a / b)
 
 console.log("— rien n'a encore été exécuté —")
 
 console.log(Effect.runSync(hello))
-console.log(Effect.runSyncExit(hello))
 console.log(Effect.runSyncExit(boom))
+console.log(Effect.runSyncExit(divide(10, 2)))
+console.log(Effect.runSyncExit(divide(10, 0)))
 ```
 
 </div>
@@ -431,6 +441,8 @@ console.log(Effect.runSyncExit(boom))
 <!--
 Effect<A, E, R> : A = ce qu'on obtient, E = ce qui peut échouer, R = les dépendances (on y revient plus tard).
 E vaut never quand rien ne peut échouer ; A vaut never quand rien ne peut réussir.
+divide : la signature dit tout. Comparer avec `(a, b) => number` qui peut renvoyer Infinity ou lancer une exception sans prévenir.
+Data.TaggedError : une classe d'erreur avec un _tag, qu'on pourra traiter par son nom (catchTag, section suivante).
 Essayer Effect.runSync(boom) : ça lève une exception, d'où runSyncExit.
 -->
 
@@ -440,17 +452,15 @@ zoom: 0.85
 
 # ▶ Composer : `pipe`, `map` et `flatMap`
 
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div class="grid grid-cols-[1fr_1fr] gap-6">
 <div>
 
-- `x.pipe(f, g)` = `g(f(x))` : on enchaîne des étapes
-- `map` : **transforme** la valeur de succès
-- `flatMap` : **enchaîne** un autre Effect… et **ajoute** ses erreurs au type
-- Survolez `length` puis `checked` : `E` passe de `never` à `string`
+- `pipe()`, c'est comme le `|` en bash, vous avez tous déjà utilisé cette syntaxe :<br>`curl -fsSL https://bun.sh/install | bash`
 
-👉 Essayez `n > 5`
-
+- `map()` : **transforme** la valeur de succès
+- `flatMap()` : **enchaîne** un autre Effect… et **ajoute** ses erreurs au type
 </div>
+
 <div>
 
 ```ts {monaco-run} {autorun: false}
@@ -459,13 +469,16 @@ import { Effect } from "effect"
 const hello = Effect.succeed("Hello DevFest")
 
 // map : transformer la valeur de succès
-const length = hello.pipe( // 👈 survolez : Effect<number, never, never>
+const length = hello.pipe( 
   Effect.map((msg) => msg.length),
 )
 
 // flatMap : enchaîner un autre Effect… qui peut échouer
-const checked = length.pipe( // 👈 survolez : Effect<number, string, never>
-  Effect.flatMap((n) => n > 20 ? Effect.succeed(n) : Effect.fail(`Trop court : ${n}`)),
+const checked = length.pipe( 
+  
+  Effect.flatMap((n) => n > 20 ? 
+    Effect.succeed(n) : 
+    Effect.fail(`Trop court : ${n}`)),
 )
 
 console.log(Effect.runSyncExit(length))
@@ -481,223 +494,19 @@ Si une étape échoue, les suivantes ne s'exécutent pas : l'erreur court-circui
 -->
 
 ---
-zoom: 0.8
+zoom: 0.67
 ---
 
-# ▶ Le même `getUser`, avec Effect
-
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
-<div>
-
-- Le **même exemple** qu'avec `try/catch` et neverthrow
-- Deux petites fonctions, chacune avec **son** erreur
-- `flatMap` les enchaîne : survolez `getUser`, les **deux** erreurs sont dans le type
-- `catchTags` : chaque erreur traitée par son `_tag`
-
-👉 Essayez les ids `1`, `0`, `999`… et survolez `program`
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Data, Effect } from "effect"
-
-class InvalidUserId extends Data.TaggedError("InvalidUserId")<{ id: number }> {}
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-type User = { id: number; name: string }
-
-// 1. Valider l'id
-const validateId = (id: number): Effect.Effect<number, InvalidUserId> =>
-  id > 0 ? Effect.succeed(id) : Effect.fail(new InvalidUserId({ id }))
-
-// 2. Chercher l'utilisateur
-const findUser = (id: number): Effect.Effect<User, UserNotFound> =>
-  id <= 100 ? Effect.succeed({ id, name: `User ${id}` }) : Effect.fail(new UserNotFound({ id }))
-
-// 3. Enchaîner : les deux erreurs s'additionnent dans le type
-const getUser = (id: number) => // 👈 survolez getUser
-  validateId(id).pipe(Effect.flatMap(findUser))
-
-const program = getUser(999).pipe( // 👈 survolez program
-  Effect.map((user) => `✅ ${user.name}`),
-  Effect.catchTags({
-    InvalidUserId: (e) => Effect.succeed(`⚠️ id ${e.id} invalide`),
-    UserNotFound: (e) => Effect.succeed(`🔍 User ${e.id} introuvable`),
-  }),
-)
-
-console.log(Effect.runSync(program))
-```
-
-</div>
-</div>
-
-<!--
-3e version du même getUser : même comportement que les slides try/catch et neverthrow.
-getUser vaut Effect<User, InvalidUserId | UserNotFound, never> sans l'avoir écrit : flatMap a additionné les erreurs.
-Au survol, program vaut Effect<string, never, never> : E = never, toutes les erreurs ont été traitées.
--->
-
----
-zoom: 0.85
----
-
-# ▶ Une Promise court déjà, un Effect attend
-
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
-<div>
-
-- Une `Promise` démarre **dès sa création**
-- Un `Effect` est une **description** : rien ne se passe avant `run*`
-- Donc on peut le **rejouer**, le **retarder**, l'**interrompre**…
-
-👉 Lancez et regardez **l'ordre** des logs
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
-
-const promise = new Promise<number>((resolve) => {
-  console.log("🏃 Promise : je démarre tout de suite !")
-  resolve(999)
-})
-
-const effect = Effect.sync(() => {
-  console.log("🧘 Effect : je démarre quand on me lance")
-  return 42
-})
-
-console.log("— rien n'a encore été lancé —")
-
-console.log(await Effect.runPromise(effect))
-console.log(await Effect.runPromise(effect)) // une description se rejoue
-console.log(await promise) // la Promise, elle, ne se rejoue pas
-```
-
-</div>
-</div>
-
-<!--
-C'est LA différence fondamentale : c'est ce qui rend possibles retry, timeout, interruption… sans toucher au code.
--->
-
----
-zoom: 0.85
----
-
-# ▶ Créer et lancer un Effect
-
-<div class="grid grid-cols-[1fr_1.8fr] gap-6">
-<div>
-
-| Créer | à partir de… |
-|---|---|
-| `Effect.succeed(v)` | une valeur |
-| `Effect.fail(e)` | une erreur typée |
-| `Effect.sync(f)` | du code qui ne throw pas |
-| `Effect.try(…)` | du code qui peut throw |
-| `Effect.tryPromise(…)` | une `Promise` |
-
-`runSync`, `runPromise`… ou `run*Exit` pour obtenir un `Exit` : **Success** ou **Failure**.
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
-
-const ok = Effect.succeed(42) // 👈 survolez : Effect<number, never, never>
-const ko = Effect.fail("💥 boom") // Effect<never, string, never>
-
-const parse = (json: string) =>
-  Effect.try({
-    try: () => JSON.parse(json) as unknown,
-    catch: () => "JSON invalide", // l'erreur rejoint le type
-  })
-
-console.log(Effect.runSync(ok))
-console.log(Effect.runSyncExit(ko))
-console.log(Effect.runSyncExit(parse('{ "ok": true }')))
-console.log(Effect.runSyncExit(parse("{ oops")))
-```
-
-</div>
-</div>
-
-<!--
-📁 tutorial02/script.ts — pnpm start:tutorial02
-runSync(ko) lève une exception : le runner l'affiche en rouge.
--->
-
----
-zoom: 0.85
----
-
-# ▶ Deux styles : `gen` et `pipe`
-
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
-<div>
-
-- `Effect.gen` + `yield*` ≈ `async` + `await`
-- `x.pipe(f, g)` = `g(f(x))`
-- En pratique : **gen** pour la logique, **pipe** pour ajouter des comportements (retry, timeout, logs…)
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
-
-const getUser = (id: number) => Effect.succeed({ id, name: `ada ${id}` })
-
-// Style « générateur » : se lit comme du async / await
-const withGen = Effect.gen(function* () {
-  const user = yield* getUser(1)
-  return user.name.toUpperCase()
-})
-
-// Style « pipe » : une chaîne de transformations
-const withPipe = getUser(1).pipe(
-  Effect.map((user) => user.name),
-  Effect.map((name) => name.toUpperCase()),
-)
-
-console.log(Effect.runSync(withGen), Effect.runSync(withPipe))
-
-// On ajoute des comportements sans toucher à la logique
-const resilient = withGen.pipe(
-  Effect.timeout("1 second"),
-  Effect.retry({ times: 3 }),
-  Effect.tap((name) => Effect.log(`👋 ${name}`)),
-)
-console.log(await Effect.runPromise(resilient))
-```
-
-</div>
-</div>
-
-<!--
-Effect.log affiche l'heure et la fibre (#3) : on s'en servira pour visualiser la concurrence.
--->
-
----
-zoom: 0.7
----
-
-# ▶ Les erreurs s'additionnent… dans le type
+# ▶ Les erreurs s'additionnent… avec `pipe`
 
 <div class="grid grid-cols-[1fr_2.6fr] gap-6">
 <div>
 
 - Le même `getUser`… plus un `getCountry`
 - Chaque fonction **déclare** ses erreurs
-- `yield*` les **additionne** : survolez `program`
+- `flatMap` les **additionne** : survolez `program`
 - `catchTags` les traite une à une
 - `Effect<string>` = `E` vaut `never` : **tout** doit être traité
-
-👉 Retirez une ligne de `catchTags`
 
 </div>
 <div>
@@ -719,7 +528,72 @@ const getCountry = (user: User): Effect.Effect<string, CountryNotFound> =>
   user.id === 31 ? Effect.fail(new CountryNotFound({ id: user.id }))
   : Effect.succeed(user.id > 50 ? "France" : "Belgique")
 
-const program = (id: number) => // 👈 survolez : les 3 erreurs sont dans le type
+const program = (id: number) => // les 3 erreurs sont dans le type
+  getUser(id).pipe(
+    Effect.flatMap((user) =>
+      getCountry(user).pipe(
+        Effect.map((country) => `✅ ${user.name} (${country})`),
+      ),
+    ),
+  )
+
+const describe = (id: number): Effect.Effect<string> =>
+  program(id).pipe(
+    Effect.catchTags({
+      InvalidUserId: (e) => Effect.succeed(`⚠️ id invalide : ${e.id}`),
+      UserNotFound: (e) => Effect.succeed(`🔍 introuvable : ${e.id}`),
+      CountryNotFound: (e) => Effect.succeed(`🌍 pays inconnu : ${e.id}`),
+    }),
+  )
+
+for (const id of [1, 99, 0, 999, 31]) console.log(Effect.runSync(describe(id)))
+```
+
+</div>
+</div>
+
+<!--
+Même getUser que les slides try/catch et neverthrow (ids 0 et 999), plus getCountry (le user 31, de Toulouse, est rejeté 😉).
+program vaut Effect<string, InvalidUserId | UserNotFound | CountryNotFound, never> sans l'avoir écrit : flatMap a additionné les erreurs.
+Remarquer l'imbrication : pour garder `user` sous la main dans le map, il faut un flatMap dans le flatMap… slide suivante, Effect.gen règle ça.
+En retirant une ligne de catchTags, `describe` ne compile plus : l'erreur restante n'est pas traitée.
+-->
+
+---
+zoom: 0.7
+---
+
+# ▶ Le même programme, avec `Effect.gen`
+
+<div class="grid grid-cols-[1fr_2.6fr] gap-6">
+<div>
+
+- **Exactement** le même programme qu'avec `pipe`
+- `Effect.gen` + `yield*` ≈ `async` + `await`
+- Plus d'imbrication : on lit le code **de haut en bas**
+- Les erreurs s'additionnent **de la même façon** : survolez `program`
+</div>
+
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Data, Effect } from "effect"
+
+class InvalidUserId extends Data.TaggedError("InvalidUserId")<{ id: number }> {}
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ id: number }> {}
+type User = { id: number; name: string }
+
+const getUser = (id: number): Effect.Effect<User, InvalidUserId | UserNotFound> =>
+  id <= 0 ? Effect.fail(new InvalidUserId({ id }))
+  : id > 100 ? Effect.fail(new UserNotFound({ id }))
+  : Effect.succeed({ id, name: `User ${id}` })
+
+const getCountry = (user: User): Effect.Effect<string, CountryNotFound> =>
+  user.id === 31 ? Effect.fail(new CountryNotFound({ id: user.id }))
+  : Effect.succeed(user.id > 50 ? "France" : "Belgique")
+
+const program = (id: number) => // les 3 erreurs sont dans le type
   Effect.gen(function* () {
     const user = yield* getUser(id) // yield* ≈ await
     const country = yield* getCountry(user)
@@ -741,10 +615,7 @@ for (const id of [1, 99, 0, 999, 31]) console.log(Effect.runSync(describe(id)))
 </div>
 </div>
 
-<!--
-📁 tutorial02/script.ts (le user 31, de Toulouse, est rejeté 😉).
-En retirant une ligne de catchTags, `describe` ne compile plus : l'erreur restante n'est pas traitée.
--->
+
 ---
 layout: section
 ---
@@ -1023,6 +894,10 @@ const getUser = (id: string) =>
     return yield* Effect.tryPromise(() => res.json() as Promise<User>)
   })
 
+// Effect.all vs Promise.all / Promise.allSettled :
+//  ✅ les erreurs restent typées (pas de `catch (e: unknown)` ni de `reason: any`)
+//  ✅ si une branche échoue, les autres sont interrompues (pas de requête zombie)
+//  ✅ { mode: "result" } ≈ allSettled… mais chaque échec garde son type
 const getUserWithOrders = (id: string) =>
   Effect.all([getUser(id), getOrders(id)], { concurrency: "unbounded" }).pipe(
     Effect.map(([user, orders]) => ({ ...user, orders }))
@@ -1136,6 +1011,12 @@ const getUsersWithOrders = (ids: string[]) =>
 
 <!--
 Même déroulé que la version classique, 1 clic = 1 étape.
+Étape ③ : Effect.all remplace Promise.all. Avantages :
+  - Promise.all rejette avec la première erreur, typée unknown, et laisse tourner les autres promesses ;
+    Effect.all garde l'union des erreurs dans le type et interrompt les branches restantes (démo slide « Promise.all vs Effect.all : la requête zombie »).
+  - Promise.allSettled donne { status, reason: any } à tester à la main ;
+    Effect.all({ mode: "result" }) renvoie des Result typés (📁 tutorial05/effect-server.ts).
+  - Sans option, Effect.all est séquentiel : la concurrence est explicite ({ concurrency }).
 Étape ④ : "unbounded" → 5, c'est tout.
 Étape ⑤ : aucune signature ne change ; l'interruption est structurée (fibers).
 Étape ⑥ : un pipe, pas de helper ; le sleep est interruptible par construction.
@@ -1143,120 +1024,24 @@ Même déroulé que la version classique, 1 clic = 1 étape.
 Étape ⑧ : le timeout ajoute Cause.TimeoutError au type ; withSpan donne des traces sans effort.
 -->
 ---
-
-# Survolons le résultat
-
-```ts twoslash
-import { Data, Effect, Schedule } from "effect"
-type User = { id: string; name: string }
-type Order = { id: string; total: number }
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: string }> {}
-class HttpError extends Data.TaggedError("HttpError")<{ status: number }> {}
-class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {}
-declare const getOrders: (id: string) => Effect.Effect<Order[], HttpError | NetworkError>
-const getUser = (id: string) =>
-  Effect.gen(function* () {
-    const res = yield* Effect.tryPromise({
-      try: (signal) => fetch(`/api/users/${id}`, { signal }),
-      catch: (cause) => new NetworkError({ cause }),
-    })
-    if (res.status === 404) return yield* new UserNotFound({ id })
-    if (!res.ok) return yield* new HttpError({ status: res.status })
-    return yield* Effect.promise(() => res.json() as Promise<User>)
-  }).pipe(
-    Effect.retry({
-      schedule: Schedule.exponential("100 millis"),
-      times: 3,
-      while: (e) => e._tag !== "UserNotFound",
-    }),
-    Effect.withSpan("getUser", { attributes: { id } })
-  )
-// ---cut---
-const getUserWithOrders = (id: string) =>
-  Effect.all([getUser(id), getOrders(id)], { concurrency: "unbounded" }).pipe(
-    Effect.map(([user, orders]) => ({ ...user, orders }))
-  )
-
-const program = Effect.forEach(["1", "2", "3"], getUserWithOrders, {
-  concurrency: 5,
-}).pipe(Effect.timeout("5 seconds"))
-
-program
-// ^?
-```
-
-<!--
-LE moment "wow" : toutes les erreurs possibles apparaissent dans le type, sans rien écrire de plus.
--->
----
-zoom: 0.85
+zoom: 0.7
 ---
 
-# ▶ Concurrence : une option, pas un helper
+# ▶ `Promise.all` vs `Effect.all` : la requête zombie
 
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+Même scénario : `getUser` échoue au bout de 100 ms, pendant que `getOrders` tourne encore.
+
+<div class="grid grid-cols-2 gap-6">
 <div>
 
-- `Effect.forEach` + `{ concurrency: n }`
-- Chaque tâche tourne dans une **fibre** : `#2`, `#3`… dans les logs
-- Regardez les horodatages
-
-👉 Essayez `1`, `3` ou `"unbounded"`
-
-</div>
-<div>
+### ❌ `Promise.all` rejette… mais n'annule rien
 
 ```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
-
-// Une "requête" qui prend 300 ms
-const fetchUser = (id: number) =>
-  Effect.gen(function* () {
-    yield* Effect.log(`▶️ user ${id}`)
-    yield* Effect.sleep("300 millis")
-    return { id, name: `User ${id}` }
-  })
-
-const ids = [1, 2, 3, 4, 5, 6]
-
-const program = Effect.forEach(ids, fetchUser, { concurrency: 2 })
-
-const start = Date.now()
-const users = await Effect.runPromise(program)
-console.log(`⏱ ${users.length} users en ${Date.now() - start} ms`)
-```
-
-</div>
-</div>
-
-<!--
-Étape ④ du fil rouge : en classique il fallait écrire mapWithConcurrency (ou ajouter p-limit).
--->
-
----
-zoom: 0.85
----
-
-# ▶ `Promise.all` : la requête zombie
-
-<div class="grid grid-cols-[1fr_2.4fr] gap-6">
-<div>
-
-- `getUser` échoue au bout de 100 ms
-- `Promise.all` rejette… mais **n'annule rien**
-- La requête `orders` continue dans le vide 🧟
-- Pour l'annuler : un `AbortController` à propager **partout** (étape ⑤)
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-// Un faux fetch qui respecte l'AbortSignal, comme le vrai
 const fakeFetch = (url: string, signal?: AbortSignal) =>
   new Promise<unknown[]>((resolve, reject) => {
     console.log(`🌐 GET ${url}`)
     const timer = setTimeout(() => {
-      console.log(`🧟 GET ${url} terminé… mais plus personne n'attend`)
+      console.log(`🧟 ${url} terminé… pour rien`)
       resolve([])
     }, 1000)
     signal?.addEventListener("abort", () => {
@@ -1269,7 +1054,6 @@ async function getUser(id: number) {
   await new Promise((resolve) => setTimeout(resolve, 100))
   throw new Error(`User ${id} introuvable`)
 }
-
 const getOrders = (id: number) => fakeFetch(`/api/users/${id}/orders`)
 
 try {
@@ -1280,40 +1064,20 @@ try {
 ```
 
 </div>
-</div>
-
-<!--
-Le log 🧟 arrive presque une seconde APRÈS l'erreur : la requête a été payée pour rien.
--->
-
----
-zoom: 0.8
----
-
-# ▶ `Effect.all` : annulation automatique
-
-<div class="grid grid-cols-[1fr_2.4fr] gap-6">
 <div>
 
-- Le même scénario
-- `tryPromise((signal) => …)` : Effect **fournit** l'`AbortSignal`
-- Dès que `getUser` échoue, la fibre sœur est **interrompue**… et le `fetch` **annulé**
-- Zéro ligne de plomberie
-
-</div>
-<div>
+### ✅ `Effect.all` interrompt la branche sœur
 
 ```ts {monaco-run} {autorun: false}
 import { Effect } from "effect"
 
-// Le même faux fetch, qui respecte l'AbortSignal
 const fakeFetch = (url: string, signal?: AbortSignal) =>
   new Promise<unknown[]>((resolve, reject) => {
     console.log(`🌐 GET ${url}`)
     const timer = setTimeout(() => resolve([]), 1000)
     signal?.addEventListener("abort", () => {
       clearTimeout(timer)
-      console.log(`🛑 GET ${url} annulé`)
+      console.log(`🛑 ${url} annulé`)
       reject(signal.reason)
     })
   })
@@ -1323,8 +1087,7 @@ const getUser = (id: number) =>
     yield* Effect.sleep("100 millis")
     return yield* Effect.fail(`User ${id} introuvable`)
   })
-
-// Effect fournit le signal… et l'annule si on n'a plus besoin du résultat
+// Effect fournit le signal… et l'annule si besoin
 const getOrders = (id: number) =>
   Effect.tryPromise((signal) => fakeFetch(`/api/users/${id}/orders`, signal))
 
@@ -1339,250 +1102,11 @@ await Effect.runPromise(
 </div>
 
 <!--
-Étape ⑤ : aucune signature ne change, l'interruption est structurée (les fibres enfants suivent leur parent).
--->
-
----
-zoom: 0.85
----
-
-# ▶ Retry : rejouer une description
-
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
-<div>
-
-- L'API échoue 2 fois, puis répond
-- `Schedule.exponential("100 millis")` : 100 ms, 200 ms, 400 ms…
-- Regardez les horodatages des logs
-
-👉 Essayez `times: 1`
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Effect, Schedule } from "effect"
-
-let attempts = 0
-const flakyApi = Effect.gen(function* () {
-  attempts++
-  yield* Effect.log(`📡 tentative ${attempts}`)
-  if (attempts < 3) return yield* Effect.fail("503 Service Unavailable")
-  return "✅ OK"
-})
-
-// Un Effect est une description : le retry la rejoue
-const program = flakyApi.pipe(
-  Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 5 }),
-)
-
-console.log(await Effect.runPromise(program))
-```
-
-</div>
-</div>
-
-<!--
-Étape ⑥ : pas de helper retry, pas de sleep annulable à écrire.
-Avec times: 1, l'erreur finale remonte : le runner l'affiche en rouge.
--->
-
----
-zoom: 0.85
----
-
-# ▶ Timeout : on répond… et on nettoie
-
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
-<div>
-
-- `Effect.timeout` ajoute `TimeoutError` au type
-- La requête lente est **interrompue** : `onInterrupt` s'exécute
-- Avec `Promise.race`, elle continuerait en arrière-plan
-
-👉 Essayez `"3 seconds"`
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
-
-const slowApi = Effect.gen(function* () {
-  yield* Effect.log("🐢 requête lente…")
-  yield* Effect.sleep("2 seconds")
-  return "📦 réponse"
-}).pipe(
-  Effect.onInterrupt(() => Effect.log("🧹 interrompue : ressources libérées")),
-)
-
-const program = slowApi.pipe(
-  Effect.timeout("500 millis"),
-  Effect.catchTag("TimeoutError", () => Effect.succeed("⏱ trop long : valeur par défaut")),
-)
-
-console.log(await Effect.runPromise(program))
-```
-
-</div>
-</div>
-
-<!--
-Étape ⑧. 📁 tutorial05 montre le même contraste côté serveur : Promise.race répond mais laisse tourner le travail.
--->
-
----
-layout: section
----
-
-# 5. Exploiter les erreurs typées
-
----
-
-# Traiter… et voir le type changer
-
-````md magic-move {lines: true}
-```ts
-const program = getUsersWithOrders(ids)
-// Effect<UserWithOrders[], UserNotFound | HttpError | NetworkError | Cause.TimeoutError, never>
-```
-
-```ts
-const program = getUsersWithOrders(ids).pipe(
-  Effect.catchTag("TimeoutError", () => Effect.succeed([]))
-)
-// Effect<UserWithOrders[], UserNotFound | HttpError | NetworkError, never>
-```
-
-```ts
-const program = getUsersWithOrders(ids).pipe(
-  Effect.catchTags({
-    TimeoutError: () => Effect.succeed([]),
-    UserNotFound: (e) => Effect.logWarning(`User ${e.id} introuvable`).pipe(Effect.as([])),
-    HttpError: (e) => Effect.logError(`HTTP ${e.status}`).pipe(Effect.as([])),
-    NetworkError: () => Effect.succeed([]),
-  })
-)
-// Effect<UserWithOrders[], never, never>
-```
-
-```ts
-// Ou : ne pas tout perdre si UN utilisateur échoue
-const program = Effect.partition(ids, getUserWithOrders, { concurrency: 5 })
-// Effect<[users: UserWithOrders[], errors: (UserNotFound | HttpError | NetworkError)[]], never, never>
-```
-````
-
-<v-click>
-
-👉 Le type **montre** les erreurs qui restent à traiter. Exiger `never` à la frontière (handler, `Layer`…) et un oubli devient une erreur de compilation.
-
-</v-click>
----
-zoom: 0.85
----
-
-# ▶ Tout ou rien… ou rien de perdu
-
-<div class="grid grid-cols-[1fr_2.6fr] gap-6">
-<div>
-
-- `forEach` : la première erreur gagne
-- `partition` : succès et erreurs séparés, **typés**
-- `catchTag` : traite **une** erreur, qui disparaît du type (survolez `guest`)
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Data, Effect } from "effect"
-
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-class HttpError extends Data.TaggedError("HttpError")<{ status: number }> {}
-type User = { id: number; name: string }
-
-const getUser = (id: number): Effect.Effect<User, UserNotFound | HttpError> =>
-  id === 404 ? Effect.fail(new UserNotFound({ id }))
-  : id === 500 ? Effect.fail(new HttpError({ status: 500 }))
-  : Effect.succeed({ id, name: `User ${id}` })
-
-const ids = [1, 404, 2, 500, 3]
-
-// 1. Tout ou rien : la première erreur gagne
-console.log(await Effect.runPromiseExit(Effect.forEach(ids, getUser)))
-
-// 2. Ne rien perdre : les succès d'un côté, les erreurs de l'autre
-const [users, errors] = await Effect.runPromise(Effect.partition(ids, getUser))
-console.log("✅", users.map((user) => user.name).join(", "))
-console.log("❌", errors)
-
-// 3. Traiter UNE erreur : elle disparaît du type (survolez `guest`)
-const guest = getUser(404).pipe(
-  Effect.catchTag("UserNotFound", () => Effect.succeed({ id: 0, name: "Invité" })),
-)
-console.log("🎭", (await Effect.runPromise(guest)).name)
-```
-
-</div>
-</div>
-
----
-
-# Erreurs attendues vs défauts
-
-| | Erreur attendue (`E`) | Défaut (*defect*) |
-|---|---|---|
-| Exemple | `UserNotFound`, `HttpError` | bug, JSON invalide inattendu |
-| Typée ? | ✅ oui | ❌ non |
-| Création | `Effect.fail` / `yield* new MyError()` | `Effect.die`, `throw`, `Effect.promise` qui rejette |
-| Récupération | `catchTag`, `catchTags`, `partition` | `catchDefect` (rare) |
-
-<!--
-Message clé : on ne type que ce qu'on peut raisonnablement gérer.
--->
----
-zoom: 0.85
----
-
-# ▶ Erreur attendue ou défaut ?
-
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
-<div>
-
-- `Fail` : prévue, typée, dans `E`
-- `Die` : un **bug**, hors du type
-- Un `Effect.sync` qui throw = un défaut
-- `catchDefect` existe… mais on préfère corriger le bug !
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Data, Effect } from "effect"
-
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-
-// ✅ Erreur attendue : prévue, typée, dans E
-const expected = Effect.fail(new UserNotFound({ id: 42 }))
-
-// 💥 Défaut : Effect.sync promet de ne jamais throw… raté
-const defect = Effect.sync((): unknown => JSON.parse("{ oops"))
-
-console.log(await Effect.runPromiseExit(expected))
-console.log(await Effect.runPromiseExit(defect))
-
-// Un défaut n'est pas dans E… mais on peut quand même l'attraper
-const safe = defect.pipe(
-  Effect.catchDefect((cause) => Effect.succeed(`🩹 défaut rattrapé : ${cause}`)),
-)
-console.log(await Effect.runPromise(safe))
-```
-
-</div>
-</div>
-
-<!--
-C'est la 2e règle du début : toutes les erreurs ne se valent pas.
+Lancer les deux, et comparer les logs.
+Promise.all : le log 🧟 arrive presque une seconde APRÈS l'erreur, la requête a été payée pour rien.
+Pour l'annuler, il faudrait un AbortController propagé partout (étape ⑤ de la version classique).
+Effect.all : tryPromise((signal) => …) fournit l'AbortSignal ; dès que getUser échoue, la fibre sœur est interrompue et le fetch annulé.
+Aucune signature ne change : l'interruption est structurée (les fibres enfants suivent leur parent).
 -->
 
 ---
