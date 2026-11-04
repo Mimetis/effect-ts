@@ -149,6 +149,8 @@ Frontier Company : modèle « Forward Deployed Engineering », des ingénieurs M
 Annonce : « Microsoft Frontier Company: AI engineering that amplifies and protects your intelligence », Judson Althoff, 2 juillet 2026.
 -->
 ---
+zoom: 0.9
+---
 
 # Ils en parlent
 
@@ -184,30 +186,32 @@ Quelques voix de la communauté TypeScript, sur X
   </div>
   <div class="tweet">
     <div class="tweet-head">
-      <img class="tweet-avatar" src="./images/avatars/kitlangton.jpg" alt="Kit Langton" />
-      <div><b>Kit Langton</b><small>@kitlangton · OpenCode</small></div>
+      <img class="tweet-avatar" src="./images/avatars/jullerino.jpg" alt="Julius Marminge" />
+      <div><b>Julius Marminge</b><small>@jullerino · T3 Code</small></div>
       <div class="i-carbon-logo-x tweet-x" />
     </div>
-    <p>I'm adding <span class="tweet-at">@EffectTS_</span> to <span class="tweet-at">@opencode</span> now.</p>
-    <div class="tweet-foot"><span>févr. 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />405</span></div>
+    <p><b>T3 Code is built pretty much entirely with Effect</b> and very large portions agent coded without much context engineering.</p>
+    <div class="tweet-ctx">L'app open source de <b>Theo</b> (t3.gg)</div>
+    <div class="tweet-foot"><span>17 mars 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />474</span></div>
   </div>
   <div class="tweet">
     <div class="tweet-head">
-      <img class="tweet-avatar" src="./images/avatars/danielgri.jpg" alt="Daniel Griesser" />
-      <div><b>Daniel Griesser</b><small>@DanielGri · Sentry</small></div>
+      <img class="tweet-avatar" src="./images/avatars/theprimeagen.jpg" alt="ThePrimeagen" />
+      <div><b>ThePrimeagen</b><small>@ThePrimeagen</small></div>
       <div class="i-carbon-logo-x tweet-x" />
     </div>
-    <p>Effect is one of the rare frameworks where <b>observability isn't an afterthought</b>.</p>
-    <div class="tweet-foot"><span class="tweet-likes"><span class="i-carbon-favorite" />358</span></div>
+    <p>fine, you convinced me teej... <b>ill try it</b></p>
+    <div class="tweet-ctx">Suivi de 2 h de live sur Effect v4</div>
+    <div class="tweet-foot"><span>12 mars 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />1,1 k</span></div>
   </div>
   <div class="tweet">
     <div class="tweet-head">
-      <img class="tweet-avatar" src="./images/avatars/rauchg.jpg" alt="Guillermo Rauch" />
-      <div><b>Guillermo Rauch</b><small>@rauchg · CEO de Vercel</small></div>
+      <img class="tweet-avatar" src="./images/avatars/theo.jpg" alt="Theo Browne" />
+      <div><b>Theo - t3.gg</b><small>@theo</small></div>
       <div class="i-carbon-logo-x tweet-x" />
     </div>
-    <p>“Before the effect one believes in different causes than one does after the <span class="tweet-at">@EffectTS_</span>”<br>— Friedrich Nietzsche</p>
-    <div class="tweet-foot"><span>29 avr. 2024</span><span class="tweet-likes"><span class="i-carbon-favorite" />65</span></div>
+    <p>Been using Effect for like a week and <b>I'm already filing PRs</b></p>
+    <div class="tweet-foot"><span>28 juil. 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />1,1 k</span></div>
   </div>
 </div>
 
@@ -279,6 +283,13 @@ Quelques voix de la communauté TypeScript, sur X
 .tweet-at {
   color: #1d9bf0;
 }
+.tweet-ctx {
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--tech-blue) 10%, transparent);
+  font-size: 0.72rem;
+  color: var(--tech-muted);
+}
 .tweet-quote {
   display: flex;
   flex-direction: column;
@@ -306,15 +317,18 @@ Quelques voix de la communauté TypeScript, sur X
 
 <!--
 Ne pas tout lire : laisser le public lire, commenter Matt Pocock (le prof de TypeScript le plus suivi) qui reprend Dillon Mulroy.
-Rhys Sullivan : Effect en prod à 1,5 M d'utilisateurs actifs par mois. Kit Langton : OpenCode (agent de code) migré vers Effect.
-Finir sur la blague de Guillermo Rauch (CEO de Vercel) pour détendre avant le sommaire.
+Rhys Sullivan : Effect en prod à 1,5 M d'utilisateurs actifs par mois.
+T3 Code (l'app de Theo, plus de 20 000 étoiles) : écrite quasi entièrement en Effect, en grande partie par des agents.
+ThePrimeagen : « teej » = TJ DeVries, qui l'a convaincu ; il a ensuite appris Effect v4 en live (et trouvé la syntaxe des générateurs « cursed »).
+Finir sur Theo (T3 Stack, T3 Code) : une semaine d'Effect et il envoie déjà des PR.
 
 Sources :
 - Dillon Mulroy, 1er sept. 2026 (2,1 k likes, 87 réponses), repris par Matt Pocock en quote tweet : cités dans « This Week in Effect 134 » (effect.website/blog/this-week-in-effect/134).
 - Rhys Sullivan, mars 2026 : « fully written in Effect now & supporting 1.5M monthly active users ».
-- Guillermo Rauch, 29 avr. 2024 (65 likes) : repris dans la newsletter de Sandro Maglione « Why everyone is talking about Effect ».
-- Kit Langton (fév. 2026) et Daniel Griesser (Sentry) : citations fournies, tweet d'origine non retrouvé, à revérifier avant le talk.
-- Portraits : photos de profil X (via unavatar.io), stockées dans images/avatars. Comptes @RhysSullivan et @DanielGri confirmés par leurs profils GitHub.
+- Theo (@theo), 28 juil. 2026 (1,1 k likes, 44 réponses) : « This Week in Effect 129 » (x.com/theo/status/2082006488797856093).
+- ThePrimeagen, 12 mars 2026 (1,1 k likes, 39 réponses) : « This Week in Effect 109 » (x.com/ThePrimeagen/status/2031885878633648369).
+- Julius Marminge (@jullerino), 17 mars 2026 (474 likes) : « This Week in Effect 110 ».
+- Portraits : photos de profil X (via unavatar.io), stockées dans images/avatars. Comptes @RhysSullivan, @ThePrimeagen, @jullerino et @theo confirmés par leurs profils GitHub.
 -->
 ---
 

@@ -4,7 +4,7 @@ Une présentation [Slidev](https://sli.dev) pour faire découvrir [Effect](https
 
 > Sébastien Pertus · DevFest Toulouse 2026 · `effect` 4.0
 
-Le deck est [slides/slides.md](./slides/slides.md) : 38 slides réparties en 8 chapitres, dont **14 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, Dillon Mulroy, Guillermo Rauch et d'autres, avant le sommaire.
+Le deck est [slides/slides.md](./slides/slides.md) : 38 slides réparties en 8 chapitres, dont **14 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres, avant le sommaire.
 
 ## Lancer la présentation
 
