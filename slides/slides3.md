@@ -99,16 +99,14 @@ Annonce : « Microsoft Frontier Company: AI engineering that amplifies and prote
 2. `Effect<A, E, R>` : les bases
 3. Un `getUser` qui grandit
 4. Le même chemin, avec Effect
-5. Exploiter les erreurs typées
 
 </div>
 <div>
 
-6. Valider ce qui vient de l'extérieur
-7. Services & Layers
-8. Aller plus loin
-9. En vrai : un serveur Express
-10. Et maintenant ?
+5. Valider ce qui vient de l'extérieur
+6. Services & Layers
+7. Aller plus loin
+8. Et maintenant ?
 
 </div>
 </div>
@@ -143,7 +141,7 @@ Chaque solution corrige le défaut de la précédente… et en crée un nouveau
     <span>Rien n'oblige à vérifier : on <b>oublie</b>, le bug passe en silence</span>
   </div>
   <div v-click class="tl-row">
-    <div class="tl-name">💥 Exceptions<small>C++, Java, JS</small></div>
+    <div class="tl-name">💥 Exceptions<small>C++, Java, JS, C#</small></div>
     <code>throw new Error("boom")</code>
     <span>Impossible d'ignorer l'erreur</span>
     <span><b>Invisible</b> dans la signature : on le découvre en prod</span>
@@ -176,29 +174,10 @@ Effect garde le "typé" de Result et ajoute ce qui manquait.
 -->
 
 ---
-
-
-# Le problème
-
-```ts
-async function getUser(id: string): Promise<User> {
-  // Quelles erreurs peut-on recevoir ici ? 🤷
-}
-```
-
-<v-clicks>
-
-- La signature **ment** : les erreurs ne sont pas dans le type
-- `try / catch` reçoit un `unknown`
-- Rien n'oblige l'appelant à gérer les cas d'échec
-
-</v-clicks>
-
----
 zoom: 0.85
 ---
 
-# ▶ `try / catch` : la signature ment
+# ▶ Le Problème: la signature ment
 
 <div class="grid grid-cols-[1fr_2.2fr] gap-6">
 <div>
@@ -206,8 +185,6 @@ zoom: 0.85
 - `Promise<User>` ne dit **rien** des erreurs
 - On peut `throw` **n'importe quoi**, même une `string`
 - Dans le `catch`, `e` est `unknown` : survolez-le
-
-👉 Essayez les ids `1`, `0`, `999`
 
 </div>
 <div>
@@ -270,13 +247,9 @@ if (error) {
 }
 ```
 
-<v-click>
-
 Ça marche, mais :
 - il faut **déclarer les erreurs à chaque appel**
 - si `getUser()` ajoute demain un `UnauthorizedError`, **rien ne le signale**
-
-</v-click>
 
 <!--
 📁 tutorial01/script.ts, étapes 2 et 3 — pnpm start:tutorial01
@@ -294,8 +267,6 @@ zoom: 0.85
 - L'erreur fait **partie du type de retour**
 - `result.error` est typé : le `switch` est vérifié
 - Plus de `unknown` 🎉
-
-👉 Essayez les ids `1`, `0`, `999`
 
 </div>
 <div>
@@ -372,7 +343,7 @@ Effect: Décrire le résultat, les erreurs, les dépendances
 
 # `Effect<A, E, R>`
 ```ts
-type UserEffect=Effect<User, InvalidUserId | UserNotFound, never>  // Effect      : les erreurs ✅ les dépendances ✅
+type UserEffect=Effect<User, InvalidUserId | UserNotFound, UserRepository>  // Effect : Le resultat, les erreurs, les dépendances
 ```
 
 <v-click>
@@ -381,7 +352,7 @@ type UserEffect=Effect<User, InvalidUserId | UserNotFound, never>  // Effect    
 |---|---|---|
 | **A** | Ce que ça produit en cas de succès | `User` |
 | **E** | Les erreurs **attendues**, typées | `InvalidUserId \| UserNotFound` |
-| **R** | Les dépendances nécessaires | `never` : Aucune… pour l'instant |
+| **R** | Les dépendances nécessaires | `UserRepository`  |
 
 > Un `Effect` est une **description** d'un programme : rien ne s'exécute tant qu'on ne le lance pas.
  
@@ -391,7 +362,7 @@ type UserEffect=Effect<User, InvalidUserId | UserNotFound, never>  // Effect    
 
 <!--
 Analogie : une recette vs le plat.
-R = never ici ; on verra en section 7 un getUser qui dépend d'un UserRepository.
+R = never ici ; on verra en section 6 un getUser qui dépend d'un UserRepository.
 -->
 
 ---
@@ -1113,7 +1084,7 @@ Aucune signature ne change : l'interruption est structurée (les fibres enfants 
 layout: section
 ---
 
-# 6. Valider ce qui vient de l'extérieur
+# 5. Valider ce qui vient de l'extérieur
 ### `Schema` et `Config`
 
 ---
@@ -1133,14 +1104,11 @@ const user = (await res.json()) as User
 // createdAt est une string, pas une Date
 ```
 
-<v-click>
 
 Avec zod ou valibot, deux options… et aucune ne rejoint le type :
 
 - `parse` : **lève une exception**, retour au `catch (e: unknown)`
 - `safeParse` : renvoie un objet `{ success, … }`, à **tester à la main** à chaque appel
-
-</v-click>
 
 </div>
 <div>
@@ -1201,10 +1169,6 @@ zoom: 0.73
 - `constantCase` : `app.apiUrl` → `APP_API_URL`
 - `Redacted` : la clé n'apparaît **jamais** dans les logs
 
-👉 Essayez `APP_PORT: "70000"`, ou supprimez une variable
-
-📁 `tutorial03/config.ts`
-
 </div>
 <div>
 
@@ -1255,71 +1219,10 @@ Dans le tutoriel, fromEnv() lit le vrai .env chargé par node --env-file : pnpm 
 layout: section
 ---
 
-# 7. Services & Layers
+# 6. Services & Layers
 ### L'injection de dépendances, typée
 
----
 
-# Sortir `fetch` du code métier
-
-```ts twoslash
-import { Context, Data, Effect } from "effect"
-
-type User = { id: string; name: string }
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: string }> {}
-class HttpError extends Data.TaggedError("HttpError")<{ status: number }> {}
-class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {}
-
-class UserRepo extends Context.Service<
-  UserRepo,
-  {
-    readonly findById: (id: string) =>
-      Effect.Effect<User, UserNotFound | HttpError | NetworkError>
-  }
->()("app/UserRepo") {}
-
-const greet = (id: string) =>
-  Effect.gen(function* () {
-    const repo = yield* UserRepo
-    const user = yield* repo.findById(id)
-    return `Bonjour ${user.name} 👋`
-  })
-
-const program = greet("42")
-//    ^?
-```
-
-<!--
-Le R vaut maintenant UserRepo : impossible de lancer le programme sans le fournir.
--->
----
-
-# Fournir une implémentation : `Layer`
-
-```ts
-import { Effect, Layer } from "effect"
-
-// Convention v4 : `layer` pour la prod, `layerTest` pour les tests
-const layer = Layer.succeed(UserRepo, {
-  findById: (id) => getUser(id), // notre getUser avec retry, timeout, traces…
-})
-
-const layerTest = Layer.succeed(UserRepo, {
-  findById: (id) =>
-    id === "42"
-      ? Effect.succeed({ id, name: "Ada" })
-      : Effect.fail(new UserNotFound({ id })),
-})
-
-Effect.runPromise(greet("42").pipe(Effect.provide(layer)))     // prod
-Effect.runPromise(greet("42").pipe(Effect.provide(layerTest))) // tests
-```
-
-<v-click>
-
-👉 Oublier une dépendance = **erreur de compilation**, pas un crash au runtime.
-
-</v-click>
 ---
 zoom: 0.77
 ---
@@ -1332,8 +1235,6 @@ zoom: 0.77
 - `greet` ne connaît que le **contrat**
 - Un `Layer` par implémentation : mock, API, PostgreSQL…
 
-👉 Supprimez un `Effect.provide` : soulignement rouge… et `Service not found` si on lance quand même
-
 </div>
 <div>
 
@@ -1343,99 +1244,99 @@ import { Context, Data, Effect, Layer } from "effect"
 type User = { id: number; name: string }
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 
-// 1. Le contrat
-class UserRepository extends Context.Service<UserRepository, {
-  readonly getById: (id: number) => Effect.Effect<User, UserNotFound>
-}>()("UserRepository") {}
+// 1. Le contrat (A la mode .NET):
+interface IUserRepository { findById: (id: number) => Effect.Effect<User, UserNotFound> }
 
-// 2. La logique métier ne connaît que le contrat
-const greet = (id: number) => // 👈 survolez : R = UserRepository
+// 2. Context: Pensez ce Context comme un conteneur pour les services: Map<ServiceKey, Service>
+const UserRepository = Context.Service<IUserRepository>("app/UserRepository")
+
+// 3. La logique métier ne connaît que le contrat
+const greet = (id: number) => 
   Effect.gen(function* () {
     const repository = yield* UserRepository
-    const user = yield* repository.getById(id)
+    const user = yield* repository.findById(id)
     return `👋 Bonjour ${user.name}`
   })
 
-// 3. Des implémentations interchangeables
-const MockRepository = Layer.succeed(UserRepository, {
-  getById: (id) => id === 1
-    ? Effect.succeed({ id, name: "Ada (mock)" })
-    : Effect.fail(new UserNotFound({ id })),
-})
-
+// 4. Un Layer = Implémentation de IUserRepository
 const ApiRepository = Layer.succeed(UserRepository, {
-  getById: (id) =>
-    Effect.succeed({ id, name: "Grace (API)" }).pipe(Effect.delay("500 millis")),
+  findById: (id) =>
+    Effect.succeed({ id, name: "Jane " }).pipe(Effect.delay("500 millis")),
 })
 
-console.log(await Effect.runPromise(greet(1).pipe(Effect.provide(MockRepository))))
 console.log(await Effect.runPromise(greet(1).pipe(Effect.provide(ApiRepository))))
 ```
 
 </div>
 </div>
 
+
 ---
-zoom: 0.8
+zoom: 0.75
 ---
 
-# En vrai : mock **ou** PostgreSQL
+# Classique vs Effect
 
-<div class="grid grid-cols-[1fr_1.3fr] gap-8">
-<div>
+<div class="vs-table">
 
-📁 `tutorial04`
-
-- `APP_REPOSITORY=mock` ou `postgres` choisit l'implémentation
-- La logique métier (`findUser`) **ne change pas**
-- Le `Layer` PostgreSQL ouvre **et ferme** le pool de connexions
-- Chaque ligne lue est validée par `UserSchema`
-
-```sh
-cp tutorial04/.env.example tutorial04/.env
-pnpm start:tutorial04
-```
-
-`APP_USER_ID` : `1` valide · `2` rejeté par le schéma · `999` absent
+| | Étape | ❌ TypeScript classique | ✅ Effect |
+|---|---|---|---|
+| ⏳ | async / await | `async` / `await` | `Effect.gen` / `yield*` |
+| 🔀 | Parallélisme | `Promise.all` | `Effect.all` / `Effect.forEach` |
+| 🚦 | Concurrence limitée | helper maison | `{ concurrency: 5 }` |
+| 🛑 | Interruption | `AbortSignal` dans chaque signature | automatique (fibers) |
+| 🔁 | Retry | `retry` + `sleep` annulable | `Effect.retry` + `Schedule` |
+| 🧯 | Erreurs | `unknown` + `instanceof` | union typée dans `E` |
+| ⏱️ | Timeout | `AbortSignal.any` + `AbortSignal.timeout` | `Effect.timeout` |
+| 🔍 | Traces | à brancher à la main | `Effect.withSpan` |
+| 🛡️ | Validation | `as User` (ou zod à brancher) | `Schema` + `SchemaError` typée |
+| 🧩 | Dépendances | singletons, conteneur DI ou mocks de modules | `Layer`, vérifié à la compilation (`R`) |
 
 </div>
-<div>
 
-```ts
-// script.ts : seule la couche fournie change
-if (config.repository === "mock") {
-  return yield* Effect.provide(
-    findUser(config.userId),
-    MockUserRepositoryLayer,
-  )
+<style>
+.vs-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.35);
+  font-size: 1.05rem;
 }
-return yield* Effect.provide(
-  findUser(config.userId),
-  makePostgresUserRepositoryLayer(config.databaseUrl),
-)
-```
-
-```ts
-// postgres-user-repository.ts (simplifié)
-export const makePostgresUserRepositoryLayer = (url: Redacted<string>) =>
-  Layer.effect(UserRepository, makePostgresUserRepository).pipe(
-    Layer.provide(PgClient.layerFrom(PgClient.make({ url }))),
-  )
-```
-
-</div>
-</div>
+.vs-table th {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: white;
+  background: #475569;
+}
+.vs-table th:nth-child(3) { background: #b91c1c; }
+.vs-table th:nth-child(4) { background: #15803d; }
+.vs-table td {
+  padding: 0.55rem 1rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.18);
+  vertical-align: middle;
+}
+.vs-table td:first-child { width: 2.5rem; text-align: center; font-size: 1.25rem; }
+.vs-table td:nth-child(2) { font-weight: 650; white-space: nowrap; }
+.vs-table td:nth-child(3) { background: rgba(239, 68, 68, 0.07); opacity: 0.85; }
+.vs-table td:nth-child(4) { background: rgba(34, 197, 94, 0.1); font-weight: 600; }
+.vs-table tr:hover td { filter: brightness(1.08); }
+</style>
 
 <!--
-Le repository PostgreSQL exécute `SELECT … WHERE id = ${id}` (requête paramétrée) puis décode la ligne avec UserSchema.
+Le récapitulatif de tout le fil rouge : chaque ligne = un helper ou une convention maison d'un côté, une option ou un type de l'autre.
 -->
+
 
 ---
 layout: section
 ---
 
-# 8. Aller plus loin
-### Regrouper les appels, tester le temps
+# 7. Aller plus loin
+### Regrouper les appels, tester le temps, partager l'état
 
 ---
 zoom: 0.72
@@ -1563,87 +1464,8 @@ console.log(`✅ ${result} — en ${Date.now() - start} ms`)
 </div>
 
 <!--
-Même principe pour fetch : on fournit un Layer de test (section 7).
+Même principe pour fetch : on fournit un Layer de test (section 6).
 -->
-
----
-
-# Classique vs Effect
-
-| Étape | TypeScript classique | Effect |
-|---|---|---|
-| async / await | `async` / `await` | `Effect.gen` / `yield*` |
-| Parallélisme | `Promise.all` | `Effect.all` / `Effect.forEach` |
-| Concurrence limitée | helper maison | `{ concurrency: 5 }` |
-| Interruption | `AbortSignal` dans chaque signature | automatique (fibers) |
-| Retry | `retry` + `sleep` annulable | `Effect.retry` + `Schedule` |
-| Erreurs | `unknown` + `instanceof` | union typée dans `E` |
-| Timeout | `AbortSignal.any` + `AbortSignal.timeout` | `Effect.timeout` |
-| Traces | à brancher à la main | `Effect.withSpan` |
-| Validation | `as User` (ou zod à brancher) | `Schema` + `SchemaError` typée |
-| Regroupement des appels | DataLoader ou cache maison | `Request` + `RequestResolver` |
-| Tester le retry | fake timers + mocks | `TestClock`, sans attendre |
----
-layout: section
----
-
-# 9. En vrai : un serveur Express
-### 📁 `tutorial05`
-
----
-layout: two-cols-header
-layoutClass: gap-4
----
-
-# Le même serveur, deux fois
-
-::left::
-
-**Express + async/await**
-
-<<< @/../tutorial05/classic-server.ts ts {all}{maxHeight:'350px'}
-
-::right::
-
-**Express + Effect**
-
-<<< @/../tutorial05/effect-server.ts ts {all}{maxHeight:'350px'}
-
-<!--
-Même API, mêmes données. Faire défiler : buildSummary classique (try/catch imbriqués) vs Effect.all + Result.
--->
-
----
-
-# Quatre scénarios à essayer
-
-```sh
-pnpm start:tutorial05:classic   # http://localhost:3000
-pnpm start:tutorial05:effect    # http://localhost:3001
-```
-
-| Requête | Scénario | Classique | Effect |
-|---|---|---|---|
-| `/users/1/summary` | cas valide | ✅ | ✅ |
-| `/users/2/summary` | données invalides | `as User` laisse passer | `Schema` : erreur explicite |
-| `/users/4/summary` | timeout (500 ms) | `Promise.race` répond… et continue | `Effect.timeout` interrompt |
-| 2 appels puis `/stats` | état partagé | un incrément perdu | `Ref` atomique |
-
-<!--
-Démo terminal : lancer les deux serveurs, puis les curl du README.
--->
-
----
-
-# Le bilan côté serveur
-
-| Problème | Async/await classique | Effect |
-|---|---|---|
-| Données externes | Cast TypeScript | Validation `Schema` |
-| Erreurs possibles | Invisibles dans `Promise<A>` | Canal d'erreur typé |
-| Travail concurrent | `Promise.allSettled` + `reason: any` | `Effect.all` + `Result` typé |
-| Timeout | Répond sans annuler | Interrompt les fibres enfants |
-| État partagé | Mutation manuelle | `Ref` atomique |
 
 ---
 zoom: 0.85
@@ -1698,41 +1520,10 @@ Honnêteté : `completed++` juste après l'await marcherait aussi. Le vrai bug, 
 -->
 
 ---
-
-# Adopter Effect… à la frontière
-
-Express reste là. Seul le handler appelle `Effect.runPromise` :
-
-```ts
-app.get("/users/:id/summary", async (request, response) => {
-  const result = await Effect.runPromise(Effect.result(getSummary(request.params.id)))
-
-  if (Result.isSuccess(result)) return response.json(result.success)
-
-  switch (result.failure._tag) { // toutes les erreurs possibles, typées
-    case "InvalidRequest": return response.status(400).json({ error: result.failure.message })
-    case "UserNotFound": return response.status(404).json({ error: result.failure.message })
-    case "InvalidDatabaseData": return response.status(502).json({ error: result.failure.details })
-    case "TimeoutError": return response.status(504).json({ error: result.failure.message })
-  }
-})
-```
-
-<v-click>
-
-👉 On peut convertir **un endpoint à la fois** : le reste de l'application ne voit qu'une `Promise`.
-
-</v-click>
-
-<!--
-Version simplifiée du handler de tutorial05/effect-server.ts.
--->
-
----
 layout: section
 ---
 
-# 10. Et maintenant ?
+# 8. Et maintenant ?
 
 ---
 
@@ -1740,13 +1531,85 @@ layout: section
 
 Depuis Effect 4 : **un seul paquet `effect`**, sans dépendance, et toutes les briques partagent le même numéro de version.
 
-- **`effect`** — le cœur : Effect, Layer, Schedule, Stream, **Schema** (voir étape ⑨)…
-- **`effect/http`, `effect/sql`, `effect/rpc`, `effect/cli`…** — intégrés au paquet principal (ex-`@effect/platform`, `@effect/sql`…)
+- **`effect`** — le cœur : Effect, Layer, Schedule, Stream, Schema, Config ...
+- **`effect/http`, `effect/sql`, `effect/rpc`, `effect/cli`…** — intégrés au package principal
 - **`@effect/platform-node` / `-bun` / `-deno` / `-browser`** — les implémentations par plateforme
 - **`@effect/sql-pg`, `@effect/sql-sqlite-node`…** — les drivers de base de données
 - **`@effect/opentelemetry`** — exporter les traces de `withSpan`
-- **`@effect/vitest`** — les tests (voir étape ⑪)
+- **`@effect/vitest`** — les tests
 - [Ajouter : autres modules pertinents pour le public]
+---
+zoom: 0.8
+---
+
+# Et côté frontend ? **Foldkit**
+
+<div class="grid grid-cols-[1fr_1.25fr] gap-8">
+<div>
+
+Un **framework frontend** TypeScript **construit sur Effect**, architecturé comme Elm.
+
+- **Un seul `Model`**, décrit par un `Schema` : tout l'état de l'app
+- **Des `Message`** typés, une fonction **`update`** pure : chaque changement est visible
+- **Les effets de bord sont des valeurs** (`Command`) : le runtime Effect gère concurrence, interruption, ressources
+- Routing typé, SSR, composants UI accessibles, **DevTools** (et MCP pour les agents IA)
+- Tests sans DOM ni mocks : *Story* et *Scene*
+
+```bash
+npx create-foldkit-app@latest
+```
+
+<div class="text-sm opacity-70 mt-2">
+  <a href="https://foldkit.dev">foldkit.dev</a> · projet communautaire, encore en 0.x
+</div>
+
+</div>
+<div>
+
+```ts
+import { Schema } from "effect"
+import { Runtime, Update } from "foldkit"
+import { Document, HtmlBuilder } from "foldkit/html"
+import { defineMessageUnion } from "foldkit/message"
+import { modifyFields } from "foldkit/struct"
+
+// MODEL : l'état, décrit par un Schema
+const Model = Schema.Struct({ count: Schema.Number })
+type Model = typeof Model.Type
+
+// MESSAGES : tout ce qui peut arriver
+const Message = defineMessageUnion({ ClickedIncrement: {}, ClickedDecrement: {} })
+type Message = typeof Message.Type
+
+// UPDATE : (model, message) → nouveau model
+const update = (model: Model, message: Message) =>
+  Message.match<Update.Return<Model, Message>>(message, {
+    ClickedIncrement: () => ({ model: modifyFields(model, { count: (n) => n + 1 }) }),
+    ClickedDecrement: () => ({ model: modifyFields(model, { count: (n) => n - 1 }) }),
+  })
+
+// VIEW : model → HTML
+const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
+  title: `Counter: ${model.count}`,
+  body: h.div([], [
+    h.button([h.OnClick(Message.ClickedDecrement())], ["-"]),
+    h.p([], [model.count.toString()]),
+    h.button([h.OnClick(Message.ClickedIncrement())], ["+"]),
+  ]),
+})
+```
+
+</div>
+</div>
+
+<!--
+Foldkit (foldkit.dev, github.com/foldkit/foldkit) : « React, Vue, Svelte et Solid règlent le rendu et vous laissent l'architecture ; Foldkit vous donne l'architecture. »
+Toute application Foldkit est un Effect ; le Model entier est un Schema ; les Commands utilisent les services, l'interruption, les ressources et la concurrence d'Effect.
+Si le backend est déjà en Effect, on retrouve les mêmes outils et les mêmes patterns dans le navigateur.
+Exemple : le Counter officiel, légèrement raccourci (sans Reset, init et entry.ts).
+Honnêteté : pré-1.0, des breaking changes restent possibles. Dépend de effect ~4.1.
+Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@effect/atom-react, -vue, -solid).
+-->
 ---
 
 # Quand l'adopter ? (avec honnêteté)
@@ -1775,37 +1638,25 @@ Depuis Effect 4 : **un seul paquet `effect`**, sans dépendance, et toutes les b
 👉 Adoption **progressive** possible : `Effect.runPromise` à la frontière de ton code existant.
 
 </v-click>
----
 
-# Pour essayer : les tutoriels du repo
+<v-click>
 
-| | Sujet | Lancer |
-|---|---|---|
-| `tutorial01` | `try/catch`, tuples, neverthrow | `pnpm start:tutorial01` |
-| `tutorial02` | Premiers pas : créer, composer, lancer | `pnpm start:tutorial02` |
-| `tutorial03` | Services, `Schema` et `Config` | `pnpm start:tutorial03` · `pnpm start:tutorial03:config` |
-| `tutorial04` | Application complète : mock et PostgreSQL | `pnpm start:tutorial04` |
-| `tutorial05` | Express : async/await vs Effect | `pnpm start:tutorial05:classic` · `:effect` |
+<div class="mt-6 p-4 rounded-lg border border-green-500/40 bg-green-500/8">
 
-<br>
+**💼 Et côté emploi ?** Effect reste une compétence **de niche, mais recherchée** : le [job board officiel](https://effect.website/effect-jobs) liste une vingtaine d'entreprises qui recrutent, surtout dans **l'IA et les LLM** (OpenRouter, HumanLayer, Supermemory), **la fintech et l'assurance** (Gen, Reap, Tranched à Paris, Evalucar en France) et **les outils pour développeurs** (Warp, Solid). Des postes souvent seniors ou « founding engineer », affichés de **90–120 k€** à Munich à **plus de 200 k$** aux États-Unis.
 
-Et ces slides : `pnpm slides slides3.md` — chaque démo ▶ est modifiable.
+</div>
 
----
+</v-click>
 
-# À retenir
-
-<v-clicks>
-
-1. Une `Promise` court déjà, un `Effect` est une **description** : on le rejoue, on l'interrompt, on le teste
-2. `Effect<A, E, R>` : un type qui **dit la vérité**
-3. Parallélisme, concurrence, interruption, retry : **des options, pas des helpers**
-4. Les erreurs sont **typées** et le compilateur vérifie qu'on les traite
-5. Les dépendances sont **vérifiées à la compilation**
-6. On peut l'adopter **progressivement**, un endpoint à la fois
-
-</v-clicks>
-
+<!--
+Sources (vérifiées le 4 novembre 2026) :
+- effect.website/effect-jobs : 20 entreprises listées. IA/LLM : OpenRouter, HumanLayer, Supermemory, Datapizza, SynTwin, Joymore. Fintech/insurtech : Gen, Reap, Tranched (Paris), Evalucar (France). Dev tools : Warp, Solid. Aussi santé (Medblocks), legaltech (LEAP), broadcast (Bitfocus).
+- Salaires affichés : SynTwin 90–120 k€ (Munich), HumanLayer 180–250 k$ (SF), Gen 218–239 k$ (NYC).
+- En production (effect.website) : OpenCode, OpenRouter, MasterClass ; Effect Days 2026 cite aussi Cloudflare, Warp, Alchemy.
+- npm : ~74 M de téléchargements/semaine pour `effect`, mais gonflés par les dépendances indirectes (ex. @prisma/config dépend de effect) ; GitHub : ~17 500 étoiles.
+- Honnêteté : marché encore petit ; c'est un atout différenciant sur un CV TypeScript, pas encore un mot-clé de masse.
+-->
 ---
 layout: center
 class: text-center
@@ -1815,10 +1666,43 @@ class: text-center
 
 Questions ?
 
-[Ajouter : QR code vers les slides et le repo de démo]
+<div class="grid grid-cols-[1fr_auto_1fr] gap-10 items-center text-left mt-8 text-sm">
+<div>
 
-effect.website · [Ajouter : contact]
+### 🔗 Pour aller plus loin
+
+- [effect.website/docs](https://effect.website/docs/) : la documentation
+- [github.com/Effect-TS/effect](https://github.com/Effect-TS/effect) : le code source
+- [discord.gg/effect-ts](https://discord.gg/effect-ts) : la communauté (très active)
+- [Module of the Week](https://effect.website/module-of-the-week) : un module expliqué chaque semaine
+- [Effect Days](https://effect.website/effect-days) : la conférence
+- [Effect Jobs](https://effect.website/effect-jobs) : les offres d'emploi
+
+</div>
+<div class="text-center">
+  <div class="inline-block bg-white p-3 rounded-xl shadow-lg">
+    <img src="./images/qr-github-effect-ts.svg" alt="QR code vers github.com/Mimetis/effect-ts" class="w-44 h-44" style="image-rendering: pixelated" />
+  </div>
+  <div class="mt-2 font-mono text-xs">
+    <a href="https://github.com/Mimetis/effect-ts">github.com/Mimetis/effect-ts</a>
+  </div>
+  <div class="text-xs opacity-70">slides + tutoriels</div>
+</div>
+<div>
+
+### 🐦 À suivre sur X
+
+- [@EffectTS_](https://x.com/EffectTS_) : le compte officiel
+- [@MichaelArnaldi](https://x.com/MichaelArnaldi) : créateur d'Effect
+- [@kitlangton](https://x.com/kitlangton) : OpenCode, talks Effect
+- [@mattiamanzati](https://x.com/mattiamanzati) : Effectful Technologies
+- [@schickling](https://x.com/schickling) : local-first, LiveStore
+- [@mattpocockuk](https://x.com/mattpocockuk) : TypeScript (et Effect)
+
+</div>
+</div>
 
 <!--
-Garder 2-3 minutes pour les questions si possible.
+Le QR code pointe vers https://github.com/Mimetis/effect-ts (slides + tutoriels du repo).
+Comptes X vérifiés : @EffectTS_ et @MichaelArnaldi cités par effect.website ; @kitlangton, @mattiamanzati, @schickling via leurs profils GitHub ; @mattpocockuk cité sur effect.website (« Why Effect was designed this way »).
 -->
