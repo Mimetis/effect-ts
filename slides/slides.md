@@ -476,7 +476,7 @@ try {
   console.log("✅", user.name)
 } catch (e) { // 👈 survolez e : unknown
   if (e instanceof UserNotFound) console.log("🔍", e.message)
-  else console.log(`Error: ${e}`) // 😬 le toast.error() de tous les projets
+  else console.log(`Erreur non gérée: ${e}`) // 😬 le toast.error() de tous les projets
 }
 ```
 
