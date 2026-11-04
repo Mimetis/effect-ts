@@ -150,6 +150,174 @@ Annonce : « Microsoft Frontier Company: AI engineering that amplifies and prote
 -->
 ---
 
+# Ils en parlent
+
+Quelques voix de la communauté TypeScript, sur X
+
+<div class="tweets">
+  <div class="tweet tweet-main">
+    <div class="tweet-head">
+      <img class="tweet-avatar" src="./images/avatars/mattpocockuk.jpg" alt="Matt Pocock" />
+      <div><b>Matt Pocock</b><small>@mattpocockuk · Total TypeScript</small></div>
+      <div class="i-carbon-logo-x tweet-x" />
+    </div>
+    <p>It used to be "use TS, not JS".<br>Now, for backend, it's <b>"use Effect, not just TS"</b>.</p>
+    <p>Took a long time for me to drop my scepticism but I 100% agree with Dillon.</p>
+    <div class="tweet-quote">
+      <div class="tweet-head">
+        <img class="tweet-avatar tweet-avatar-sm" src="./images/avatars/dillon_mulroy.jpg" alt="Dillon Mulroy" />
+        <div><b>Dillon Mulroy</b><small>@dillon_mulroy</small></div>
+      </div>
+      <p>i'm confident in saying that i will never start another typescript application or project without <span class="tweet-at">@EffectTS_</span></p>
+      <div class="tweet-foot"><span>1 sept. 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />2,1 k</span></div>
+    </div>
+    <div class="tweet-foot"><span>sept. 2026</span></div>
+  </div>
+  <div class="tweet">
+    <div class="tweet-head">
+      <img class="tweet-avatar" src="./images/avatars/rhyssullivan.jpg" alt="Rhys Sullivan" />
+      <div><b>Rhys Sullivan</b><small>@RhysSullivan</small></div>
+      <div class="i-carbon-logo-x tweet-x" />
+    </div>
+    <p>Answer Overflow is fully written in Effect now &amp; supporting <b>1.5M monthly active users</b></p>
+    <div class="tweet-foot"><span>mars 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />224</span></div>
+  </div>
+  <div class="tweet">
+    <div class="tweet-head">
+      <img class="tweet-avatar" src="./images/avatars/kitlangton.jpg" alt="Kit Langton" />
+      <div><b>Kit Langton</b><small>@kitlangton · OpenCode</small></div>
+      <div class="i-carbon-logo-x tweet-x" />
+    </div>
+    <p>I'm adding <span class="tweet-at">@EffectTS_</span> to <span class="tweet-at">@opencode</span> now.</p>
+    <div class="tweet-foot"><span>févr. 2026</span><span class="tweet-likes"><span class="i-carbon-favorite" />405</span></div>
+  </div>
+  <div class="tweet">
+    <div class="tweet-head">
+      <img class="tweet-avatar" src="./images/avatars/danielgri.jpg" alt="Daniel Griesser" />
+      <div><b>Daniel Griesser</b><small>@DanielGri · Sentry</small></div>
+      <div class="i-carbon-logo-x tweet-x" />
+    </div>
+    <p>Effect is one of the rare frameworks where <b>observability isn't an afterthought</b>.</p>
+    <div class="tweet-foot"><span class="tweet-likes"><span class="i-carbon-favorite" />358</span></div>
+  </div>
+  <div class="tweet">
+    <div class="tweet-head">
+      <img class="tweet-avatar" src="./images/avatars/rauchg.jpg" alt="Guillermo Rauch" />
+      <div><b>Guillermo Rauch</b><small>@rauchg · CEO de Vercel</small></div>
+      <div class="i-carbon-logo-x tweet-x" />
+    </div>
+    <p>“Before the effect one believes in different causes than one does after the <span class="tweet-at">@EffectTS_</span>”<br>— Friedrich Nietzsche</p>
+    <div class="tweet-foot"><span>29 avr. 2024</span><span class="tweet-likes"><span class="i-carbon-favorite" />65</span></div>
+  </div>
+</div>
+
+<style>
+.tweets {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 0.9rem;
+  margin-top: 0.4rem;
+  font-family: system-ui, sans-serif;
+}
+.tweet {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 14px;
+  background: var(--tech-code-bg);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+.tweet-main {
+  grid-row: span 2;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+  font-size: 0.92rem;
+}
+.tweet p {
+  margin: 0;
+  color: var(--tech-fg-strong);
+}
+.tweet-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.tweet-head b {
+  display: block;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--tech-fg-strong);
+}
+.tweet-head small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--tech-muted);
+}
+.tweet-avatar {
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--tech-border);
+}
+.tweet-avatar-sm {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.tweet-x {
+  margin-left: auto;
+  align-self: flex-start;
+  font-size: 1rem;
+  color: var(--tech-fg-strong);
+}
+.tweet-at {
+  color: #1d9bf0;
+}
+.tweet-quote {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+.tweet-foot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: auto;
+  font-size: 0.72rem;
+  color: var(--tech-muted);
+}
+.tweet-likes {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #f91880;
+}
+</style>
+
+<!--
+Ne pas tout lire : laisser le public lire, commenter Matt Pocock (le prof de TypeScript le plus suivi) qui reprend Dillon Mulroy.
+Rhys Sullivan : Effect en prod à 1,5 M d'utilisateurs actifs par mois. Kit Langton : OpenCode (agent de code) migré vers Effect.
+Finir sur la blague de Guillermo Rauch (CEO de Vercel) pour détendre avant le sommaire.
+
+Sources :
+- Dillon Mulroy, 1er sept. 2026 (2,1 k likes, 87 réponses), repris par Matt Pocock en quote tweet : cités dans « This Week in Effect 134 » (effect.website/blog/this-week-in-effect/134).
+- Rhys Sullivan, mars 2026 : « fully written in Effect now & supporting 1.5M monthly active users ».
+- Guillermo Rauch, 29 avr. 2024 (65 likes) : repris dans la newsletter de Sandro Maglione « Why everyone is talking about Effect ».
+- Kit Langton (fév. 2026) et Daniel Griesser (Sentry) : citations fournies, tweet d'origine non retrouvé, à revérifier avant le talk.
+- Portraits : photos de profil X (via unavatar.io), stockées dans images/avatars. Comptes @RhysSullivan et @DanielGri confirmés par leurs profils GitHub.
+-->
+---
+
 # Au programme
 
 <div class="toc">
