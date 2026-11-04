@@ -1,4 +1,4 @@
-import { Effect, ManagedRuntime, Schedule, Schema, SchemaIssue } from "effect";
+import { Effect, ManagedRuntime, Schedule, Schema } from "effect";
 import { Database } from "@/lib/effect/database";
 import { Order, User, type UserWithOrders } from "@/lib/effect/schemas";
 
@@ -19,17 +19,22 @@ const UserId = Schema.NumberFromString.pipe(Schema.check(Schema.isInt()), Schema
 // On est trés proche en .NET de : services.AddSingleton<IDatabase, Database.layer>();
 const runtime = ManagedRuntime.make(Database.layer);
 
-const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1();
-
 // The signature tells everything: Effect<User, DatabaseError | UserNotFoundError | SchemaError, Database>
 const getUser = Effect.fn("getUser")(function* (id: number) {
   
+  // 1. Get the database connection
   const database = yield* Database;
+
+  // 2. Find the user by id, retrying on transient database errors
   const row = yield* database.findUserById(id).pipe(
     Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }),
   );
+  
+  // 3. If no user is found, return a UserNotFoundError
   if (row === null) return yield* new UserNotFoundError({ id });
-  return yield* Schema.decodeUnknownEffect(User)(row);
+
+  // 4. Decode and validate the user data from the database
+    return yield* Schema.decodeUnknownEffect(User)(row);
 });
 
 // Effect<ReadonlyArray<Order>, DatabaseError | SchemaError, Database>
@@ -77,7 +82,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/user
         Effect.logError(error).pipe(
           Effect.as(
             Response.json(
-              { error: "ValidationError", message: "Invalid user or order data", issues: formatIssues(error.issue).issues },
+              { error: "ValidationError", message: "Invalid user or order data", issues: error.message },
               { status: 500 },
             ),
           ),

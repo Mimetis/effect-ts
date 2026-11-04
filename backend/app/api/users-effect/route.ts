@@ -1,12 +1,10 @@
 import { connection } from "next/server";
-import { Effect, ManagedRuntime, Schedule, Schema, SchemaIssue } from "effect";
+import { Effect, ManagedRuntime, Schedule, Schema } from "effect";
 import { Database } from "@/lib/effect/database";
 import { User } from "@/lib/effect/schemas";
 
 // Built once, shared by every request: it provides the Database service.
 const runtime = ManagedRuntime.make(Database.layer);
-
-const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1();
 
 // GET /api/users-effect
 export async function GET() {
@@ -36,7 +34,7 @@ export async function GET() {
         Effect.logError(error).pipe(
           Effect.as(
             Response.json(
-              { error: "ValidationError", message: "Invalid user data", issues: formatIssues(error.issue).issues },
+              { error: "ValidationError", message: "Invalid user data", issues: error.message },
               { status: 500 },
             ),
           ),
