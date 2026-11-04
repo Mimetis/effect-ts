@@ -3,14 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "pnpm -r --workspace-concurrency=1 --if-present start",
-    "start:tutorial01": "pnpm --filter tutorial01 start",
-    "start:tutorial02": "pnpm --filter tutorial02 start",
-    "start:tutorial03": "pnpm --filter tutorial03 start",
-    "start:tutorial03:config": "pnpm --filter tutorial03 start:config",
-    "start:tutorial04": "pnpm --filter tutorial04 start",
-    "start:tutorial05:classic": "pnpm --filter tutorial05 start:classic",
-    "start:tutorial05:effect": "pnpm --filter tutorial05 start:effect",
     "slides": "pnpm --filter slides dev",
     "slides:build": "pnpm --filter slides build",
     "slides:export": "pnpm --filter slides export",
@@ -21,7 +13,6 @@
   "devDependencies": {
     "@eslint/compat": "^2.1.1",
     "@eslint/js": "^10.0.1",
-    "@types/express": "^5.0.6",
     "@types/node": "^24.19.1",
     "eslint": "^10.12.0",
     "eslint-plugin-neverthrow": "^1.1.4",
@@ -29,9 +20,6 @@
     "typescript-eslint": "^8.71.0"
   },
   "dependencies": {
-    "@effect/sql-pg": "4.0.0",
-    "effect": "4.0.0",
-    "express": "^5.2.1",
-    "neverthrow": "^8.2.0"
+    "effect": "4.0.0"
   }
 }

@@ -1,8 +1,0 @@
-{
-  "name": "tutorial02",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node script.ts"
-  }
-}

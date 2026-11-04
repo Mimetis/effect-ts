@@ -1,8 +1,0 @@
-{
-  "name": "tutorial04",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "start": "node --env-file=.env script.ts"
-  }
-}

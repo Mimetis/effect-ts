@@ -1,5 +1,129 @@
+# Effect 4 : du TypeScript qui ne ment plus
 
-# Error Handling
+Une présentation [Slidev](https://sli.dev) pour faire découvrir [Effect](https://effect.website) à des développeurs TypeScript qui ne le connaissent pas.
+
+> Sébastien Pertus · DevFest Toulouse 2026 · `effect` 4.0
+
+Le deck est [slides/slides.md](./slides/slides.md) : 37 slides réparties en 8 chapitres, dont **14 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide.
+
+## Lancer la présentation
+
+```sh
+pnpm install
+pnpm slides          # serveur de dev, ouvre le navigateur
+pnpm slides:build    # site statique dans slides/dist
+pnpm slides:export   # export PDF (nécessite playwright-chromium)
+```
+
+En présentation :
+
+- `→` / `←` pour avancer et reculer, `o` pour la vue d'ensemble, `g` pour aller à une slide ;
+- le mode présentateur (avec les notes) s'ouvre depuis la barre de navigation, ou à l'adresse `/presenter` ;
+- le bouton en haut à droite, ou la touche `d`, bascule entre mode clair et mode sombre ;
+- sur une slide ▶, le bouton ▷ exécute le code.
+
+## Pourquoi ce talk ?
+
+La gestion des erreurs n'a jamais été vraiment résolue : codes d'erreur qu'on oublie de vérifier, exceptions invisibles dans les signatures, checked exceptions qui finissent en `catch (e) {}`, `Result` qu'il faut tout brancher à la main…
+
+Deux constats guident le talk :
+
+1. **Tout système qui repose sur la discipline des développeurs échoue** : des erreurs seront oubliées. Il faut que ce soit le compilateur qui vérifie.
+2. **Toutes les erreurs ne se valent pas** : certaines se rattrapent, d'autres non, et ça dépend du projet. Il faut pouvoir choisir lesquelles traiter.
+
+Effect répond aux deux : les erreurs sont dans le type, et on choisit lesquelles traiter. En plus, il fournit tout ce qui manque à une `Promise` : concurrence, annulation, retry, timeout, injection de dépendances, validation.
+
+## Le fil rouge
+
+Un même exemple traverse tout le deck : une fonction `getUser` qui récupère un utilisateur.
+
+- d'abord en `try / catch`, puis avec des tuples `[data, error]`, puis avec un `Result` (neverthrow) ;
+- puis avec Effect, en partant de zéro ;
+- enfin dans un cas réaliste qui grandit étape par étape, écrit une fois en TypeScript classique et une fois avec Effect.
+
+## Ce qu'on va voir
+
+### 1. Les erreurs : une longue histoire (slides 4 à 9)
+
+- **Un éternel recommencement** : une frise qui montre comment chaque approche (codes d'erreur, exceptions, checked exceptions, `Result`) corrige le défaut de la précédente… et en crée un nouveau.
+- ▶ **La signature ment** : `Promise<User>` ne dit rien des erreurs, on peut `throw` n'importe quoi, et dans le `catch`, `e` est `unknown`.
+- **Les tuples `[data, error]`** : un helper `catchErrorTyped`, mais il faut déclarer les erreurs à chaque appel.
+- ▶ **Un `Result` avec neverthrow** : l'erreur entre enfin dans le type… mais concurrence, annulation, retry et dépendances restent à écrire soi-même.
+
+### 2. `Effect<A, E, R>` : les bases (slides 10 à 15)
+
+- **Trois paramètres, trois vérités** : le même `getUser` vu comme `Promise<User>`, `Result<User, …>` et `Effect<User, …, never>`. `A` = ce qu'on obtient, `E` = les erreurs possibles, `R` = les dépendances.
+- ▶ **Premier Effect** : `Effect.succeed`, `Effect.fail`, et une fonction `divide` qui renvoie `Effect<number, DivisionByZero>`. Un Effect est une *description* : rien ne s'exécute avant `run*`.
+- ▶ **Composer avec `pipe`, `map` et `flatMap`** : `pipe` fonctionne comme le `|` du terminal, et `flatMap` ajoute les erreurs de l'étape suivante au type.
+- ▶ **Les erreurs s'additionnent** : `getUser` + `getCountry` enchaînés avec `pipe`. Les trois erreurs apparaissent dans le type, et `catchTags` les traite une par une.
+- ▶ **Le même programme avec `Effect.gen`** : `yield*` se lit comme `await`, sans imbrication, avec exactement le même type.
+
+### 3. Un `getUser` qui grandit (slides 16 à 19)
+
+Une liste de besoins réalistes : récupérer un utilisateur et ses commandes en parallèle, pour N utilisateurs mais 5 à la fois, en pouvant tout annuler, avec des retries, une vraie gestion d'erreurs, un timeout, de la validation…
+
+Un magic-move fait évoluer le code TypeScript classique en 8 étapes : `Promise.all`, un helper `mapWithConcurrency`, un `AbortSignal` propagé partout, un `retry` avec un `sleep` annulable, des `instanceof`… Le bilan : trois helpers maison, et une signature qui dit toujours `Promise<UserWithOrders[]>`.
+
+### 4. Le même chemin, avec Effect (slides 20 à 22)
+
+- Les mêmes 8 étapes avec Effect. Chaque besoin devient **une option ou une fonction**, pas un helper : `{ concurrency: 5 }`, `Effect.retry` avec un `Schedule`, `Effect.timeout`, `Effect.withSpan` pour les traces. La signature finale liste toutes les erreurs possibles.
+- Pourquoi `Effect.all` plutôt que `Promise.all` ou `Promise.allSettled` : les erreurs restent typées, les branches restantes sont interrompues, et `{ mode: "result" }` fait un `allSettled` typé.
+- ▶ **La requête zombie** : côte à côte, `Promise.all` rejette mais laisse tourner la requête sœur, alors qu'`Effect.all` l'annule réellement.
+
+### 5. Valider ce qui vient de l'extérieur (slides 23 à 25)
+
+- ▶ **`Schema`** : avec `as User`, on fait confiance au backend ; avec zod ou valibot, `parse` lève une exception et `safeParse` est à tester à la main. Avec Effect, une ligne (`Schema.decodeUnknownEffect`) suffit pour que `SchemaError` rejoigne le type de `getUser`, avec le chemin exact du champ fautif.
+- ▶ **`Config`** : un `.env` simulé, validé au démarrage par un `Schema`, avec `constantCase` (`app.apiUrl` → `APP_API_URL`) et `Redacted` pour que la clé d'API n'apparaisse jamais dans les logs.
+
+### 6. Services & Layers (slides 26 à 28)
+
+- ▶ **Changer d'implémentation sans toucher au métier** : un contrat (`Context.Service`), une logique métier qui ne connaît que lui, et un `Layer` qui fournit l'implémentation. La dépendance apparaît dans `R` : oublier de la fournir est une **erreur de compilation**, pas un `Service not found` à l'exécution.
+- **Classique vs Effect** : le tableau récapitulatif de tout le fil rouge, de `async / await` aux dépendances.
+
+### 7. Aller plus loin (slides 29 à 32)
+
+- ▶ **Regrouper les appels** avec `Request` et `RequestResolver` : les requêtes concurrentes partent en un seul appel, et `withCache` les dédoublonne.
+- ▶ **Tester le retry sans attendre** avec `TestClock` : 7 secondes de backoff testées en quelques millisecondes.
+- ▶ **État partagé : `let` vs `Ref`** : 10 requêtes concurrentes, des incréments perdus avec une variable classique, aucun avec `Ref.update`.
+
+### 8. Et maintenant ? (slides 33 à 37)
+
+- **L'écosystème** : depuis Effect 4, un seul paquet `effect` (HTTP, SQL, RPC, CLI inclus), plus les implémentations par plateforme et les drivers de base de données.
+- **Et côté frontend ?** [Foldkit](https://foldkit.dev), un framework frontend construit sur Effect, architecturé comme Elm.
+- **Quand l'adopter (avec honnêteté)** : dans quels cas ça vaut le coup, dans quels cas non, l'adoption progressive avec `Effect.runPromise`, et les perspectives d'emploi (IA et LLM, fintech, outils pour développeurs).
+- **Merci !** : liens utiles, comptes à suivre sur X, et un QR code vers ce dépôt.
+
+## Les démos exécutables ▶
+
+Les démos tournent **dans le navigateur**, sans réseau ni terminal : on peut modifier le code pendant la présentation et le relancer.
+
+- Les types d'Effect sont chargés dans l'éditeur : on peut **survoler** une variable pour voir son type, et les erreurs de compilation sont **soulignées en rouge** dès qu'on modifie le code.
+- Les logs d'Effect (`Effect.log`, `Console.log`) et les erreurs typées s'affichent proprement sous l'éditeur.
+- La première slide ▶ met quelques secondes à charger les types d'Effect ; les suivantes sont immédiates.
+
+## Organisation du dépôt
+
+| Fichier | Rôle |
+|---|---|
+| [slides/slides.md](./slides/slides.md) | Le deck |
+| [slides/setup/code-runners.ts](./slides/setup/code-runners.ts) | Affiche les logs Effect et formate les erreurs sous les démos ▶ |
+| [slides/setup/monaco.ts](./slides/setup/monaco.ts) | Charge les types d'Effect 4 dans les éditeurs live |
+| [slides/setup/shiki.ts](./slides/setup/shiki.ts) | Thème de coloration du code |
+| [slides/setup/main.ts](./slides/setup/main.ts) | Rend le focus aux slides après un clic, pour que les flèches continuent de fonctionner |
+| [slides/global-top.vue](./slides/global-top.vue) | Bouton clair / sombre |
+| [slides/slide-bottom.vue](./slides/slide-bottom.vue) | Barre d'état (numéro de slide) |
+| [slides/style.css](./slides/style.css) | Polices et styles partagés |
+| [slides/images/](./slides/images) | Photo, logos et QR code |
+
+## Pour aller plus loin
+
+- [effect.website/docs](https://effect.website/docs/) : la documentation officielle
+- [github.com/Effect-TS/effect](https://github.com/Effect-TS/effect) : le code source
+- [discord.gg/effect-ts](https://discord.gg/effect-ts) : la communauté
+- [effect.website/effect-jobs](https://effect.website/effect-jobs) : les offres d'emploi
+
+<details>
+<summary>Le texte d'origine : <em>Error Handling</em></summary>
 
 Error handling has been wrong since the beginning, and has continued to be wrong ever since.
 
@@ -19,180 +143,9 @@ Then we got multi-return error objects, maybes, panics, and all sorts of bright 
   Any error system that handles all errors the same way will fail because there are some errors we can ignore,
   and some errors we must not ignore. And what's ignorable/retriable to one project is not ignorable/retriable to another.
 
-Attempting to get the complete set of error types that any given call may raise is a fool's errand because of the halting 
+Attempting to get the complete set of error types that any given call may raise is a fool's errand because of the halting
 problem it eventually invokes. Forcing people to provide such a list results in the Java problem for the same reason.
 
-It's a hard problem, which is why no one has solved it yet. 
+It's a hard problem, which is why no one has solved it yet.
 
-## Tutorial 03 - Effect Schema et Config
-
-L'exemple `tutorial03/config.ts` suit un flux simple :
-
-1. Node charge le fichier `.env` grâce à son option native `--env-file` ;
-2. **Config** lit les variables d'environnement ;
-3. **Schema** valide les valeurs et déduit leur type TypeScript ;
-4. **Effect** conserve l'éventuelle `ConfigError` dans son canal d'erreur.
-
-Aucune dépendance comme `dotenv` n'est nécessaire. Le schéma transforme aussi
-l'URL en objet `URL` et protège la clé API avec `Redacted`.
-
-Créer le fichier local de configuration :
-
-```sh
-cp tutorial03/.env.example tutorial03/.env
-```
-
-Puis exécuter l'exemple :
-
-```sh
-pnpm start:tutorial03:config
-```
-
-Pour observer une erreur de validation, remplacer par exemple le port dans
-`tutorial03/.env` :
-
-```dotenv
-APP_PORT=70000
-```
-
-## Tutorial 04 - Application complète
-
-Ce dernier tutoriel fusionne les notions précédentes dans un seul programme :
-
-1. `Config` charge l'identifiant demandé et l'URL de la base depuis `.env` ;
-2. `AppConfigSchema` valide cette configuration ;
-3. `UserSchema` décrit et valide les utilisateurs retournés par la base ;
-4. `UserRepository` sépare la logique métier de la base de données ;
-5. `mock-user-repository.ts` fournit une implémentation en mémoire ;
-6. `postgres-user-repository.ts` utilise le driver officiel `@effect/sql-pg`
-   et une requête SQL paramétrée ;
-7. Effect compose les erreurs de configuration, d'utilisateur absent et de
-   données invalides.
-
-Préparer puis exécuter l'exemple :
-
-```sh
-cp tutorial04/.env.example tutorial04/.env
-pnpm start:tutorial04
-```
-
-Modifier `APP_USER_ID` dans `tutorial04/.env` pour observer les différents cas :
-
-- `1` : utilisateur valide ;
-- `2` : ligne trouvée, mais rejetée par `UserSchema` ;
-- `999` : utilisateur absent de la base mockée.
-
-Le fichier `.env.example` utilise le repository mocké par défaut :
-
-```dotenv
-APP_REPOSITORY=mock
-```
-
-Pour utiliser une vraie base PostgreSQL, créer la base et la table d'exemple :
-
-```sh
-createdb effect_tutorial
-psql effect_tutorial -f tutorial04/schema.sql
-```
-
-Puis modifier `tutorial04/.env` :
-
-```dotenv
-APP_REPOSITORY=postgres
-APP_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/effect_tutorial
-```
-
-La logique métier dans `script.ts` reste identique : seule la couche
-`UserRepository` fournie à Effect change.
-
-## Tutorial 05 - Express, async/await et Effect
-
-Ce tutoriel expose la même API avec deux implémentations :
-
-- `tutorial05/classic-server.ts` : Express avec `async/await` et des Promises ;
-- `tutorial05/effect-server.ts` : Express avec Effect.
-
-Node n'exécute pas automatiquement le JavaScript de chaque requête sur un
-thread différent. En revanche, les requêtes et opérations asynchrones
-s'entrelacent. Les exemples comparent donc la **concurrence**, pas du calcul
-CPU parallèle. Pour un travail CPU intensif, il faut toujours utiliser des
-Worker Threads ou un service externe.
-
-Préparer la configuration :
-
-```sh
-cp tutorial05/.env.example tutorial05/.env
-```
-
-Lancer les serveurs dans deux terminaux :
-
-```sh
-pnpm start:tutorial05:classic
-pnpm start:tutorial05:effect
-```
-
-### 1. Cas valide
-
-```sh
-curl http://localhost:3000/users/1/summary
-curl http://localhost:3001/users/1/summary
-```
-
-### 2. Données externes invalides
-
-```sh
-curl http://localhost:3000/users/2/summary
-curl http://localhost:3001/users/2/summary
-```
-
-La version classique utilise `as User` : TypeScript est satisfait, mais la
-ligne invalide traverse l'application. La version Effect utilise `Schema` et
-répond avec une erreur de données explicite.
-
-La version classique utilise également `Promise.allSettled`. Elle doit :
-
-- vérifier manuellement `status` pour chaque résultat ;
-- récupérer un `reason` non typé ;
-- imbriquer plusieurs `try/catch` pour traduire les erreurs ;
-- penser à préserver chaque erreur métier dans les `catch` externes.
-
-De son côté, `Effect.all` avec `mode: "result"` joue le même rôle que
-`allSettled`, mais chaque `failure` conserve son type. Il suffit de tester
-`Result.isFailure` puis de propager l'erreur avec `Effect.fail`, sans exception
-ni `try/catch`.
-
-### 3. Timeout et annulation
-
-```sh
-curl http://localhost:3000/users/4/summary
-curl http://localhost:3001/users/4/summary
-```
-
-Les deux serveurs répondent après 500 ms. Avec `Promise.race`, la requête
-classique continue néanmoins son travail en arrière-plan. Avec
-`Effect.timeout`, la fibre encore active est interrompue.
-
-### 4. État partagé et requêtes concurrentes
-
-Exécuter deux appels en parallèle, puis consulter `/stats` :
-
-```sh
-curl -s http://localhost:3000/users/1/summary > /dev/null & \
-curl -s http://localhost:3000/users/1/summary > /dev/null & wait
-curl http://localhost:3000/stats
-
-curl -s http://localhost:3001/users/1/summary > /dev/null & \
-curl -s http://localhost:3001/users/1/summary > /dev/null & wait
-curl http://localhost:3001/stats
-```
-
-La variable classique peut perdre un incrément entre deux `await`. La version
-Effect utilise `Ref.update`, qui réalise une mise à jour atomique.
-
-| Problème | Async/await classique | Effect |
-|---|---|---|
-| Données externes | Cast TypeScript | Validation `Schema` |
-| Erreurs possibles | Invisibles dans `Promise<A>` | Canal d'erreur typé |
-| Travail concurrent | `Promise.allSettled` + `reason: any` | `Effect.all` + `Result` typé |
-| Timeout | Répond sans annuler | Interrompt les fibres enfants |
-| État partagé | Mutation manuelle | `Ref` atomique |
+</details>
