@@ -17,7 +17,6 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 <template>
   <div class="slidev-layout section tech-section">
-    <div class="tech-section__grid" />
     <div v-if="index > 0" class="tech-section__number">{{ pad(index) }}</div>
 
     <div class="tech-section__body">
@@ -42,21 +41,6 @@ const pad = (value: number) => String(value).padStart(2, "0");
   height: 100%;
   overflow: hidden;
   padding-left: 5rem;
-  background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--tech-cyan) 16%, transparent), transparent 45%),
-    radial-gradient(circle at 88% 85%, color-mix(in srgb, var(--tech-violet) 18%, transparent), transparent 50%);
-}
-
-.tech-section__grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--tech-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse at 70% 50%, black 10%, transparent 70%);
-  opacity: 0.6;
-  pointer-events: none;
 }
 
 .tech-section__number {

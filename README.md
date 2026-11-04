@@ -111,7 +111,7 @@ Les démos tournent **dans le navigateur**, sans réseau ni terminal : on peut m
 | [slides/setup/shiki.ts](./slides/setup/shiki.ts) | Thème de coloration du code |
 | [slides/setup/main.ts](./slides/setup/main.ts) | Rend le focus aux slides après un clic, pour que les flèches continuent de fonctionner |
 | [slides/global-top.vue](./slides/global-top.vue) | Bouton clair / sombre |
-| [slides/slide-bottom.vue](./slides/slide-bottom.vue) | Barre d'état (numéro de slide) |
+| [slides/slide-bottom.vue](./slides/slide-bottom.vue) | Fond commun à tous les slides (dégradés + grille) et barre d'état (numéro de slide) |
 | [slides/layouts/section.vue](./slides/layouts/section.vue) | Layout des slides de chapitre (`layout: section`) : numéro et progression calculés automatiquement |
 | [slides/style.css](./slides/style.css) | Polices et styles partagés |
 | [slides/images/](./slides/images) | Photo, logos et QR code |

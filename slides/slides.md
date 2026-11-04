@@ -36,11 +36,6 @@ La gestion d'erreurs (et tout le reste), enfin typée
 </div>
 
 <style>
-.slidev-layout.cover {
-  background:
-    radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--tech-cyan) 18%, transparent), transparent 40%),
-    radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--tech-violet) 20%, transparent), transparent 45%);
-}
 .slidev-layout.cover h1 {
   width: fit-content;
   margin: 0 auto 0.25rem;
@@ -280,19 +275,31 @@ zoom: 0.85
 <div>
 
 - `Promise<User>` ne dit **rien** des erreurs
-- On peut `throw` **n'importe quoi**, même une `string`
-- Dans le `catch`, `e` est `unknown` : survolez-le
+- On peut `throw` **n'importe quoi**, `string`, `Object` ...
+- Dans le `catch`, `e` est `unknown`
+
+<div v-click class="mt-8">
+  <div class="fake-alert">
+    <div class="fake-alert__title">localhost:3000 indique</div>
+    <div class="fake-alert__msg">Error: [object Object]</div>
+    <div class="fake-alert__actions"><span>OK</span></div>
+  </div>
+  <div class="mt-4 text-center text-sm opacity-70">🏆 Le message d'erreur le plus célèbre du web.<br>Cherchez l'erreur. <b>Littéralement.</b></div>
+</div>
 
 </div>
 <div>
 
 ```ts {monaco-run} {autorun: false}
 class UserNotFound extends Error {}
+class NetworkError extends Error {}
 
 // La signature promet un User… et ne dit rien des erreurs
 async function getUser(id: number): Promise<{ id: number; name: string }> {
   if (id <= 0) throw "id invalide" // on peut throw… n'importe quoi
+  if (id === 42) throw { status: 500 } // le JSON de l'API, relancé tel quel
   if (id > 100) throw new UserNotFound(`User ${id} introuvable`)
+  if (id > 10) throw new NetworkError(`Network Issue`)
   return { id, name: `User ${id}` }
 }
 
@@ -301,15 +308,70 @@ try {
   console.log("✅", user.name)
 } catch (e) { // 👈 survolez e : unknown
   if (e instanceof UserNotFound) console.log("🔍", e.message)
-  else console.log("🤷 erreur inattendue :", e)
+  else console.log(`Error: ${e}`) // 😬 le toast.error() de tous les projets
 }
 ```
 
 </div>
 </div>
 
+<style>
+.fake-alert {
+  width: 17rem;
+  margin: 0 auto;
+  padding: 1.1rem 1.2rem 0.9rem;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: system-ui, sans-serif;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transform: rotate(-2deg);
+}
+.slidev-vclick-target:not(.slidev-vclick-hidden) .fake-alert {
+  animation: fake-alert-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.fake-alert__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.fake-alert__msg {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+}
+.fake-alert__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+.fake-alert__actions span {
+  padding: 0.3rem 1.3rem;
+  border-radius: 999px;
+  background: #0b57d0;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.dark .fake-alert {
+  background: #2d2e31;
+  color: #e3e3e3;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.dark .fake-alert__actions span {
+  background: #a8c7fa;
+  color: #062e6f;
+}
+@keyframes fake-alert-pop {
+  from {
+    opacity: 0;
+    transform: rotate(-2deg) scale(0.6);
+  }
+}
+</style>
+
 <!--
 Avec 0 : la string "id invalide" tombe dans le cas "inattendu". Personne ne l'avait prévue.
+Avec 42 : l'API a renvoyé un objet, on le relance tel quel… et le toast affiche le fameux « Error: [object Object] ».
+Le template `Error: ${e}` appelle String(e) : pour un objet, c'est "[object Object]". Une erreur, aucune information.
 -->
 
 ---
