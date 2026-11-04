@@ -1,0 +1,148 @@
+<script setup lang="ts">
+import { useNav, useSlideContext } from "@slidev/client";
+import { computed } from "vue";
+
+// Overrides the theme `section` layout: the chapter number and the progress
+// bar are computed from the position of the slide among all `layout: section` slides.
+const { slides } = useNav();
+const { $page } = useSlideContext();
+
+const sectionPages = computed(() =>
+    slides.value.filter(route => route.meta.slide.frontmatter?.layout === "section").map(route => route.no),
+);
+const index = computed(() => sectionPages.value.indexOf($page.value) + 1);
+const total = computed(() => sectionPages.value.length);
+const pad = (value: number) => String(value).padStart(2, "0");
+</script>
+
+<template>
+  <div class="slidev-layout section tech-section">
+    <div class="tech-section__grid" />
+    <div v-if="index > 0" class="tech-section__number">{{ pad(index) }}</div>
+
+    <div class="tech-section__body">
+      <div v-if="index > 0" class="tech-section__label">
+        <span>Chapitre {{ pad(index) }}</span>
+        <span class="tech-section__total">/ {{ pad(total) }}</span>
+      </div>
+      <slot />
+    </div>
+
+    <div v-if="index > 0" class="tech-section__progress">
+      <span v-for="n in total" :key="n" :class="{ 'is-done': n <= index }" />
+    </div>
+  </div>
+</template>
+
+<style>
+.slidev-layout.tech-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  padding-left: 5rem;
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--tech-cyan) 16%, transparent), transparent 45%),
+    radial-gradient(circle at 88% 85%, color-mix(in srgb, var(--tech-violet) 18%, transparent), transparent 50%);
+}
+
+.tech-section__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--tech-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tech-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at 70% 50%, black 10%, transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.tech-section__number {
+  position: absolute;
+  right: 3.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--tech-font-mono);
+  font-size: 15rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  background: var(--tech-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0.18;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tech-section__body {
+  position: relative;
+  max-width: 34rem;
+}
+
+.tech-section__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-family: var(--tech-font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tech-cyan);
+}
+
+.tech-section__label::before {
+  content: "";
+  width: 2.5rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--tech-gradient);
+}
+
+.tech-section__total {
+  color: var(--tech-muted);
+}
+
+.slidev-layout.tech-section h1 {
+  margin: 0;
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--tech-fg-strong);
+}
+
+.slidev-layout.tech-section h1 code {
+  font-size: 0.85em;
+}
+
+.slidev-layout.tech-section h3 {
+  margin-top: 1rem;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--tech-muted);
+}
+
+.tech-section__progress {
+  position: absolute;
+  left: 5rem;
+  bottom: 2.5rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.tech-section__progress span {
+  width: 1.8rem;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--tech-border);
+}
+
+.tech-section__progress span.is-done {
+  background: var(--tech-gradient);
+}
+</style>

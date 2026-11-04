@@ -17,6 +17,8 @@ drawings:
 class: text-center
 ---
 
+<div class="cover-kicker">DevFest Toulouse 2026</div>
+
 # Effect 4
 ## Du TypeScript qui ne ment plus
 
@@ -24,15 +26,80 @@ La gestion d'erreurs (et tout le reste), enfin typée
 
 <div class="tech-prompt mt-6">pnpm add effect</div>
 
-<div class="mt-8">
-
-Sébastien Pertus · DevFest Toulouse 2026
-
+<div class="cover-author">
+  <div class="cover-avatar"><img src="./images/sebastien_pertus.jpg" alt="Sébastien Pertus" /></div>
+  <span>Sébastien Pertus</span>
 </div>
 
 <div class="abs-br m-6 text-sm opacity-50 font-mono">
   effect 4.0
 </div>
+
+<style>
+.slidev-layout.cover {
+  background:
+    radial-gradient(circle at 15% 20%, color-mix(in srgb, var(--tech-cyan) 18%, transparent), transparent 40%),
+    radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--tech-violet) 20%, transparent), transparent 45%);
+}
+.slidev-layout.cover h1 {
+  width: fit-content;
+  margin: 0 auto 0.25rem;
+  font-size: 5.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  background: var(--tech-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.slidev-layout.cover h2 {
+  font-size: 2.1rem;
+  font-weight: 600;
+  color: var(--tech-fg-strong);
+}
+.slidev-layout.cover h2 + p {
+  margin-top: 0.6rem;
+  color: var(--tech-muted);
+}
+.cover-kicker {
+  width: fit-content;
+  margin: 0 auto 1.2rem;
+  padding: 0.2rem 0.9rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 999px;
+  background: var(--tech-code-bg);
+  font-family: var(--tech-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--tech-cyan);
+}
+.cover-author {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 2rem;
+  font-weight: 600;
+  color: var(--tech-fg-strong);
+}
+.cover-avatar {
+  width: 2.6rem;
+  height: 2.6rem;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--tech-border);
+}
+.cover-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  transform: scale(1.5);
+  transform-origin: 50% 32%;
+}
+</style>
 
 <!--
 Accroche : "Qui a déjà eu un `undefined is not a function` en prod un vendredi soir ?"
@@ -90,24 +157,56 @@ Annonce : « Microsoft Frontier Company: AI engineering that amplifies and prote
 
 # Au programme
 
-<div class="grid grid-cols-2 gap-x-12 text-left mt-6">
-<div>
-
-1. Les erreurs : une longue histoire
-2. `Effect<A, E, R>` : les bases
-3. Un `getUser` qui grandit
-4. Le même chemin, avec Effect
-
+<div class="toc">
+  <div class="toc-card"><span class="toc-num">01</span><div><b>Les erreurs</b><small>Une longue histoire de mensonges</small></div></div>
+  <div class="toc-card"><span class="toc-num">02</span><div><b><code>Effect&lt;A, E, R&gt;</code></b><small>Un type qui dit enfin la vérité</small></div></div>
+  <div class="toc-card"><span class="toc-num">03</span><div><b>Un <code>getUser</code> qui grandit</b><small>Le fil rouge : un cas réaliste</small></div></div>
+  <div class="toc-card"><span class="toc-num">04</span><div><b>Le même chemin, avec Effect</b><small>Concurrence, annulation, retry… sans helper maison</small></div></div>
+  <div class="toc-card"><span class="toc-num">05</span><div><b>Valider ce qui vient de l'extérieur</b><small><code>Schema</code> et <code>Config</code></small></div></div>
+  <div class="toc-card"><span class="toc-num">06</span><div><b>Services &amp; Layers</b><small>L'injection de dépendances, typée</small></div></div>
+  <div class="toc-card"><span class="toc-num">07</span><div><b>Aller plus loin</b><small>Regrouper les appels, tester le temps, partager l'état</small></div></div>
+  <div class="toc-card"><span class="toc-num">08</span><div><b>Et maintenant ?</b><small>L'écosystème, le frontend, et quand l'adopter</small></div></div>
 </div>
-<div>
 
-5. Valider ce qui vient de l'extérieur
-6. Services & Layers
-7. Aller plus loin
-8. Et maintenant ?
-
-</div>
-</div>
+<style>
+.toc {
+  display: grid;
+  grid-template-rows: repeat(4, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.75rem 1.5rem;
+  margin-top: 1.5rem;
+}
+.toc-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+}
+.toc-num {
+  flex: none;
+  font-family: var(--tech-font-mono);
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: var(--tech-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.toc-card b {
+  display: block;
+  font-weight: 650;
+  color: var(--tech-fg-strong);
+}
+.toc-card small {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--tech-muted);
+}
+</style>
 
 
 <!--
@@ -119,7 +218,7 @@ Les types Effect sont chargés dans l'éditeur : on peut survoler et voir les er
 layout: section
 ---
 
-# 1. Les erreurs
+# Les erreurs
 ### Une longue histoire de mensonges
 
 ---
@@ -245,9 +344,20 @@ if (error) {
 }
 ```
 
-Ça marche, mais :
+<div class="tuple-callout mt-2 px-4 py-1 rounded-lg border-l-4 border-amber-500 bg-amber-500/10">
+
+⚠️ Ça marche, mais :
 - il faut **déclarer les erreurs à chaque appel**
 - si `getUser()` ajoute demain un `UnauthorizedError`, **rien ne le signale**
+
+</div>
+
+<style>
+.tuple-callout p,
+.tuple-callout ul {
+  margin: 0.25rem 0;
+}
+</style>
 
 
 ---
@@ -299,20 +409,54 @@ if (result.isErr()) {
 
 # `Result` : un vrai progrès… mais
 
-<v-clicks>
+<div class="grid grid-cols-2 gap-4 mt-8">
+  <div v-click class="lim lim-ok"><span>✅</span><div>Les erreurs entrent <b>enfin</b> dans le type</div></div>
+  <div v-click class="lim lim-warn"><span>🧤</span><div>Tout ce qui peut <code>throw</code> (<code>fetch</code>, <code>JSON.parse</code>…) doit être <b>encapsulé à la main</b></div></div>
+  <div v-click class="lim lim-warn"><span>🔀</span><div><code>Promise&lt;Result&gt;</code> ou <code>ResultAsync</code> : deux mondes à jongler</div></div>
+  <div v-click class="lim lim-ko"><span>🚫</span><div>Concurrence, annulation, retry, timeout, dépendances : <b>rien de prévu</b></div></div>
+</div>
 
-- ✅ Les erreurs entrent **enfin** dans le type
-- 🧤 Tout ce qui peut `throw` (`fetch`, `JSON.parse`…) doit être **encapsulé à la main**
-- 🔀 `Promise<Result>` ou `ResultAsync` : deux mondes à jongler
-- 🚫 Concurrence, annulation, retry, timeout, dépendances : **rien de prévu**
-
-</v-clicks>
-
-<v-click>
+<div v-click class="punch mt-8">
 
 👉 Et si **un seul type** portait les erreurs… **et** tout le reste ?
 
-</v-click>
+</div>
+
+<style>
+.lim {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--tech-border);
+  border-left: 4px solid;
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+  font-size: 1.05rem;
+}
+.lim > span {
+  font-size: 1.8rem;
+}
+.lim-ok {
+  border-left-color: var(--tech-green);
+}
+.lim-warn {
+  border-left-color: #e0a82e;
+}
+.lim-ko {
+  border-left-color: var(--tech-red);
+}
+.punch {
+  padding: 0.4rem 1.2rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+  font-size: 1.15rem;
+  text-align: center;
+}
+</style>
 
 <!--
 Transition vers Effect : on reprend exactement le même getUser, en version Effect.
@@ -322,7 +466,7 @@ Transition vers Effect : on reprend exactement le même getUser, en version Effe
 layout: section
 ---
 
-# 2. `Effect<A, E, R>`
+# `Effect<A, E, R>`
 ### Un type qui dit enfin la vérité
 
 ---
@@ -333,24 +477,63 @@ zoom: 0.9
 
 Effect: Décrire le résultat, les erreurs, les dépendances
 
-# `Effect<A, E, R>`
+<div class="aer-sig">Effect&lt;<span class="a">A</span>, <span class="e">E</span>, <span class="r">R</span>&gt;</div>
+
 ```ts
-type UserEffect=Effect<User, InvalidUserId | UserNotFound, UserRepository>  // Effect : Le resultat, les erreurs, les dépendances
+type UserEffect = Effect<User, InvalidUserId | UserNotFound, UserRepository>
 ```
 
 <v-click>
 
-| | Signification | Pour `getUser` |
-|---|---|---|
-| **A** | Ce que ça produit en cas de succès | `User` |
-| **E** | Les erreurs **attendues**, typées | `InvalidUserId \| UserNotFound` |
-| **R** | Les dépendances nécessaires | `UserRepository`  |
+<div class="grid grid-cols-3 gap-4 my-4">
+  <div class="aer aer-a"><div class="aer-key">A · succès</div><div>Ce que ça produit en cas de succès</div><code>User</code></div>
+  <div class="aer aer-e"><div class="aer-key">E · erreurs</div><div>Les erreurs <b>attendues</b>, typées</div><code>InvalidUserId | UserNotFound</code></div>
+  <div class="aer aer-r"><div class="aer-key">R · dépendances</div><div>Les dépendances nécessaires</div><code>UserRepository</code></div>
+</div>
 
 > Un `Effect` est une **description** d'un programme : rien ne s'exécute tant qu'on ne le lance pas.
  
 > 👉 Donc on peut le **rejouer** (retry), l'**interrompre**, le **limiter**… sans toucher à son code.
 
 </v-click>
+
+<style>
+.aer-sig {
+  margin: 0.5rem 0 1rem;
+  font-family: var(--tech-font-mono);
+  font-size: 2.6rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--tech-fg-strong);
+}
+.aer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-top: 4px solid;
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+  font-size: 0.9rem;
+}
+.aer code {
+  align-self: flex-start;
+}
+.aer-key {
+  font-family: var(--tech-font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.aer-sig .a, .aer-a .aer-key { color: var(--tech-green); }
+.aer-sig .e, .aer-e .aer-key { color: var(--tech-red); }
+.aer-sig .r, .aer-r .aer-key { color: var(--tech-blue); }
+.aer-a { border-top-color: var(--tech-green); }
+.aer-e { border-top-color: var(--tech-red); }
+.aer-r { border-top-color: var(--tech-blue); }
+</style>
 
 <!--
 Analogie : une recette vs le plat.
@@ -583,7 +766,7 @@ for (const id of [1, 99, 0, 999, 31]) console.log(Effect.runSync(describe(id)))
 layout: section
 ---
 
-# 3. Un `getUser` qui grandit…
+# Un `getUser` qui grandit…
 ### Le fil rouge : un cas réaliste
 
 ---
@@ -592,18 +775,58 @@ zoom: 0.85
 
 # Le besoin
 
-<v-clicks>
+<div class="need">
+  <div v-click class="need-item"><span class="need-n">1</span><div class="i-carbon-user" /><div>Récupérer un utilisateur</div></div>
+  <div v-click class="need-item"><span class="need-n">2</span><div class="i-carbon-code" /><div>… proprement, avec <code>async/await</code></div></div>
+  <div v-click class="need-item"><span class="need-n">3</span><div class="i-carbon-shopping-cart" /><div>… et ses <b>commandes</b>, en <b>parallèle</b></div></div>
+  <div v-click class="need-item"><span class="need-n">4</span><div class="i-carbon-group" /><div>… pour <b>N utilisateurs</b>, mais pas plus de <b>5 à la fois</b></div></div>
+  <div v-click class="need-item"><span class="need-n">5</span><div class="i-carbon-stop-outline" /><div>… en pouvant <b>tout annuler</b> (l'utilisateur quitte la page)</div></div>
+  <div v-click class="need-item"><span class="need-n">6</span><div class="i-carbon-renew" /><div>… avec des <b>retries</b> (le réseau, c'est le réseau)</div></div>
+  <div v-click class="need-item"><span class="need-n">7</span><div class="i-carbon-warning-alt" /><div>… et une <b>gestion d'erreurs</b> digne de ce nom</div></div>
+  <div v-click class="need-item"><span class="need-n">8</span><div class="i-carbon-checkmark-outline" /><div>… en <b>validant</b> ce que renvoie l'API</div></div>
+</div>
 
-1. Récupérer un utilisateur
-2. … proprement, avec `async/await`
-3. … et ses **commandes**, en **parallèle**
-4. … pour **N utilisateurs**, mais pas plus de **5 à la fois**
-5. … en pouvant **tout annuler** (l'utilisateur quitte la page)
-6. … avec des **retries** (le réseau, c'est le réseau)
-7. … et une **gestion d'erreurs** digne de ce nom
-8. … en **validant** ce que renvoie l'API
-
-</v-clicks>
+<style>
+.need {
+  display: grid;
+  grid-template-rows: repeat(4, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 1rem 1.5rem;
+  margin-top: 2rem;
+}
+.need-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+  font-size: 1.15rem;
+}
+.need-n {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--tech-gradient);
+  color: white;
+  font-family: var(--tech-font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.dark .need-n {
+  color: #1a1b26;
+}
+.need-item > [class^="i-carbon"] {
+  flex: none;
+  font-size: 1.3rem;
+  color: var(--tech-cyan);
+}
+</style>
 
 <!--
 Poser le scénario fil rouge : chaque étape est une demande "réaliste" d'un PO ou d'un incident de prod.
@@ -802,16 +1025,38 @@ Faire défiler les 8 étapes (1 clic = 1 étape), en commentant à chaque fois c
 
 # Le bilan
 
-<v-clicks>
+<div class="grid grid-cols-3 gap-4 mt-6">
+  <div v-click class="bilan"><span>🧰</span><div><b>3 helpers maison</b> : <code>mapWithConcurrency</code>, <code>retry</code>, <code>sleep</code></div></div>
+  <div v-click class="bilan"><span>🔌</span><div>Un <code>AbortSignal</code> <b>propagé à la main</b> dans chaque signature</div></div>
+  <div v-click class="bilan"><span>🧟</span><div><code>Promise.all</code> n'annule pas les requêtes sœurs, et les workers continuent après un échec</div></div>
+  <div v-click class="bilan"><span>🙈</span><div>Les erreurs sont <code>unknown</code> : on teste avec <code>instanceof</code> et on espère n'en oublier aucune</div></div>
+  <div v-click class="bilan"><span>🔍</span><div>Pas de logs, pas de traces, difficile à tester (retry = vrais <code>setTimeout</code>)</div></div>
+  <div v-click class="bilan bilan-punch"><span>😬</span><div>Et la signature ? <b>Toujours</b> <code>Promise&lt;UserWithOrders[]&gt;</code></div></div>
+</div>
 
-- 🧰 **3 helpers maison** : `mapWithConcurrency`, `retry`, `sleep`
-- 🔌 Un `AbortSignal` **propagé à la main** dans chaque signature
-- 🧟 `Promise.all` n'annule pas les requêtes sœurs, et les workers continuent après un échec
-- 🙈 Les erreurs sont `unknown` : on teste avec `instanceof` et on espère n'en oublier aucune
-- 🔍 Pas de logs, pas de traces, difficile à tester (retry = vrais `setTimeout`)
-- 😬 Et la signature ? **Toujours** `Promise<UserWithOrders[]>`
-
-</v-clicks>
+<style>
+.bilan {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+.bilan > span {
+  font-size: 2rem;
+  line-height: 1;
+}
+.bilan-punch {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    linear-gradient(135deg, var(--tech-red), var(--tech-violet)) border-box;
+}
+</style>
 
 <!--
 Transition : "On connaît maintenant Effect : refaisons exactement le même chemin avec lui."
@@ -820,7 +1065,8 @@ Transition : "On connaît maintenant Effect : refaisons exactement le même chem
 layout: section
 ---
 
-# 4. Le même chemin, avec Effect
+# Le même chemin, avec Effect
+### Concurrence, annulation, retry… sans helper maison
 
 ---
 zoom: 0.72
@@ -1074,7 +1320,7 @@ Aucune signature ne change : l'interruption est structurée (les fibres enfants 
 layout: section
 ---
 
-# 5. Valider ce qui vient de l'extérieur
+# Valider ce qui vient de l'extérieur
 ### `Schema` et `Config`
 
 ---
@@ -1209,7 +1455,7 @@ En vrai, ConfigProvider.fromEnv() sans option lit process.env (par exemple un .e
 layout: section
 ---
 
-# 6. Services & Layers
+# Services & Layers
 ### L'injection de dépendances, typée
 
 
@@ -1325,7 +1571,7 @@ Le récapitulatif de tout le fil rouge : chaque ligne = un helper ou une convent
 layout: section
 ---
 
-# 7. Aller plus loin
+# Aller plus loin
 ### Regrouper les appels, tester le temps, partager l'état
 
 ---
@@ -1511,7 +1757,8 @@ Honnêteté : `completed++` juste après l'await marcherait aussi. Le vrai bug, 
 layout: section
 ---
 
-# 8. Et maintenant ?
+# Et maintenant ?
+### L'écosystème, le frontend, et quand l'adopter
 
 ---
 
@@ -1519,12 +1766,52 @@ layout: section
 
 Depuis Effect 4 : **un seul paquet `effect`**, sans dépendance, et toutes les briques partagent le même numéro de version.
 
-- **`effect`** — le cœur : Effect, Layer, Schedule, Stream, Schema, Config ...
-- **`effect/http`, `effect/sql`, `effect/rpc`, `effect/cli`…** — intégrés au package principal
-- **`@effect/platform-node` / `-bun` / `-deno` / `-browser`** — les implémentations par plateforme
-- **`@effect/sql-pg`, `@effect/sql-sqlite-node`…** — les drivers de base de données
-- **`@effect/opentelemetry`** — exporter les traces de `withSpan`
-- **`@effect/vitest`** — les tests
+<div class="eco">
+  <div class="eco-card eco-core"><div class="i-carbon-cube" /><div><code>effect</code><p>Le cœur : Effect, Layer, Schedule, Stream, Schema, Config…</p></div></div>
+  <div class="eco-card"><div class="i-carbon-application" /><div><code>effect/http</code> <code>effect/sql</code> <code>effect/rpc</code> <code>effect/cli</code>…<p>Intégrés au package principal</p></div></div>
+  <div class="eco-card"><div class="i-carbon-bare-metal-server" /><div><code>@effect/platform-node</code> / <code>-bun</code> / <code>-deno</code> / <code>-browser</code><p>Les implémentations par plateforme</p></div></div>
+  <div class="eco-card"><div class="i-carbon-data-base" /><div><code>@effect/sql-pg</code>, <code>@effect/sql-sqlite-node</code>…<p>Les drivers de base de données</p></div></div>
+  <div class="eco-card"><div class="i-carbon-chart-network" /><div><code>@effect/opentelemetry</code><p>Exporter les traces de <code>withSpan</code></p></div></div>
+  <div class="eco-card"><div class="i-carbon-test-tool" /><div><code>@effect/vitest</code><p>Les tests</p></div></div>
+</div>
+
+<style>
+.eco {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem 1.2rem;
+  margin-top: 1.2rem;
+}
+.eco-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+  font-size: 0.85rem;
+}
+.eco-card > [class^="i-carbon"] {
+  flex: none;
+  margin-top: 0.15rem;
+  font-size: 1.5rem;
+  color: var(--tech-cyan);
+}
+.eco-card code {
+  white-space: nowrap;
+}
+.eco-card p {
+  margin: 0.3rem 0 0;
+  color: var(--tech-muted);
+}
+.eco-core {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+}
+</style>
 
 ---
 zoom: 0.8
@@ -1602,8 +1889,8 @@ Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@eff
 
 # Quand l'adopter ? (avec honnêteté)
 
-<div class="grid grid-cols-2 gap-8">
-<div>
+<div class="grid grid-cols-2 gap-6">
+<div class="px-4 pt-2 rounded-xl border border-green-500/30 bg-green-500/6">
 
 ### ✅ Oui si…
 - Beaucoup d'I/O, d'erreurs et de dépendances
@@ -1611,7 +1898,7 @@ Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@eff
 - Équipe prête à apprendre un nouveau paradigme
 
 </div>
-<div>
+<div class="px-4 pt-2 rounded-xl border border-amber-500/30 bg-amber-500/6">
 
 ### ⚠️ Attention si…
 - Petit script ou projet très simple
@@ -1629,7 +1916,7 @@ Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@eff
 
 <v-click>
 
-<div class="mt-6 p-4 rounded-lg border border-green-500/40 bg-green-500/8">
+<div class="mt-3 px-4 py-1 rounded-lg border border-green-500/40 bg-green-500/8">
 
 **💼 Et côté emploi ?** Effect reste une compétence **de niche, mais recherchée** : le [job board officiel](https://effect.website/effect-jobs) liste une vingtaine d'entreprises qui recrutent, surtout dans **l'IA et les LLM** (OpenRouter, HumanLayer, Supermemory), **la fintech et l'assurance** (Gen, Reap, Tranched à Paris, Evalucar en France) et **les outils pour développeurs** (Warp, Solid). Des postes souvent seniors ou « founding engineer », affichés de **90–120 k€** à Munich à **plus de 200 k$** aux États-Unis.
 
