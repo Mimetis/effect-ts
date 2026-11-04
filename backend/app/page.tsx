@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User, UserWithOrders } from "@/lib/schemas";
 
@@ -48,10 +49,14 @@ export default function Home() {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-12 font-sans">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400">async / await</p>
       <h1 className="text-3xl font-bold">Utilisateurs</h1>
       <p className="mt-1 text-zinc-500">
         <code className="font-mono">GET /api/users</code> puis <code className="font-mono">GET /api/users/:id</code>
       </p>
+      <Link href="/effect" className="mt-2 inline-block text-sm text-zinc-500 underline">
+        Comparer avec la version Effect →
+      </Link>
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <section>

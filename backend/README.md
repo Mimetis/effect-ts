@@ -25,18 +25,22 @@ pnpm typecheck        # génère les types des routes (next typegen) puis lance 
 
 ## Le code
 
-Une petite API comme dans un vrai projet, écrite en async/await, que l'on migrera ensuite vers Effect. Toute la logique d'un endpoint est dans son `route.ts`, pour qu'on la voie d'un coup d'œil.
+La même petite API, écrite deux fois pour comparer : une version async/await, comme dans un vrai projet, et une version Effect 4. Les deux renvoient les mêmes réponses (mêmes JSON, mêmes codes HTTP) et utilisent la même base simulée. Toute la logique d'un endpoint est dans son `route.ts`, pour qu'on la voie d'un coup d'œil.
 
-| Fichier | Rôle |
-|---|---|
-| [app/api/users/route.ts](./app/api/users/route.ts) | `GET /api/users` : lit les utilisateurs (avec retry), les valide avec zod, et traduit chaque erreur en code HTTP (503, 500) |
-| [app/api/users/[id]/route.ts](./app/api/users/[id]/route.ts) | `GET /api/users/:id` : valide l'id, charge l'utilisateur et ses commandes en parallèle (`Promise.all`), et gère ses propres erreurs : 400 id invalide, 404 introuvable, 503 base indisponible, 500 donnée invalide (utilisateur ou commandes) |
-| [lib/db.ts](./lib/db.ts) | Une base de données simulée : chaque requête prend du temps, et la connexion tombe 1 fois sur 5 (`DatabaseError`) |
-| [lib/retry.ts](./lib/retry.ts) | Le helper `retry` maison, avec backoff exponentiel |
-| [lib/schemas.ts](./lib/schemas.ts) | Les schémas zod `UserSchema` et `OrderSchema`, et les types qui en sont déduits, partagés avec la page (`User`, `Order`, `UserWithOrders`) |
-| [app/page.tsx](./app/page.tsx) | La page : la liste, le détail d'un utilisateur au clic, et deux liens pour provoquer les erreurs |
+| | async / await | Effect 4 |
+|---|---|---|
+| Page | [`/`](./app/page.tsx) | [`/effect`](./app/effect/page.tsx) |
+| Liste | [`GET /api/users`](./app/api/users/route.ts) | [`GET /api/users-effect`](./app/api/users-effect/route.ts) |
+| Un utilisateur et ses commandes | [`GET /api/users/:id`](./app/api/users/[id]/route.ts) | [`GET /api/users-effect/:id`](./app/api/users-effect/[id]/route.ts) |
+| Accès à la base | [`db`](./lib/db.ts), utilisé directement | le service [`Database`](./lib/effect/database.ts) (`Context.Service` + `Layer`), qui enveloppe `db` |
+| Retry | le helper maison [`retry`](./lib/retry.ts) | `Effect.retry` + `Schedule.exponential` |
+| Validation | zod ([`lib/schemas.ts`](./lib/schemas.ts)) | `Schema` ([`lib/effect/schemas.ts`](./lib/effect/schemas.ts)) |
+| Parallélisme | `Promise.all` | `Effect.all` (l'autre requête est interrompue si l'une échoue) |
+| Erreurs | des classes `Error`, et un `catch (error: unknown)` avec une chaîne d'`instanceof` | des `Schema.TaggedError` dans le type, et un `Effect.catchTags` vérifié par le compilateur |
+
+Chaque endpoint gère ses propres erreurs : 400 id invalide, 404 utilisateur introuvable, 503 base indisponible après les retries, 500 donnée invalide (utilisateur ou commandes). [lib/db.ts](./lib/db.ts) simule une base dont chaque requête prend du temps et dont la connexion tombe 1 fois sur 5.
 
 ## Pour les agents
 
-- [AGENTS.md](./AGENTS.md) : consignes Next.js 16 (générées par Next.js) ; la doc de la version installée est dans `node_modules/next/dist/docs/`.
+- [AGENTS.md](./AGENTS.md) : consignes Next.js 16 (générées par Next.js ; la doc de la version installée est dans `node_modules/next/dist/docs/`), et le renvoi vers le skill Effect.
 - Les skills du projet, dont celui dédié à Effect, sont à la racine du dépôt, dans [.github/skills/](../.github/skills).
