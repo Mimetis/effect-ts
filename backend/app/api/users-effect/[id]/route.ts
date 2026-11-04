@@ -4,14 +4,12 @@ import { Order, User, type UserWithOrders } from "@/lib/effect/schemas";
 
 class InvalidUserIdError extends Schema.TaggedError<InvalidUserIdError>()("InvalidUserIdError", {
   id: Schema.String,
-}) {}
+}) { }
 
 class UserNotFoundError extends Schema.TaggedError<UserNotFoundError>()("UserNotFoundError", {
   id: Schema.Number,
-}) {}
+}) { }
 
-// The id from the URL: a string that must contain a positive integer
-const UserId = Schema.NumberFromString.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isGreaterThan(0)));
 
 // Built once, shared by every request: it provides the Database service.
 // - Effect.provide(layer) fournit les dépendances pour une exécution. 
@@ -21,7 +19,7 @@ const runtime = ManagedRuntime.make(Database.layer);
 
 // The signature tells everything: Effect<User, DatabaseError | UserNotFoundError | SchemaError, Database>
 const getUser = Effect.fn("getUser")(function* (id: number) {
-  
+
   // 1. Get the database connection
   const database = yield* Database;
 
@@ -29,19 +27,19 @@ const getUser = Effect.fn("getUser")(function* (id: number) {
   const row = yield* database.findUserById(id).pipe(
     Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }),
   );
-  
+
   // 3. If no user is found, return a UserNotFoundError
   if (row === null) return yield* new UserNotFoundError({ id });
 
   // 4. Decode and validate the user data from the database
-    return yield* Schema.decodeUnknownEffect(User)(row);
+  return yield* Schema.decodeUnknownEffect(User)(row);
 });
 
 // Effect<ReadonlyArray<Order>, DatabaseError | SchemaError, Database>
 const getOrders = Effect.fn("getOrders")(function* (userId: number) {
 
   const database = yield* Database;
-  
+
   const rows = yield* database.findOrdersByUserId(userId).pipe(
     Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }),
   );
@@ -54,9 +52,10 @@ export async function GET(_request: Request, { params }: RouteContext<"/api/user
   const { id: rawId } = await params;
 
   // Effect<Response, never, Database>: needs a Database, and every error is handled (never).
-  const program = Effect.gen(function* () {
-    
+  const program: Effect.Effect<Response, never, Database> = Effect.gen(function* () {
+
     // 1. Validate the id from the URL
+    const UserId = Schema.NumberFromString.pipe(Schema.check(Schema.isInt()), Schema.check(Schema.isGreaterThan(0)));
     const id = yield* Schema.decodeUnknownEffect(UserId)(rawId).pipe(
       Effect.mapError(() => new InvalidUserIdError({ id: rawId })),
     );
