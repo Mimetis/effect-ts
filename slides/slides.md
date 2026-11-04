@@ -1752,6 +1752,61 @@ console.log(await Effect.runPromise(greet(1).pipe(Effect.provide(ApiRepository))
 
 
 ---
+zoom: 0.77
+---
+
+# ▶ Le même service, écrit comme une classe
+
+<div class="grid grid-cols-[1fr_2.4fr] gap-6">
+<div>
+
+- Une seule **classe** : le **contrat** (le type) **et** la **clé** du service
+- Le `Layer` rangé avec le contrat : `UserRepository.api`
+- Dans le type, `R` affiche le nom de la classe : `Effect<string, UserNotFound, UserRepository>`
+- `greet` ne change pas
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Context, Data, Effect, Layer } from "effect"
+
+type User = { id: number; name: string }
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+
+// 1. Une classe = le contrat (le type) + la clé du service
+class UserRepository extends Context.Service<UserRepository, {
+  readonly findById: (id: number) => Effect.Effect<User, UserNotFound>
+}>()("app/UserRepository") {
+  // 2. L'implémentation (Layer), rangée avec le contrat
+  static readonly api = Layer.succeed(UserRepository, {
+    findById: (id) => Effect.succeed({ id, name: "Jane" }).pipe(Effect.delay("500 millis")),
+  })
+}
+
+// 3. La logique métier ne connaît que le contrat : rien ne change
+const greet = (id: number) =>
+  Effect.gen(function* () {
+    const repository = yield* UserRepository
+    const user = yield* repository.findById(id)
+    return `👋 Bonjour ${user.name}`
+  })
+
+console.log(await Effect.runPromise(greet(1).pipe(Effect.provide(UserRepository.api))))
+```
+
+</div>
+</div>
+
+<!--
+Même exemple que le slide précédent, avec la forme « classe » de Context.Service : c'est celle qu'on écrit dans un vrai projet.
+La classe porte à la fois le type du contrat et la clé ; l'implémentation est une propriété statique (api ; on ajouterait test, postgres… de la même façon).
+Survoler greet : R = UserRepository, le nom de la classe (avec la forme fonction, le type est moins lisible).
+Dans le backend de démo : backend/lib/effect/database.ts suit ce modèle (Database.layer).
+Pas de `export` devant la classe dans le slide : le code tourne comme le corps d'une fonction ; dans un vrai fichier, on l'exporte.
+-->
+
+---
 zoom: 0.75
 ---
 

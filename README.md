@@ -4,7 +4,7 @@ Une présentation [Slidev](https://sli.dev) pour faire découvrir [Effect](https
 
 > Sébastien Pertus · DevFest Toulouse 2026 · `effect` 4.0
 
-Le deck est [slides/slides.md](./slides/slides.md) : 38 slides réparties en 8 chapitres, dont **14 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres, avant le sommaire.
+Le deck est [slides/slides.md](./slides/slides.md) : 39 slides réparties en 8 chapitres, dont **15 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres, avant le sommaire.
 
 ## Lancer la présentation
 
@@ -75,18 +75,19 @@ Un magic-move fait évoluer le code TypeScript classique en 8 étapes : `Promise
 - ▶ **`Schema`** : avec `as User`, on fait confiance au backend ; avec zod ou valibot, `parse` lève une exception et `safeParse` est à tester à la main. Avec Effect, une ligne (`Schema.decodeUnknownEffect`) suffit pour que `SchemaError` rejoigne le type de `getUser`, avec le chemin exact du champ fautif.
 - ▶ **`Config`** : un `.env` simulé, validé au démarrage par un `Schema`, avec `constantCase` (`app.apiUrl` → `APP_API_URL`) et `Redacted` pour que la clé d'API n'apparaisse jamais dans les logs.
 
-### 6. Services & Layers (slides 27 à 29)
+### 6. Services & Layers (slides 27 à 30)
 
 - ▶ **Changer d'implémentation sans toucher au métier** : un contrat (`Context.Service`), une logique métier qui ne connaît que lui, et un `Layer` qui fournit l'implémentation. La dépendance apparaît dans `R` : oublier de la fournir est une **erreur de compilation**, pas un `Service not found` à l'exécution.
+- ▶ **Le même service, écrit comme une classe** : `class UserRepository extends Context.Service<UserRepository, { … }>()("…")`, la forme qu'on écrit dans un vrai projet. La classe porte à la fois le contrat et la clé, l'implémentation est rangée en `static` (`UserRepository.api`), et `R` affiche le nom de la classe.
 - **Classique vs Effect** : le tableau récapitulatif de tout le fil rouge, de `async / await` aux dépendances.
 
-### 7. Aller plus loin (slides 30 à 33)
+### 7. Aller plus loin (slides 31 à 34)
 
 - ▶ **Regrouper les appels** avec `Request` et `RequestResolver` : les requêtes concurrentes partent en un seul appel, et `withCache` les dédoublonne.
 - ▶ **Tester le retry sans attendre** avec `TestClock` : 7 secondes de backoff testées en quelques millisecondes.
 - ▶ **État partagé : `let` vs `Ref`** : 10 requêtes concurrentes, des incréments perdus avec une variable classique, aucun avec `Ref.update`.
 
-### 8. Et maintenant ? (slides 34 à 38)
+### 8. Et maintenant ? (slides 35 à 39)
 
 - **L'écosystème** : depuis Effect 4, un seul paquet `effect` (HTTP, SQL, RPC, CLI inclus), plus les implémentations par plateforme et les drivers de base de données.
 - **Et côté frontend ?** [Foldkit](https://foldkit.dev), un framework frontend construit sur Effect, architecturé comme Elm.
