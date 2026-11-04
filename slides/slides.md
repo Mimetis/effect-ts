@@ -601,16 +601,14 @@ zoom: 0.85
 5. … en pouvant **tout annuler** (l'utilisateur quitte la page)
 6. … avec des **retries** (le réseau, c'est le réseau)
 7. … et une **gestion d'erreurs** digne de ce nom
-8. *Bonus : un timeout global*
-9. … en **validant** ce que renvoie l'API
-10. … en **regroupant** les appels (1 000 users ≠ 1 000 requêtes)
-11. … et en **testant** le retry sans attendre
+8. … en **validant** ce que renvoie l'API
 
 </v-clicks>
 
 <!--
 Poser le scénario fil rouge : chaque étape est une demande "réaliste" d'un PO ou d'un incident de prod.
 -->
+
 ---
 zoom: 0.72
 ---
@@ -1527,7 +1525,7 @@ Depuis Effect 4 : **un seul paquet `effect`**, sans dépendance, et toutes les b
 - **`@effect/sql-pg`, `@effect/sql-sqlite-node`…** — les drivers de base de données
 - **`@effect/opentelemetry`** — exporter les traces de `withSpan`
 - **`@effect/vitest`** — les tests
-- [Ajouter : autres modules pertinents pour le public]
+
 ---
 zoom: 0.8
 ---
