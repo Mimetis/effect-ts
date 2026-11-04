@@ -2185,6 +2185,119 @@ Honnêteté : pré-1.0, des breaking changes restent possibles. Dépend de effec
 Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@effect/atom-react, -vue, -solid).
 -->
 ---
+zoom: 0.85
+---
+
+# Effect 🤝 les agents IA
+
+Un code Effect est plus facile à écrire et à vérifier… pour un agent aussi
+
+<div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-4">
+<div class="ai-why">
+  <div class="ai-card"><span>🧭</span><div><b>Une structure prévisible</b><p><code>Effect.gen</code>, <code>Effect.fn</code>, services, layers : un seul style, rien à inventer</p></div></div>
+  <div class="ai-card"><span>🔁</span><div><b>Le compilateur corrige l'agent</b><p>Une erreur non traitée, un service non fourni : visible dans le type (<code>E</code>, <code>R</code>), avant d'exécuter</p></div></div>
+  <div class="ai-card"><span>🧰</span><div><b>Tout est déjà là</b><p>Retry, timeout, concurrence, validation, config : pas de librairie choisie au hasard</p></div></div>
+  <div class="ai-card"><span>📚</span><div><b>La doc est dans le paquet</b><p><code>node_modules/effect/AGENTS.md</code>, <code>ai-docs/</code> et les sources, alignés sur la version installée</p></div></div>
+</div>
+<div class="ai-skill">
+  <div class="ai-skill__title"><b>Le skill officiel</b><a href="https://www.skills.sh/effect-ts/skills/effect-ts">skills.sh</a></div>
+  <div class="tech-prompt">npx skills add Effect-TS/skills</div>
+  <ul>
+    <li><code>effect-ts</code> : avant d'écrire du code Effect, l'agent lit <code>node_modules/effect/AGENTS.md</code>, puis les sources</li>
+    <li><code>effect-v3-to-v4</code> : migrer un projet d'Effect 3 à Effect 4</li>
+    <li>Claude Code, Cursor, Codex, GitHub Copilot… · <b>8,5 k</b> installations</li>
+  </ul>
+  <div class="ai-quote">« Effect feels insanely good to use with agents […] An outrageous advantage for any non-frontend TS code »<small>— Matt Pocock, oct. 2026</small></div>
+  <div class="ai-repo">📁 Dans ce dépôt : un skill Effect (<code>.github/skills/effect</code>), et <code>backend/AGENTS.md</code> qui y renvoie</div>
+</div>
+</div>
+
+<style>
+.ai-why {
+  display: grid;
+  gap: 0.7rem;
+}
+.ai-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+}
+.ai-card > span {
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.ai-card b {
+  color: var(--tech-fg-strong);
+}
+.ai-card p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--tech-muted);
+}
+.ai-skill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+}
+.ai-skill__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--tech-fg-strong);
+}
+.ai-skill__title a {
+  font-size: 0.8rem;
+}
+.ai-skill .tech-prompt {
+  align-self: flex-start;
+}
+.ai-skill ul {
+  margin: 0;
+  font-size: 0.88rem;
+}
+.ai-quote {
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--tech-violet);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tech-violet) 8%, transparent);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.ai-repo {
+  margin-top: auto;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--tech-border);
+  font-size: 0.8rem;
+  color: var(--tech-muted);
+}
+.ai-quote small {
+  display: block;
+  margin-top: 0.3rem;
+  font-style: normal;
+  color: var(--tech-muted);
+}
+</style>
+
+<!--
+Message : Effect est un très bon terrain pour les agents de code, et l'équipe Effect l'outille officiellement.
+Pourquoi : un style unique (moins de « créativité » de l'agent), des erreurs et dépendances dans le type (le compilateur lui signale ce qu'il a oublié), tout est intégré (pas de dépendances au hasard), et la doc voyage avec le paquet.
+Le paquet effect 4.0.0 contient AGENTS.md (≈ 400 lignes, identique à CLAUDE.md), ai-docs/ (76 fichiers d'exemples par thème : services, schedule, streams, http, sql, cli, cluster…) et les sources src/.
+Le skill officiel (github.com/Effect-TS/skills) : effect-ts ajoute aux instructions de l'agent (AGENTS.md / CLAUDE.md) « lire node_modules/effect/AGENTS.md avant d'écrire du code Effect » ; effect-v3-to-v4 guide la migration.
+Dans ce dépôt : un skill Effect dans .github/skills/effect, et backend/AGENTS.md qui y renvoie ; le plugin @effect/tsgo ajoute des diagnostics Effect au compilateur (encore du feedback pour l'agent).
+Autres témoignages : Rhys Sullivan (mars 2026) : « in the long term it's much more token efficient than writing standard TS » ; T3 Code, « very large portions agent coded » ; Michael Arnaldi : donner le repo Effect à l'agent (git subtree).
+Sources : skills.sh/effect-ts/skills/effect-ts (8,5 k installations au 4 nov. 2026), effect.website (« LLMs ❤️ Effect »), tweet de Matt Pocock du 1er oct. 2026.
+-->
+---
 
 # Quand l'adopter ? (avec honnêteté)
 

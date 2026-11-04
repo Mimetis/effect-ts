@@ -4,7 +4,7 @@ Une présentation [Slidev](https://sli.dev) pour faire découvrir [Effect](https
 
 > Sébastien Pertus · DevFest Toulouse 2026 · `effect` 4.0
 
-Le deck est [slides/slides.md](./slides/slides.md) : 39 slides réparties en 8 chapitres, dont **15 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres, avant le sommaire.
+Le deck est [slides/slides.md](./slides/slides.md) : 40 slides réparties en 8 chapitres, dont **15 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres, avant le sommaire.
 
 ## Lancer la présentation
 
@@ -87,10 +87,11 @@ Un magic-move fait évoluer le code TypeScript classique en 8 étapes : `Promise
 - ▶ **Tester le retry sans attendre** avec `TestClock` : 7 secondes de backoff testées en quelques millisecondes.
 - ▶ **État partagé : `let` vs `Ref`** : 10 requêtes concurrentes, des incréments perdus avec une variable classique, aucun avec `Ref.update`.
 
-### 8. Et maintenant ? (slides 35 à 39)
+### 8. Et maintenant ? (slides 35 à 40)
 
 - **L'écosystème** : depuis Effect 4, un seul paquet `effect` (HTTP, SQL, RPC, CLI inclus), plus les implémentations par plateforme et les drivers de base de données.
 - **Et côté frontend ?** [Foldkit](https://foldkit.dev), un framework frontend construit sur Effect, architecturé comme Elm.
+- **Effect 🤝 les agents IA** : pourquoi un code Effect est plus facile à écrire et à vérifier pour un agent (un style unique, des erreurs et des dépendances dans le type, tout est intégré, la doc livrée dans le paquet `effect`), et le skill officiel [Effect-TS/skills](https://www.skills.sh/effect-ts/skills/effect-ts) (`npx skills add Effect-TS/skills`).
 - **Quand l'adopter (avec honnêteté)** : dans quels cas ça vaut le coup, dans quels cas non, l'adoption progressive avec `Effect.runPromise`, et les perspectives d'emploi (IA et LLM, fintech, outils pour développeurs).
 - **Merci !** : liens utiles, comptes à suivre sur X, et un QR code vers ce dépôt.
 
