@@ -6,6 +6,8 @@
     "slides": "pnpm --filter slides dev",
     "slides:build": "pnpm --filter slides build",
     "slides:export": "pnpm --filter slides export",
+    "backend": "pnpm --filter backend dev",
+    "backend:build": "pnpm --filter backend build",
     "typecheck": "tsc -p .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

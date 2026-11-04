@@ -1,2 +1,7 @@
 packages:
   - "slides"
+  - "backend"
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver

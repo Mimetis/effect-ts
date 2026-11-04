@@ -115,6 +115,8 @@ Les démos tournent **dans le navigateur**, sans réseau ni terminal : on peut m
 | [slides/layouts/section.vue](./slides/layouts/section.vue) | Layout des slides de chapitre (`layout: section`) : numéro et progression calculés automatiquement |
 | [slides/style.css](./slides/style.css) | Polices et styles partagés |
 | [slides/images/](./slides/images) | Photo, logos et QR code |
+| [backend/](./backend) | Petite app Next.js 16 (App Router) dont le backend utilise Effect : `pnpm backend` (dev), `pnpm backend:build` |
+| [.github/skills/effect/](./.github/skills/effect/SKILL.md) | Le skill d'agent (Copilot) dédié à Effect 4 : conventions, pièges de la v4, migration depuis async/await, avec des références par thème |
 
 ## Pour aller plus loin
 
