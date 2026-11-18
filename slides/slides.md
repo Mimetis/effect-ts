@@ -331,6 +331,139 @@ Sources :
 - Portraits : photos de profil X (via unavatar.io), stockées dans images/avatars. Comptes @RhysSullivan, @ThePrimeagen, @jullerino et @theo confirmés par leurs profils GitHub.
 -->
 ---
+zoom: 0.9
+---
+
+# Effect, c'est quoi ?
+
+Une librairie TypeScript qui **regroupe la gestion des erreurs et des dépendances**<br>à travers les appels successifs de vos fonctions.
+
+<div class="wie-head">
+  <div class="wie-sig">Effect&lt;<span class="a">A</span>, <span class="e">E</span>, <span class="r">R</span>&gt;</div>
+  <div class="wie-aer">
+    <div class="wie-a"><b>A · succès</b>ce que ça renvoie</div>
+    <div class="wie-e"><b>E · erreurs</b>comment ça peut échouer</div>
+    <div class="wie-r"><b>R · dépendances</b>de quoi ça a besoin</div>
+  </div>
+</div>
+
+<div class="wie-code">
+
+```ts {1-3|5-9}
+// Chaque fonction annonce son résultat, ses erreurs et ses dépendances
+declare const getUser: (id: number) => Effect<User, UserNotFound, UserRepository>
+declare const getOrders: (user: User) => Effect<Order[], DbError, OrderRepository>
+
+// On les appelle à la suite, comme avec async / await
+const program = Effect.gen(function* () {
+  const user = yield* getUser(42)
+  return yield* getOrders(user)
+})
+```
+
+</div>
+
+<div v-click class="wie-compare">
+  <span class="wie-label">async / await</span>
+  <div><code>Promise&lt;Order[]&gt;</code> <span class="wie-shrug">les erreurs ? les dépendances ? 🤷</span></div>
+  <span class="wie-label wie-label-effect">Effect</span>
+  <div><code class="wie-type">Effect&lt;<span class="a">Order[]</span>, <span class="e">UserNotFound | DbError</span>, <span class="r">UserRepository | OrderRepository</span>&gt;</code></div>
+</div>
+
+<style>
+.wie-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin: 0.9rem 0 0.7rem;
+}
+.wie-sig {
+  font-family: var(--tech-font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--tech-fg-strong);
+}
+.wie-aer {
+  display: flex;
+  gap: 0.6rem;
+}
+.wie-aer > div {
+  display: flex;
+  flex-direction: column;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--tech-border);
+  border-left: 4px solid;
+  border-radius: 8px;
+  background: var(--tech-code-bg);
+  font-size: 0.8rem;
+  color: var(--tech-muted);
+}
+.wie-aer b {
+  font-family: var(--tech-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.wie-sig .a, .wie-type .a, .wie-a b { color: var(--tech-green); }
+.wie-sig .e, .wie-type .e, .wie-e b { color: var(--tech-red); }
+.wie-sig .r, .wie-type .r, .wie-r b { color: var(--tech-blue); }
+.wie-a { border-left-color: var(--tech-green) !important; }
+.wie-e { border-left-color: var(--tech-red) !important; }
+.wie-r { border-left-color: var(--tech-blue) !important; }
+.wie-code {
+  --slidev-code-font-size: 14px;
+  --slidev-code-line-height: 21px;
+}
+.wie-compare {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.45rem 1rem;
+  margin-top: 0.8rem;
+  padding: 0.6rem 1.1rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+  font-size: 0.9rem;
+}
+.wie-compare code {
+  white-space: nowrap;
+}
+.wie-label {
+  font-family: var(--tech-font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tech-muted);
+}
+.wie-label-effect {
+  font-weight: 700;
+  color: var(--tech-violet);
+}
+.wie-shrug {
+  margin-left: 0.5rem;
+  color: var(--tech-muted);
+}
+.slidev-layout .wie-compare .wie-type {
+  font-weight: 700;
+  color: var(--tech-fg-strong);
+}
+</style>
+
+<!--
+L'idée en une phrase : chaque fonction annonce ce qu'elle renvoie (A), comment elle peut échouer (E) et de quoi elle a besoin (R). Quand on les appelle à la suite, Effect regroupe tout dans le type du résultat, sans rien écrire.
+Clic 1 : les deux appels successifs. Ne pas expliquer Effect.gen ici : c'est l'équivalent d'async / await, on y revient en section 2.
+Clic 2 : la même chose en async / await donne Promise<Order[]>. Les erreurs et les dépendances existent toujours… mais restent invisibles.
+Le type de program est vérifié avec tsc sur effect 4.0.0. Sur le slide, Effect<…> est abrégé : dans le vrai code, c'est Effect.Effect<…>.
+Un Effect est une description (la recette, pas le plat) : rien ne s'exécute tant qu'on ne le lance pas. On le verra avec le premier Effect.
+Rebondir sur Matt Pocock (slide précédente) : « use TS, not JS » → « use Effect, not just TS ». Même promesse : attraper les bugs à la compilation plutôt qu'en prod.
+-->
+
+---
 
 # Au programme
 
@@ -714,77 +847,6 @@ layout: section
 ### Un type qui dit enfin la vérité
 
 ---
-zoom: 0.9
----
-
-# Trois paramètres, trois vérités
-
-Effect: Décrire le résultat, les erreurs, les dépendances
-
-<div class="aer-sig">Effect&lt;<span class="a">A</span>, <span class="e">E</span>, <span class="r">R</span>&gt;</div>
-
-```ts
-type UserEffect = Effect<User, InvalidUserId | UserNotFound, UserRepository>
-```
-
-<v-click>
-
-<div class="grid grid-cols-3 gap-4 my-4">
-  <div class="aer aer-a"><div class="aer-key">A · succès</div><div>Ce que ça produit en cas de succès</div><code>User</code></div>
-  <div class="aer aer-e"><div class="aer-key">E · erreurs</div><div>Les erreurs <b>attendues</b>, typées</div><code>InvalidUserId | UserNotFound</code></div>
-  <div class="aer aer-r"><div class="aer-key">R · dépendances</div><div>Les dépendances nécessaires</div><code>UserRepository</code></div>
-</div>
-
-> Un `Effect` est une **description** d'un programme : rien ne s'exécute tant qu'on ne le lance pas.
- 
-> 👉 Donc on peut le **rejouer** (retry), l'**interrompre**, le **limiter**… sans toucher à son code.
-
-</v-click>
-
-<style>
-.aer-sig {
-  margin: 0.5rem 0 1rem;
-  font-family: var(--tech-font-mono);
-  font-size: 2.6rem;
-  font-weight: 700;
-  text-align: center;
-  color: var(--tech-fg-strong);
-}
-.aer {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--tech-border);
-  border-top: 4px solid;
-  border-radius: 12px;
-  background: var(--tech-code-bg);
-  font-size: 0.9rem;
-}
-.aer code {
-  align-self: flex-start;
-}
-.aer-key {
-  font-family: var(--tech-font-mono);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.aer-sig .a, .aer-a .aer-key { color: var(--tech-green); }
-.aer-sig .e, .aer-e .aer-key { color: var(--tech-red); }
-.aer-sig .r, .aer-r .aer-key { color: var(--tech-blue); }
-.aer-a { border-top-color: var(--tech-green); }
-.aer-e { border-top-color: var(--tech-red); }
-.aer-r { border-top-color: var(--tech-blue); }
-</style>
-
-<!--
-Analogie : une recette vs le plat.
-R = never ici ; on verra en section 6 un getUser qui dépend d'un UserRepository.
--->
-
----
 zoom: 0.85
 ---
 
@@ -798,6 +860,7 @@ zoom: 0.85
 - L'erreur est **dans le type** : survolez `hello` et `boom`
 - `Effect<number, DivisionByZero>` : **ce que ça renvoie** + **comment ça peut échouer**
 - Un Effect est une **description** : rien ne s'exécute avant `run*`
+- 👉 Donc on peut le **rejouer** (retry), l'**interrompre**, le **limiter**… sans toucher à son code
 
 </div>
 <div>
@@ -830,6 +893,7 @@ console.log(Effect.runSyncExit(divide(10, 0)))
 
 <!--
 Effect<A, E, R> : A = ce qu'on obtient, E = ce qui peut échouer, R = les dépendances (on y revient plus tard).
+Analogie : une recette vs le plat. La description se rejoue, s'interrompt, se limite ; le plat, lui, est déjà servi (comme une Promise déjà lancée).
 E vaut never quand rien ne peut échouer ; A vaut never quand rien ne peut réussir.
 divide : la signature dit tout. Comparer avec `(a, b) => number` qui peut renvoyer Infinity ou lancer une exception sans prévenir.
 Data.TaggedError : une classe d'erreur avec un _tag, qu'on pourra traiter par son nom (catchTag, section suivante).
@@ -884,7 +948,7 @@ Si une étape échoue, les suivantes ne s'exécutent pas : l'erreur court-circui
 -->
 
 ---
-zoom: 0.67
+zoom: 0.7
 ---
 
 # ▶ Les erreurs s'additionnent… avec `pipe`
