@@ -1205,12 +1205,154 @@ Le pipeline du slide précédent, en vrai, dans une seule fonction : chercher �
 L'API a maintenant un champ country, et un troisième utilisateur, Linus, dont le pays n'est pas dans la liste.
 pipe enchaîne les étapes de haut en bas, comme le | du terminal. flatMap enchaîne un autre Effect : ici, un ternaire qui renvoie Effect.fail ou Effect.succeed ; map transforme la valeur.
 Chaque étape ajoute son erreur au type, voir les commentaires « + UserNotFound », « + SchemaError », « + CountryNotFound ».
-Pour le pays, le flatMap a besoin d'un bloc { … } avec une variable intermédiaire : chaque étape est une fonction à part, et on jongle avec les ternaires. Le slide suivant écrit la même chose avec Effect.gen.
+Pour le pays, le flatMap a besoin d'un bloc { … } avec une variable intermédiaire : chaque étape est une fonction à part, et on jongle avec les ternaires. Juste après : un intermède pour dédramatiser function* / yield*, puis la même chose avec Effect.gen.
 Survoler getUserCountryName : Effect<string, UserNotFound | SchemaError | CountryNotFound, never>. Personne n'a écrit cette union : elle est déduite étape par étape.
 catchTags : une branche par erreur. Survoler showCountry : Effect<string, never, never>.
 Lancer : 1 → Royaume-Uni, 2 → SchemaError (["createdAt"]), 3 → pays FI inconnu, 4 → utilisateur introuvable.
 Supprimer la branche CountryNotFound : CountryNotFound réapparaît dans le type de showCountry. Ajouter { code: "FI", name: "Finlande" } : Linus passe.
 Avec des Promise : Promise<Country>, et un catch (e: unknown) pour trier trois erreurs à la main.
+-->
+
+---
+layout: section
+chapter: false
+zoom: 0.82
+---
+
+<div class="gen-kicker">Étape 5 → étape 6 · on quitte <code>pipe</code> / <code>flatMap</code> / <code>map</code> pour <code>Effect.gen</code></div>
+
+# `function*` et `yield*` : pas de panique 😌
+### Fini les `flatMap` en cascade : `Effect.gen` s'écrit comme du `async / await`
+
+<div class="gen-compare">
+<div>
+<div class="gen-compare__label">Ce que vous écrivez déjà</div>
+
+```ts
+async function getName(id: number) {
+  const user = await getUser(id)
+  if (!user.active) throw new Inactive()
+  return user.name
+}
+// Promise<string>
+```
+
+</div>
+<div>
+<div class="gen-compare__label is-effect">La même chose avec Effect</div>
+
+```ts
+const getName = (id: number) => Effect.gen(function* () {
+  const user = yield* getUser(id)
+  if (!user.active) return yield* new Inactive()
+  return user.name
+})
+// Effect<string, UserNotFound | Inactive, never>
+```
+
+</div>
+</div>
+
+<div class="gen-compare__label mt-4">Le mémo : <code>pipe</code> (étape 5) et <code>async</code> → <code>Effect.gen</code> (étape 6)</div>
+<div class="gen-rules">
+  <div><code>.pipe(…)</code><i>·</i><code>async function</code><span>→</span><code>Effect.gen(function* () { … })</code></div>
+  <div><code>Effect.flatMap</code><i>·</i><code>await</code><span>→</span><code>yield*</code></div>
+  <div><code>Effect.map</code><span>→</span><code>return</code></div>
+  <div><code>Effect.fail</code><i>·</i><code>throw</code><span>→</span><code>return yield*</code><small>typé</small></div>
+</div>
+
+<div class="gen-reassure">
+  <div>✅ <b>Aucune connaissance des générateurs requise</b> : pas de <code>next()</code>, pas d'itérateur à manipuler, Effect s'en occupe.</div>
+  <div>💡 <b>Pourquoi pas <code>async</code> ?</b> Une <code>Promise</code> ne garde que le succès ; avec <code>function*</code>, TypeScript garde aussi <code>E</code> et <code>R</code>.</div>
+</div>
+
+<style>
+.gen-kicker {
+  width: fit-content;
+  margin-bottom: 0.9rem;
+  padding: 0.25rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--tech-cyan) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tech-cyan) 10%, transparent);
+  font-family: var(--tech-font-mono);
+  font-size: 0.85rem;
+  color: var(--tech-cyan);
+}
+.gen-kicker code {
+  background: none;
+  padding: 0;
+  color: var(--tech-fg-strong);
+}
+.gen-compare {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 1.2rem;
+  margin-top: 1.2rem;
+}
+.gen-compare__label {
+  margin-bottom: 0.4rem;
+  font-family: var(--tech-font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tech-muted);
+}
+.gen-compare__label code {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.gen-compare__label.is-effect {
+  color: var(--tech-cyan);
+}
+.gen-compare .slidev-code {
+  margin: 0 !important;
+}
+.gen-rules {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: start;
+  gap: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+.gen-rules > div {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 999px;
+  background: var(--tech-code-bg);
+}
+.gen-rules i {
+  font-style: normal;
+  color: var(--tech-muted);
+}
+.gen-rules span {
+  color: var(--tech-violet);
+  font-weight: 700;
+}
+.gen-rules small {
+  color: var(--tech-green);
+  font-weight: 600;
+}
+.gen-reassure {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  color: var(--tech-fg);
+}
+</style>
+
+<!--
+Intermède avant le ⑥ : annoncer la migration, et rassurer sur la syntaxe avant de la montrer.
+D'abord le pourquoi : le pipe du ⑤ fonctionne, mais flatMap + ternaires + blocs { … } deviennent vite illisibles. Au ⑥, on réécrit exactement le même pipeline avec Effect.gen.
+Ensuite la syntaxe : beaucoup n'ont jamais écrit de générateur, et function* / yield* font peur. Le message : vous n'avez rien à apprendre sur les générateurs, c'est une syntaxe, pas un concept.
+Lire les deux colonnes ligne par ligne : async function → Effect.gen(function* (), await → yield*, throw → return yield*. La forme du code ne change pas.
+Le mémo fait le lien avec le ⑤ : chaque Effect.flatMap devient un yield* (comme un await), le Effect.map final devient un simple return, et Effect.fail devient return yield* (comme un throw, mais typé).
+Pas de next(), pas d'itérateur, pas de boucle for…of : Effect pilote le générateur pour nous.
+Pourquoi pas async / await ? Parce qu'une Promise n'a qu'un paramètre de type : elle oublie les erreurs (et les dépendances). Le générateur permet à TypeScript d'inférer E et R à partir de chaque yield*.
+Astuce mémo : « yield étoile, c'est await ».
 -->
 
 ---

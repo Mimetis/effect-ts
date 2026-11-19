@@ -5,7 +5,8 @@ import { useBonus } from "../composables/useBonus";
 
 // Overrides the theme `section` layout: the chapter number and the progress
 // bar are computed from the position of the slide among the `layout: section` slides
-// of the same part (the talk, or the bonus slides).
+// of the same part (the talk, or the bonus slides). `chapter: false` in the frontmatter
+// makes an unnumbered interlude, which also gets the full width.
 const { slides } = useNav();
 const { $page } = useSlideContext();
 const { bonusStart, isBonus } = useBonus();
@@ -13,6 +14,7 @@ const { bonusStart, isBonus } = useBonus();
 const sectionPages = computed(() =>
     slides.value
         .filter(route => route.meta.slide.frontmatter?.layout === "section")
+        .filter(route => route.meta.slide.frontmatter?.chapter !== false)
         .filter(route => (route.no >= bonusStart.value) === isBonus.value)
         .map(route => route.no),
 );
@@ -23,7 +25,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
 </script>
 
 <template>
-  <div class="slidev-layout section tech-section" :class="{ 'is-bonus': isBonus }">
+  <div class="slidev-layout section tech-section" :class="{ 'is-bonus': isBonus, 'is-numbered': numbered }">
     <div v-if="numbered" class="tech-section__number">{{ pad(index) }}</div>
 
     <div class="tech-section__body">
@@ -71,7 +73,14 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 .tech-section__body {
   position: relative;
+  flex: 1;
+  padding-right: 3rem;
+}
+
+/* Leave room for the big chapter number on the right */
+.tech-section.is-numbered .tech-section__body {
   max-width: 34rem;
+  padding-right: 0;
 }
 
 .tech-section__label {

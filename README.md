@@ -4,7 +4,7 @@ Une présentation [Slidev](https://sli.dev) pour faire découvrir [Effect](https
 
 > Sébastien Pertus · DevFest Toulouse 2026 · `effect` 4.0
 
-Le deck est [slides/slides.md](./slides/slides.md) : 42 slides, **le talk** (slides 1 à 22 : un tutorial en 8 étapes, puis l'écosystème et quand adopter Effect) suivi de **20 slides bonus pour approfondir** (slides 23 à 42), non présentées en live mais laissées dans le deck pour ceux qui le récupèrent. Il contient **19 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres. Une slide « titre » affiche ensuite un grand `Effect<A, E, R>` qui résume toute la présentation : `A` (le succès, validé avec `Schema` et `Config`), `E` (les erreurs typées, `catchTag`, `retry`, `timeout`) et `R` (les dépendances, injectées avec `Layer`). Une slide présente ensuite `Effect<A, E, R>` : les mêmes fonctions déclarées en `Promise` puis en `Effect`, pour comparer leurs types de retour, et un premier Effect à exécuter (`succeed`, `fail`, `divide`). Vient ensuite le tutorial.
+Le deck est [slides/slides.md](./slides/slides.md) : 43 slides, **le talk** (slides 1 à 23 : un tutorial en 8 étapes, puis l'écosystème et quand adopter Effect) suivi de **20 slides bonus pour approfondir** (slides 24 à 43), non présentées en live mais laissées dans le deck pour ceux qui le récupèrent. Il contient **19 démos exécutables** (marquées ▶) qu'on lance et qu'on modifie directement depuis la slide. Après la présentation de l'orateur, un mur de tweets (« Ils en parlent ») montre ce qu'en disent Matt Pocock, ThePrimeagen, Theo, Rhys Sullivan et d'autres. Une slide « titre » affiche ensuite un grand `Effect<A, E, R>` qui résume toute la présentation : `A` (le succès, validé avec `Schema` et `Config`), `E` (les erreurs typées, `catchTag`, `retry`, `timeout`) et `R` (les dépendances, injectées avec `Layer`). Une slide présente ensuite `Effect<A, E, R>` : les mêmes fonctions déclarées en `Promise` puis en `Effect`, pour comparer leurs types de retour, et un premier Effect à exécuter (`succeed`, `fail`, `divide`). Vient ensuite le tutorial.
 
 ## Lancer la présentation
 
@@ -47,7 +47,7 @@ Un même exemple traverse tout le deck : une fonction `getUser` qui récupère u
 
 Une frise qui montre comment chaque approche (codes d'erreur, exceptions, checked exceptions, `Result`) corrige le défaut de la précédente… et en crée un nouveau.
 
-### Le tutorial : `getUser`, pas à pas (slides 7 à 16)
+### Le tutorial : `getUser`, pas à pas (slides 7 à 17)
 
 On part d'un `getUser` qui cherche un utilisateur dans ce que renvoie une API : un tableau de `User` à l'étape 1, puis un `Record<number, unknown>` dont une entrée est invalide. Chaque slide ajoute **un seul concept** (lignes marquées 🆕), et un bandeau rappelle ce que renvoie `getUser` (`A`, `E`, `R`) après l'étape.
 
@@ -57,13 +57,14 @@ On part d'un `getUser` qui cherche un utilisateur dans ce que renvoie une API : 
 3. ▶ **L'erreur est un type : `catchTag`** : chaque problème du `try / catch` et sa correction par le type (un clic par point). `Effect.catchTag(effect, "UserNotFound", …)` traite l'erreur par son nom, sans `pipe` ; `e` est typé, les bugs ne sont pas attrapés, et `E` redevient `never`.
 4. ▶ **`Schema`** : `Schema.decodeUnknownEffect` remplace `Effect.succeed`. `A` devient `User` (type déduit du schéma), `SchemaError` rejoint `E` avec le chemin du champ fautif, et `catchTags` traite chaque erreur.
 5. ▶ **`pipe` et `map`** : la version imbriquée `catchTags(map(getUser(id), …), …)` comparée à `getUser(id).pipe(map, catchTags)`, qui se lit de haut en bas. `showUser` renvoie `Effect<string, never>`.
+   - **Intermède « `function*` et `yield*` : pas de panique »** (slide 13) : avant l'étape 6, elle annonce qu'on quitte `pipe` / `flatMap` / `map` pour `Effect.gen`, et rassure sur la syntaxe : la même fonction en `async / await` et en `Effect.gen`, côte à côte, puis un mémo de migration (`.pipe` / `async function` → `Effect.gen(function* ()`, `flatMap` / `await` → `yield*`, `map` → `return`, `fail` / `throw` → `return yield*`). Aucune connaissance des générateurs n'est requise.
 6. ▶ **`Effect.gen`** : quand l'appel à l'API est un Effect, il faut attendre sa réponse avant de la tester. Le même `getUser` en `pipe` (avec `filterOrFail`) et en `gen` (un simple `if`, `yield*` ≈ `await`) ; la signature est inférée.
 7. ▶ **`tryPromise`, `timeout` et `retry`** : l'API devient distante et capricieuse. Deux lignes dans le `pipe`, et les tentatives s'affichent ; `runSync` devient `runPromise`.
 8. ▶ **`Context.Service` et `Layer`** : l'API devient un contrat, `R = UserApi`. L'implémentation en mémoire, c'est le `Effect.succeed` de l'étape 1. Bonus : `Effect.forEach` avec `{ concurrency: 2 }`.
 
-Le tutorial se termine par **Classique vs Effect** (slide 16) : le tableau récapitulatif de tout le fil rouge, de `async / await` aux dépendances.
+Le tutorial se termine par **Classique vs Effect** (slide 17) : le tableau récapitulatif de tout le fil rouge, de `async / await` aux dépendances.
 
-### Et maintenant ? (slides 17 à 22)
+### Et maintenant ? (slides 18 à 23)
 
 - **L'écosystème** : depuis Effect 4, un seul paquet `effect` (HTTP, SQL, RPC, CLI inclus), plus les implémentations par plateforme et les drivers de base de données.
 - **Et côté frontend ?** [Foldkit](https://foldkit.dev), un framework frontend construit sur Effect, architecturé comme Elm.
@@ -71,17 +72,17 @@ Le tutorial se termine par **Classique vs Effect** (slide 16) : le tableau réca
 - **Quand l'adopter (avec honnêteté)** : dans quels cas ça vaut le coup, dans quels cas non, l'adoption progressive avec `Effect.runPromise`, et les perspectives d'emploi (IA et LLM, fintech, outils pour développeurs).
 - **Merci !** : liens utiles, comptes à suivre sur X, et un QR code vers ce dépôt.
 
-## 📚 Bonus : pour approfondir (slides 23 à 42)
+## 📚 Bonus : pour approfondir (slides 24 à 43)
 
-Ces slides ne sont **pas présentées en live** : elles restent dans le deck pour ceux qui le récupèrent. La slide 23 en donne le sommaire cliquable, et chaque slide bonus porte un badge « 📚 bonus · pour approfondir » dans sa barre d'état. Les chapitres bonus sont numérotés à part (« Bonus 01 / 05 »). La slide 42 clôt les bonus.
+Ces slides ne sont **pas présentées en live** : elles restent dans le deck pour ceux qui le récupèrent. La slide 24 en donne le sommaire cliquable, et chaque slide bonus porte un badge « 📚 bonus · pour approfondir » dans sa barre d'état. Les chapitres bonus sont numérotés à part (« Bonus 01 / 05 »). La slide 43 clôt les bonus.
 
-### Bonus 1. Les erreurs avant Effect (slides 24 à 27)
+### Bonus 1. Les erreurs avant Effect (slides 25 à 28)
 
 - ▶ **La signature ment** : `Promise<User>` ne dit rien des erreurs, on peut `throw` n'importe quoi, et dans le `catch`, `e` est `unknown`.
 - **Les tuples `[data, error]`** : un helper `catchErrorTyped`, mais il faut déclarer les erreurs à chaque appel.
 - ▶ **Un `Result` avec neverthrow** : l'erreur entre enfin dans le type… mais concurrence, annulation, retry et dépendances restent à écrire soi-même.
 
-### Bonus 2. Un `getUser` réaliste (slides 28 à 31)
+### Bonus 2. Un `getUser` réaliste (slides 29 à 32)
 
 Une liste de besoins réalistes : récupérer un utilisateur et ses commandes en parallèle, pour N utilisateurs mais 5 à la fois, en pouvant tout annuler, avec des retries, une vraie gestion d'erreurs, un timeout, de la validation…
 
@@ -93,17 +94,17 @@ Puis le même chemin avec Effect :
 - Pourquoi `Effect.all` plutôt que `Promise.all` ou `Promise.allSettled` : les erreurs restent typées, les branches restantes sont interrompues, et `{ mode: "result" }` fait un `allSettled` typé.
 - ▶ **La requête zombie** : côte à côte, `Promise.all` rejette mais laisse tourner la requête sœur, alors qu'`Effect.all` l'annule réellement.
 
-### Bonus 3. Valider ce qui vient de l'extérieur (slides 32 à 34)
+### Bonus 3. Valider ce qui vient de l'extérieur (slides 33 à 35)
 
 - ▶ **`Schema`** : avec `as User`, on fait confiance au backend ; avec zod ou valibot, `parse` lève une exception et `safeParse` est à tester à la main. Avec Effect, une ligne (`Schema.decodeUnknownEffect`) suffit pour que `SchemaError` rejoigne le type de `getUser`, avec le chemin exact du champ fautif.
 - ▶ **`Config`** : un `.env` simulé, validé au démarrage par un `Schema`, avec `constantCase` (`app.apiUrl` → `APP_API_URL`) et `Redacted` pour que la clé d'API n'apparaisse jamais dans les logs.
 
-### Bonus 4. Services & Layers (slides 35 à 37)
+### Bonus 4. Services & Layers (slides 36 à 38)
 
 - ▶ **Changer d'implémentation sans toucher au métier** : un contrat (`Context.Service`), une logique métier qui ne connaît que lui, et un `Layer` qui fournit l'implémentation. La dépendance apparaît dans `R` : oublier de la fournir est une **erreur de compilation**, pas un `Service not found` à l'exécution.
 - ▶ **Le même service, écrit comme une classe** : `class UserRepository extends Context.Service<UserRepository, { … }>()("…")`, la forme qu'on écrit dans un vrai projet. La classe porte à la fois le contrat et la clé, l'implémentation est rangée en `static` (`UserRepository.api`), et `R` affiche le nom de la classe.
 
-### Bonus 5. Patterns avancés (slides 38 à 41)
+### Bonus 5. Patterns avancés (slides 39 à 42)
 
 - ▶ **Regrouper les appels** avec `Request` et `RequestResolver` : les requêtes concurrentes partent en un seul appel, et `withCache` les dédoublonne.
 - ▶ **Tester le retry sans attendre** avec `TestClock` : 7 secondes de backoff testées en quelques millisecondes.
