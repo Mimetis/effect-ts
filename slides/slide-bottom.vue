@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useSlideContext } from "@slidev/client";
 import { computed } from "vue";
+import { useBonus } from "./composables/useBonus";
 
 // Rendered under every slide: the shared background (gradients + grid)
-// and a terminal-like status bar with the page number.
+// and a terminal-like status bar with the page number (and a badge on bonus slides).
 const { $page, $nav, $frontmatter, $slidev } = useSlideContext();
+const { isBonus } = useBonus();
 
 const HIDDEN_LAYOUTS = new Set(["cover", "section", "center", "end", "intro"]);
 
@@ -20,6 +22,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
     <span class="tech-statusbar__dot" />
     <span class="tech-statusbar__page">{{ pad($page) }}/{{ pad($nav.total) }}</span>
     <span>{{ $slidev.configs.title }}</span>
+    <span v-if="isBonus" class="tech-statusbar__bonus">📚 bonus · pour approfondir</span>
   </footer>
 </template>
 

@@ -680,7 +680,7 @@ async function getUser(id: number): Promise<User> {
 
 <div class="tuto-sig">
   <small>getUser renvoie</small>
-  <b class="a">A</b><span class="is-new">User | undefined</span>
+  <b class="a">A</b><span class="is-new">User</span>
   <b class="e">E</b><span>never</span>
   <b class="r">R</b><span>never</span>
 </div>
@@ -834,7 +834,7 @@ const api = [
 
 // 🆕 L'erreur est dans la signature
 const getUser = (id: number): Effect.Effect<User, UserNotFound> => {
-  const user = api.find((user) => user.id === id)
+  const user = api.find((user) => user.id === id) as User
   return user === undefined
     ? Effect.fail(new UserNotFound({ id })) // 🆕 un Effect qui échoue
     : Effect.succeed(user)
@@ -1869,7 +1869,7 @@ Questions ?
   <div class="mt-2 font-mono text-xs">
     <a href="https://github.com/Mimetis/effect-ts">github.com/Mimetis/effect-ts</a>
   </div>
-  <div class="text-xs opacity-70">slides + démos</div>
+  <div class="text-xs opacity-70">slides, démos et bonus 📚</div>
 </div>
 <div>
 
@@ -1885,46 +1885,92 @@ Questions ?
 </div>
 </div>
 
+<div class="abs-br m-6 text-xs opacity-60">📚 La suite du deck : des slides bonus, pour approfondir →</div>
+
 <!--
 Le QR code pointe vers https://github.com/Mimetis/effect-ts (slides et démos du talk).
 Comptes X vérifiés : @EffectTS_ et @MichaelArnaldi cités par effect.website ; @kitlangton, @mattiamanzati, @schickling via leurs profils GitHub ; @mattpocockuk cité sur effect.website (« Why Effect was designed this way »).
+Fin du talk. Les slides suivantes (bonus) ne sont pas présentées : elles sont là pour ceux qui récupèrent le deck.
 -->
 
 ---
+bonus: true
+routeAlias: bonus
+zoom: 0.8
+---
 
-# Au programme
+<div class="bonus-kicker">📚 Bonus · pour approfondir</div>
 
-<div class="toc">
-  <div class="toc-card"><span class="toc-num">01</span><div><b>Les erreurs</b><small>Une longue histoire de mensonges</small></div></div>
-  <div class="toc-card"><span class="toc-num">02</span><div><b><code>Effect&lt;A, E, R&gt;</code></b><small>Un type qui dit enfin la vérité</small></div></div>
-  <div class="toc-card"><span class="toc-num">03</span><div><b>Un <code>getUser</code> qui grandit</b><small>Le fil rouge : un cas réaliste</small></div></div>
-  <div class="toc-card"><span class="toc-num">04</span><div><b>Le même chemin, avec Effect</b><small>Concurrence, annulation, retry… sans helper maison</small></div></div>
-  <div class="toc-card"><span class="toc-num">05</span><div><b>Valider ce qui vient de l'extérieur</b><small><code>Schema</code> et <code>Config</code></small></div></div>
-  <div class="toc-card"><span class="toc-num">06</span><div><b>Services &amp; Layers</b><small>L'injection de dépendances, typée</small></div></div>
-  <div class="toc-card"><span class="toc-num">07</span><div><b>Aller plus loin</b><small>Regrouper les appels, tester le temps, partager l'état</small></div></div>
-  <div class="toc-card"><span class="toc-num">08</span><div><b>Et maintenant ?</b><small>L'écosystème, le frontend, et quand l'adopter</small></div></div>
+# La suite, à lire à tête reposée
+
+Ces slides **n'ont pas été présentées** pendant le talk. Elles prolongent ce qu'on a vu, avec des **démos ▶ à lancer et modifier vous-même**. Cliquez sur un chapitre pour y aller, ou avancez avec <kbd>→</kbd>.
+
+<div class="bonus-toc">
+  <Link to="bonus-erreurs" class="bonus-card">
+    <span class="bonus-card__num">01</span>
+    <div><b>Les erreurs avant Effect</b><p><code>try / catch</code>, tuples <code>[data, error]</code>, <code>Result</code> (neverthrow)</p></div>
+    <span class="bonus-card__tag">prolonge l'intro</span>
+  </Link>
+  <Link to="bonus-getuser" class="bonus-card">
+    <span class="bonus-card__num">02</span>
+    <div><b>Un <code>getUser</code> réaliste</b><p>Concurrence, annulation, retry, timeout : classique vs Effect</p></div>
+    <span class="bonus-card__tag">prolonge les étapes 5 à 7</span>
+  </Link>
+  <Link to="bonus-validation" class="bonus-card">
+    <span class="bonus-card__num">03</span>
+    <div><b>Valider ce qui vient de l'extérieur</b><p><code>Schema</code> sur une réponse d'API, <code>Config</code> sur le <code>.env</code></p></div>
+    <span class="bonus-card__tag">prolonge l'étape 4</span>
+  </Link>
+  <Link to="bonus-services" class="bonus-card">
+    <span class="bonus-card__num">04</span>
+    <div><b>Services & Layers</b><p>Changer d'implémentation, la forme « classe » d'un service</p></div>
+    <span class="bonus-card__tag">prolonge l'étape 8</span>
+  </Link>
+  <Link to="bonus-avance" class="bonus-card">
+    <span class="bonus-card__num">05</span>
+    <div><b>Patterns avancés</b><p><code>Request</code> (batching), <code>TestClock</code>, <code>Ref</code></p></div>
+    <span class="bonus-card__tag bonus-card__tag--new">nouveau</span>
+  </Link>
 </div>
 
 <style>
-.toc {
-  display: grid;
-  grid-template-rows: repeat(4, auto);
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 0.75rem 1.5rem;
-  margin-top: 1.5rem;
+.bonus-kicker {
+  width: fit-content;
+  margin-bottom: 0.8rem;
+  padding: 0.2rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--tech-violet) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tech-violet) 10%, transparent);
+  font-family: var(--tech-font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--tech-violet);
 }
-.toc-card {
-  display: flex;
+.bonus-toc {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.bonus-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 1rem;
-  padding: 0.7rem 1rem;
+  padding: 0.4rem 1rem;
   border: 1px solid var(--tech-border);
   border-radius: 12px;
   background: var(--tech-code-bg);
+  color: inherit !important;
+  text-decoration: none !important;
+  border-bottom-width: 1px !important;
+  transition: border-color 0.15s, transform 0.15s;
 }
-.toc-num {
-  flex: none;
+.bonus-card:hover {
+  border-color: var(--tech-violet) !important;
+  transform: translateX(4px);
+}
+.bonus-card__num {
   font-family: var(--tech-font-mono);
   font-size: 1.4rem;
   font-weight: 800;
@@ -1933,29 +1979,49 @@ Comptes X vérifiés : @EffectTS_ et @MichaelArnaldi cités par effect.website ;
   background-clip: text;
   color: transparent;
 }
-.toc-card b {
-  display: block;
-  font-weight: 650;
+.bonus-card b {
   color: var(--tech-fg-strong);
 }
-.toc-card small {
-  display: block;
-  font-size: 0.78rem;
+.bonus-card p {
+  margin: 0.1rem 0 0;
+  font-size: 0.82rem;
   color: var(--tech-muted);
+}
+.bonus-card__tag {
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tech-cyan) 12%, transparent);
+  font-family: var(--tech-font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--tech-cyan);
+  white-space: nowrap;
+}
+.bonus-card__tag--new {
+  background: color-mix(in srgb, var(--tech-violet) 12%, transparent);
+  color: var(--tech-violet);
 }
 </style>
 
-
 <!--
-Le code des slides ▶ tourne dans le navigateur : pas de réseau, pas de terminal.
-Les types Effect sont chargés dans l'éditeur : on peut survoler et voir les erreurs de compilation en direct.
+Slide de transition pour la version partagée du deck : à partir d'ici, tout est bonus (badge dans la barre d'état, chapitres « Bonus 0X »).
+Le marqueur `bonus: true` dans le frontmatter de cette slide suffit : tout ce qui suit est traité comme bonus (slides/composables/useBonus.ts).
+Les étapes citées (④ à ⑧) renvoient au tutorial du talk.
 -->
+
+---
+layout: section
+routeAlias: bonus-erreurs
+---
+
+# Les erreurs avant Effect
+### Pourquoi `try / catch`, les tuples et `Result` ne suffisent pas
 
 ---
 zoom: 0.85
 ---
 
-# ▶ Le Problème: la signature ment
+# ▶ Le problème : la signature ment
 
 <div class="grid grid-cols-[1fr_2.2fr] gap-6">
 <div>
@@ -2099,364 +2165,13 @@ if (result.isErr()) {
 </div>
 </div>
 
-
----
-
-# `Result` : un vrai progrès… mais
-
-<div class="grid grid-cols-2 gap-4 mt-8">
-  <div v-click class="lim lim-ok"><span>✅</span><div>Les erreurs entrent <b>enfin</b> dans le type</div></div>
-  <div v-click class="lim lim-warn"><span>🧤</span><div>Tout ce qui peut <code>throw</code> (<code>fetch</code>, <code>JSON.parse</code>…) doit être <b>encapsulé à la main</b></div></div>
-  <div v-click class="lim lim-warn"><span>🔀</span><div><code>Promise&lt;Result&gt;</code> ou <code>ResultAsync</code> : deux mondes à jongler</div></div>
-  <div v-click class="lim lim-ko"><span>🚫</span><div>Concurrence, annulation, retry, timeout, dépendances : <b>rien de prévu</b></div></div>
-</div>
-
-<div v-click class="punch mt-8">
-
-👉 Et si **un seul type** portait les erreurs… **et** tout le reste ?
-
-</div>
-
-<style>
-.lim {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.2rem;
-  border: 1px solid var(--tech-border);
-  border-left: 4px solid;
-  border-radius: 12px;
-  background: var(--tech-code-bg);
-  font-size: 1.05rem;
-}
-.lim > span {
-  font-size: 1.8rem;
-}
-.lim-ok {
-  border-left-color: var(--tech-green);
-}
-.lim-warn {
-  border-left-color: #e0a82e;
-}
-.lim-ko {
-  border-left-color: var(--tech-red);
-}
-.punch {
-  padding: 0.4rem 1.2rem;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  background:
-    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
-    var(--tech-gradient) border-box;
-  font-size: 1.15rem;
-  text-align: center;
-}
-</style>
-
-<!--
-Transition vers Effect : on reprend exactement le même getUser, en version Effect.
--->
-
 ---
 layout: section
+routeAlias: bonus-getuser
 ---
 
-# `Effect<A, E, R>`
-### Un type qui dit enfin la vérité
-
----
-zoom: 0.85
----
-
-# ▶ Premier Effect
-
-<div class="grid grid-cols-[1fr_1.7fr] gap-6">
-<div>
-
-- `Effect.succeed(v)` : un Effect qui **réussit**
-- `Effect.fail(e)` : un Effect qui **échoue**
-- L'erreur est **dans le type** : survolez `hello` et `boom`
-- `Effect<number, DivisionByZero>` : **ce que ça renvoie** + **comment ça peut échouer**
-- Un Effect est une **description** : rien ne s'exécute avant `run*`
-- 👉 Donc on peut le **rejouer** (retry), l'**interrompre**, le **limiter**… sans toucher à son code
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Data, Effect } from "effect"
-
-// Un effect qui ne peut echouer
-const hello = Effect.succeed("Hello DevFest")
-
-// un effect qui échoue toujours et ne renvoie jamais de valeur
-const boom = Effect.fail("Oups")
-
-// Un résultat (number) ET une erreur possible (DivisionByZero)
-class DivisionByZero extends Data.TaggedError("DivisionByZero") {}
-
-const divide = (a: number, b: number): Effect.Effect<number, DivisionByZero> =>
-  b === 0 ? Effect.fail(new DivisionByZero()) : Effect.succeed(a / b)
-
-console.log("— rien n'a encore été exécuté —")
-
-console.log(Effect.runSync(hello))
-console.log(Effect.runSyncExit(boom))
-console.log(Effect.runSyncExit(divide(10, 2)))
-console.log(Effect.runSyncExit(divide(10, 0)))
-```
-
-</div>
-</div>
-
-<!--
-Effect<A, E, R> : A = ce qu'on obtient, E = ce qui peut échouer, R = les dépendances (on y revient plus tard).
-Analogie : une recette vs le plat. La description se rejoue, s'interrompt, se limite ; le plat, lui, est déjà servi (comme une Promise déjà lancée).
-E vaut never quand rien ne peut échouer ; A vaut never quand rien ne peut réussir.
-divide : la signature dit tout. Comparer avec `(a, b) => number` qui peut renvoyer Infinity ou lancer une exception sans prévenir.
-Data.TaggedError : une classe d'erreur avec un _tag, qu'on pourra traiter par son nom (catchTag, section suivante).
-Essayer Effect.runSync(boom) : ça lève une exception, d'où runSyncExit.
--->
-
----
-zoom: 0.85
----
-
-# ▶ Composer : `pipe`, `map` et `flatMap`
-
-<div class="grid grid-cols-[1fr_1fr] gap-6">
-<div>
-
-- `pipe()`, c'est comme le `|` en bash, vous avez tous déjà utilisé cette syntaxe :<br>`curl -fsSL https://bun.sh/install | bash`
-
-- `map()` : **transforme** la valeur de succès
-- `flatMap()` : **enchaîne** un autre Effect… et **ajoute** ses erreurs au type
-</div>
-
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Effect } from "effect"
-
-const hello = Effect.succeed("Hello DevFest")
-
-// map : transformer la valeur de succès
-const length = hello.pipe( 
-  Effect.map((msg) => msg.length),
-)
-
-// flatMap : enchaîner un autre Effect… qui peut échouer
-const checked = length.pipe( 
-  
-  Effect.flatMap((n) => n > 20 ? 
-    Effect.succeed(n) : 
-    Effect.fail(`Trop court : ${n}`)),
-)
-
-console.log(Effect.runSyncExit(length))
-console.log(Effect.runSyncExit(checked))
-```
-
-</div>
-</div>
-
-<!--
-Analogie : map / flatMap sur un tableau, ou then sur une Promise… mais l'erreur reste typée.
-Si une étape échoue, les suivantes ne s'exécutent pas : l'erreur court-circuite la chaîne.
--->
-
----
-zoom: 0.7
----
-
-# ▶ Les erreurs s'additionnent… avec `pipe`
-
-<div class="grid grid-cols-[1fr_2.6fr] gap-6">
-<div>
-
-- Le même `getUser`… plus un `getCountry`
-- Chaque fonction **déclare** ses erreurs
-- `flatMap` les **additionne** : survolez `program`
-- `catchTags` les traite une à une
-- `Effect<string>` = `E` vaut `never` : **tout** doit être traité
-
-</div>
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Data, Effect } from "effect"
-
-class InvalidUserId extends Data.TaggedError("InvalidUserId")<{ id: number }> {}
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ id: number }> {}
-type User = { id: number; name: string }
-
-const getUser = (id: number): Effect.Effect<User, InvalidUserId | UserNotFound> =>
-  id <= 0 ? Effect.fail(new InvalidUserId({ id }))
-  : id > 100 ? Effect.fail(new UserNotFound({ id }))
-  : Effect.succeed({ id, name: `User ${id}` })
-
-const getCountry = (user: User): Effect.Effect<string, CountryNotFound> =>
-  user.id === 31 ? Effect.fail(new CountryNotFound({ id: user.id }))
-  : Effect.succeed(user.id > 50 ? "France" : "Belgique")
-
-const program = (id: number) => // les 3 erreurs sont dans le type
-  getUser(id).pipe(
-    Effect.flatMap((user) =>
-      getCountry(user).pipe(
-        Effect.map((country) => `✅ ${user.name} (${country})`),
-      ),
-    ),
-  )
-
-const describe = (id: number): Effect.Effect<string> =>
-  program(id).pipe(
-    Effect.catchTags({
-      InvalidUserId: (e) => Effect.succeed(`⚠️ id invalide : ${e.id}`),
-      UserNotFound: (e) => Effect.succeed(`🔍 introuvable : ${e.id}`),
-      CountryNotFound: (e) => Effect.succeed(`🌍 pays inconnu : ${e.id}`),
-    }),
-  )
-
-for (const id of [1, 99, 0, 999, 31]) console.log(Effect.runSync(describe(id)))
-```
-
-</div>
-</div>
-
-<!--
-Même getUser que les slides try/catch et neverthrow (ids 0 et 999), plus getCountry (le user 31, de Toulouse, est rejeté 😉).
-program vaut Effect<string, InvalidUserId | UserNotFound | CountryNotFound, never> sans l'avoir écrit : flatMap a additionné les erreurs.
-Remarquer l'imbrication : pour garder `user` sous la main dans le map, il faut un flatMap dans le flatMap… slide suivante, Effect.gen règle ça.
-En retirant une ligne de catchTags, `describe` ne compile plus : l'erreur restante n'est pas traitée.
--->
-
----
-zoom: 0.7
----
-
-# ▶ Le même programme, avec `Effect.gen`
-
-<div class="grid grid-cols-[1fr_2.6fr] gap-6">
-<div>
-
-- **Exactement** le même programme qu'avec `pipe`
-- `Effect.gen` + `yield*` ≈ `async` + `await`
-- Plus d'imbrication : on lit le code **de haut en bas**
-- Les erreurs s'additionnent **de la même façon** : survolez `program`
-</div>
-
-<div>
-
-```ts {monaco-run} {autorun: false}
-import { Data, Effect } from "effect"
-
-class InvalidUserId extends Data.TaggedError("InvalidUserId")<{ id: number }> {}
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ id: number }> {}
-type User = { id: number; name: string }
-
-const getUser = (id: number): Effect.Effect<User, InvalidUserId | UserNotFound> =>
-  id <= 0 ? Effect.fail(new InvalidUserId({ id }))
-  : id > 100 ? Effect.fail(new UserNotFound({ id }))
-  : Effect.succeed({ id, name: `User ${id}` })
-
-const getCountry = (user: User): Effect.Effect<string, CountryNotFound> =>
-  user.id === 31 ? Effect.fail(new CountryNotFound({ id: user.id }))
-  : Effect.succeed(user.id > 50 ? "France" : "Belgique")
-
-const program = (id: number) => // les 3 erreurs sont dans le type
-  Effect.gen(function* () {
-    const user = yield* getUser(id) // yield* ≈ await
-    const country = yield* getCountry(user)
-    return `✅ ${user.name} (${country})`
-  })
-
-const describe = (id: number): Effect.Effect<string> =>
-  program(id).pipe(
-    Effect.catchTags({
-      InvalidUserId: (e) => Effect.succeed(`⚠️ id invalide : ${e.id}`),
-      UserNotFound: (e) => Effect.succeed(`🔍 introuvable : ${e.id}`),
-      CountryNotFound: (e) => Effect.succeed(`🌍 pays inconnu : ${e.id}`),
-    }),
-  )
-
-for (const id of [1, 99, 0, 999, 31]) console.log(Effect.runSync(describe(id)))
-```
-
-</div>
-</div>
-
-
----
-layout: section
----
-
-# Un `getUser` qui grandit…
-### Le fil rouge : un cas réaliste
-
----
-zoom: 0.85
----
-
-# Le besoin
-
-<div class="need">
-  <div v-click class="need-item"><span class="need-n">1</span><div class="i-carbon-user" /><div>Récupérer un utilisateur</div></div>
-  <div v-click class="need-item"><span class="need-n">2</span><div class="i-carbon-code" /><div>… proprement, avec <code>async/await</code></div></div>
-  <div v-click class="need-item"><span class="need-n">3</span><div class="i-carbon-shopping-cart" /><div>… et ses <b>commandes</b>, en <b>parallèle</b></div></div>
-  <div v-click class="need-item"><span class="need-n">4</span><div class="i-carbon-group" /><div>… pour <b>N utilisateurs</b>, mais pas plus de <b>5 à la fois</b></div></div>
-  <div v-click class="need-item"><span class="need-n">5</span><div class="i-carbon-stop-outline" /><div>… en pouvant <b>tout annuler</b> (l'utilisateur quitte la page)</div></div>
-  <div v-click class="need-item"><span class="need-n">6</span><div class="i-carbon-renew" /><div>… avec des <b>retries</b> (le réseau, c'est le réseau)</div></div>
-  <div v-click class="need-item"><span class="need-n">7</span><div class="i-carbon-warning-alt" /><div>… et une <b>gestion d'erreurs</b> digne de ce nom</div></div>
-  <div v-click class="need-item"><span class="need-n">8</span><div class="i-carbon-checkmark-outline" /><div>… en <b>validant</b> ce que renvoie l'API</div></div>
-</div>
-
-<style>
-.need {
-  display: grid;
-  grid-template-rows: repeat(4, auto);
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 1rem 1.5rem;
-  margin-top: 2rem;
-}
-.need-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 1rem 1.2rem;
-  border: 1px solid var(--tech-border);
-  border-radius: 12px;
-  background: var(--tech-code-bg);
-  font-size: 1.15rem;
-}
-.need-n {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 1.8rem;
-  height: 1.8rem;
-  border-radius: 50%;
-  background: var(--tech-gradient);
-  color: white;
-  font-family: var(--tech-font-mono);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.dark .need-n {
-  color: #1a1b26;
-}
-.need-item > [class^="i-carbon"] {
-  flex: none;
-  font-size: 1.3rem;
-  color: var(--tech-cyan);
-}
-</style>
-
-<!--
-Poser le scénario fil rouge : chaque étape est une demande "réaliste" d'un PO ou d'un incident de prod.
--->
+# Un `getUser` réaliste
+### Concurrence, annulation, retry, timeout : classique vs Effect
 
 ---
 zoom: 0.72
@@ -2647,58 +2362,12 @@ Faire défiler les 8 étapes (1 clic = 1 étape), en commentant à chaque fois c
 Étape ⑥ : piège classique, le sleep du retry doit lui aussi écouter le signal.
 Étape ⑦ : malgré tout ce travail, `catch (e)` reçoit `unknown`.
 -->
----
-
-# Le bilan
-
-<div class="grid grid-cols-3 gap-4 mt-6">
-  <div v-click class="bilan"><span>🧰</span><div><b>3 helpers maison</b> : <code>mapWithConcurrency</code>, <code>retry</code>, <code>sleep</code></div></div>
-  <div v-click class="bilan"><span>🔌</span><div>Un <code>AbortSignal</code> <b>propagé à la main</b> dans chaque signature</div></div>
-  <div v-click class="bilan"><span>🧟</span><div><code>Promise.all</code> n'annule pas les requêtes sœurs, et les workers continuent après un échec</div></div>
-  <div v-click class="bilan"><span>🙈</span><div>Les erreurs sont <code>unknown</code> : on teste avec <code>instanceof</code> et on espère n'en oublier aucune</div></div>
-  <div v-click class="bilan"><span>🔍</span><div>Pas de logs, pas de traces, difficile à tester (retry = vrais <code>setTimeout</code>)</div></div>
-  <div v-click class="bilan bilan-punch"><span>😬</span><div>Et la signature ? <b>Toujours</b> <code>Promise&lt;UserWithOrders[]&gt;</code></div></div>
-</div>
-
-<style>
-.bilan {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid var(--tech-border);
-  border-radius: 12px;
-  background: var(--tech-code-bg);
-  font-size: 0.95rem;
-  line-height: 1.45;
-}
-.bilan > span {
-  font-size: 2rem;
-  line-height: 1;
-}
-.bilan-punch {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
-    linear-gradient(135deg, var(--tech-red), var(--tech-violet)) border-box;
-}
-</style>
-
-<!--
-Transition : "On connaît maintenant Effect : refaisons exactement le même chemin avec lui."
--->
----
-layout: section
----
-
-# Le même chemin, avec Effect
-### Concurrence, annulation, retry… sans helper maison
 
 ---
 zoom: 0.72
 ---
 
-# `getUser`, version Effect
+# Le même `getUser`, version Effect
 
 ````md magic-move {lines: true}
 ```ts
@@ -2944,6 +2613,7 @@ Aucune signature ne change : l'interruption est structurée (les fibres enfants 
 
 ---
 layout: section
+routeAlias: bonus-validation
 ---
 
 # Valider ce qui vient de l'extérieur
@@ -3079,6 +2749,7 @@ En vrai, ConfigProvider.fromEnv() sans option lit process.env (par exemple un .e
 
 ---
 layout: section
+routeAlias: bonus-services
 ---
 
 # Services & Layers
@@ -3189,77 +2860,18 @@ Pas de `export` devant la classe dans le slide : le code tourne comme le corps d
 -->
 
 ---
-zoom: 0.75
----
-
-# Classique vs Effect
-
-<div class="vs-table">
-
-| | Étape | ❌ TypeScript classique | ✅ Effect |
-|---|---|---|---|
-| ⏳ | async / await | `async` / `await` | `Effect.gen` / `yield*` |
-| 🔀 | Parallélisme | `Promise.all` | `Effect.all` / `Effect.forEach` |
-| 🚦 | Concurrence limitée | helper maison | `{ concurrency: 5 }` |
-| 🛑 | Interruption | `AbortSignal` dans chaque signature | automatique (fibers) |
-| 🔁 | Retry | `retry` + `sleep` annulable | `Effect.retry` + `Schedule` |
-| 🧯 | Erreurs | `unknown` + `instanceof` | union typée dans `E` |
-| ⏱️ | Timeout | `AbortSignal.any` + `AbortSignal.timeout` | `Effect.timeout` |
-| 🔍 | Traces | à brancher à la main | `Effect.withSpan` |
-| 🛡️ | Validation | `as User` (ou zod à brancher) | `Schema` + `SchemaError` typée |
-| 🧩 | Dépendances | singletons, conteneur DI ou mocks de modules | `Layer`, vérifié à la compilation (`R`) |
-
-</div>
-
-<style>
-.vs-table table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.35);
-  font-size: 1.05rem;
-}
-.vs-table th {
-  padding: 0.7rem 1rem;
-  text-align: left;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: white;
-  background: #475569;
-}
-.vs-table th:nth-child(3) { background: #b91c1c; }
-.vs-table th:nth-child(4) { background: #15803d; }
-.vs-table td {
-  padding: 0.55rem 1rem;
-  border-top: 1px solid rgba(128, 128, 128, 0.18);
-  vertical-align: middle;
-}
-.vs-table td:first-child { width: 2.5rem; text-align: center; font-size: 1.25rem; }
-.vs-table td:nth-child(2) { font-weight: 650; white-space: nowrap; }
-.vs-table td:nth-child(3) { background: rgba(239, 68, 68, 0.07); opacity: 0.85; }
-.vs-table td:nth-child(4) { background: rgba(34, 197, 94, 0.1); font-weight: 600; }
-.vs-table tr:hover td { filter: brightness(1.08); }
-</style>
-
-<!--
-Le récapitulatif de tout le fil rouge : chaque ligne = un helper ou une convention maison d'un côté, une option ou un type de l'autre.
--->
-
-
----
 layout: section
+routeAlias: bonus-avance
 ---
 
-# Aller plus loin
+# Patterns avancés
 ### Regrouper les appels, tester le temps, partager l'état
 
 ---
 zoom: 0.72
 ---
 
-# ▶ ⑩ Regrouper les appels : `Request` + `RequestResolver`
+# ▶ Regrouper les appels : `Request` + `RequestResolver`
 
 <div class="grid grid-cols-[1fr_2.8fr] gap-6">
 <div>
@@ -3329,7 +2941,7 @@ Chaque entrée DOIT être complétée (completeUnsafe), sinon l'appelant reste b
 zoom: 0.85
 ---
 
-# ▶ ⑪ Tester le retry sans attendre : `TestClock`
+# ▶ Tester le retry sans attendre : `TestClock`
 
 <div class="grid grid-cols-[1fr_2.4fr] gap-6">
 <div>
@@ -3381,7 +2993,7 @@ console.log(`✅ ${result} — en ${Date.now() - start} ms`)
 </div>
 
 <!--
-Même principe pour fetch : on fournit un Layer de test (section 6).
+Même principe pour fetch : on fournit un Layer de test (bonus « Services & Layers »).
 -->
 
 ---
@@ -3435,343 +3047,22 @@ Honnêteté : `completed++` juste après l'await marcherait aussi. Le vrai bug, 
 -->
 
 ---
-layout: section
----
-
-# Et maintenant ?
-### L'écosystème, le frontend, et quand l'adopter
-
----
-
-# L'écosystème
-
-Depuis Effect 4 : **un seul paquet `effect`**, sans dépendance, et toutes les briques partagent le même numéro de version.
-
-<div class="eco">
-  <div class="eco-card eco-core"><div class="i-carbon-cube" /><div><code>effect</code><p>Le cœur : Effect, Layer, Schedule, Stream, Schema, Config…</p></div></div>
-  <div class="eco-card"><div class="i-carbon-application" /><div><code>effect/http</code> <code>effect/sql</code> <code>effect/rpc</code> <code>effect/cli</code>…<p>Intégrés au package principal</p></div></div>
-  <div class="eco-card"><div class="i-carbon-bare-metal-server" /><div><code>@effect/platform-node</code> / <code>-bun</code> / <code>-deno</code> / <code>-browser</code><p>Les implémentations par plateforme</p></div></div>
-  <div class="eco-card"><div class="i-carbon-data-base" /><div><code>@effect/sql-pg</code>, <code>@effect/sql-sqlite-node</code>…<p>Les drivers de base de données</p></div></div>
-  <div class="eco-card"><div class="i-carbon-chart-network" /><div><code>@effect/opentelemetry</code><p>Exporter les traces de <code>withSpan</code></p></div></div>
-  <div class="eco-card"><div class="i-carbon-test-tool" /><div><code>@effect/vitest</code><p>Les tests</p></div></div>
-</div>
-
-<style>
-.eco {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.9rem 1.2rem;
-  margin-top: 1.2rem;
-}
-.eco-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.9rem;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--tech-border);
-  border-radius: 12px;
-  background: var(--tech-code-bg);
-  font-size: 0.85rem;
-}
-.eco-card > [class^="i-carbon"] {
-  flex: none;
-  margin-top: 0.15rem;
-  font-size: 1.5rem;
-  color: var(--tech-cyan);
-}
-.eco-card code {
-  white-space: nowrap;
-}
-.eco-card p {
-  margin: 0.3rem 0 0;
-  color: var(--tech-muted);
-}
-.eco-core {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
-    var(--tech-gradient) border-box;
-}
-</style>
-
----
-zoom: 0.8
----
-
-# Et côté frontend ? **Foldkit**
-
-<div class="grid grid-cols-[1fr_1.25fr] gap-8">
-<div>
-
-Un **framework frontend** TypeScript **construit sur Effect**, architecturé comme Elm.
-
-- **Un seul `Model`**, décrit par un `Schema` : tout l'état de l'app
-- **Des `Message`** typés, une fonction **`update`** pure : chaque changement est visible
-- **Les effets de bord sont des valeurs** (`Command`) : le runtime Effect gère concurrence, interruption, ressources
-- Routing typé, SSR, composants UI accessibles, **DevTools** (et MCP pour les agents IA)
-- Tests sans DOM ni mocks : *Story* et *Scene*
-
-```bash
-npx create-foldkit-app@latest
-```
-
-<div class="text-sm opacity-70 mt-2">
-  <a href="https://foldkit.dev">foldkit.dev</a> · projet communautaire, encore en 0.x
-</div>
-
-</div>
-<div>
-
-```ts
-import { Schema } from "effect"
-import { Runtime, Update } from "foldkit"
-import { Document, HtmlBuilder } from "foldkit/html"
-import { defineMessageUnion } from "foldkit/message"
-import { modifyFields } from "foldkit/struct"
-
-// MODEL : l'état, décrit par un Schema
-const Model = Schema.Struct({ count: Schema.Number })
-type Model = typeof Model.Type
-
-// MESSAGES : tout ce qui peut arriver
-const Message = defineMessageUnion({ ClickedIncrement: {}, ClickedDecrement: {} })
-type Message = typeof Message.Type
-
-// UPDATE : (model, message) → nouveau model
-const update = (model: Model, message: Message) =>
-  Message.match<Update.Return<Model, Message>>(message, {
-    ClickedIncrement: () => ({ model: modifyFields(model, { count: (n) => n + 1 }) }),
-    ClickedDecrement: () => ({ model: modifyFields(model, { count: (n) => n - 1 }) }),
-  })
-
-// VIEW : model → HTML
-const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
-  title: `Counter: ${model.count}`,
-  body: h.div([], [
-    h.button([h.OnClick(Message.ClickedDecrement())], ["-"]),
-    h.p([], [model.count.toString()]),
-    h.button([h.OnClick(Message.ClickedIncrement())], ["+"]),
-  ]),
-})
-```
-
-</div>
-</div>
-
-<!--
-Foldkit (foldkit.dev, github.com/foldkit/foldkit) : « React, Vue, Svelte et Solid règlent le rendu et vous laissent l'architecture ; Foldkit vous donne l'architecture. »
-Toute application Foldkit est un Effect ; le Model entier est un Schema ; les Commands utilisent les services, l'interruption, les ressources et la concurrence d'Effect.
-Si le backend est déjà en Effect, on retrouve les mêmes outils et les mêmes patterns dans le navigateur.
-Exemple : le Counter officiel, légèrement raccourci (sans Reset, init et entry.ts).
-Honnêteté : pré-1.0, des breaking changes restent possibles. Dépend de effect ~4.1.
-Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@effect/atom-react, -vue, -solid).
--->
----
-zoom: 0.85
----
-
-# Effect 🤝 les agents IA
-
-Un code Effect est plus facile à écrire et à vérifier… pour un agent aussi
-
-<div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-4">
-<div class="ai-why">
-  <div class="ai-card"><span>🧭</span><div><b>Une structure prévisible</b><p><code>Effect.gen</code>, <code>Effect.fn</code>, services, layers : un seul style, rien à inventer</p></div></div>
-  <div class="ai-card"><span>🔁</span><div><b>Le compilateur corrige l'agent</b><p>Une erreur non traitée, un service non fourni : visible dans le type (<code>E</code>, <code>R</code>), avant d'exécuter</p></div></div>
-  <div class="ai-card"><span>🧰</span><div><b>Tout est déjà là</b><p>Retry, timeout, concurrence, validation, config : pas de librairie choisie au hasard</p></div></div>
-  <div class="ai-card"><span>📚</span><div><b>La doc est dans le paquet</b><p><code>node_modules/effect/AGENTS.md</code>, <code>ai-docs/</code> et les sources, alignés sur la version installée</p></div></div>
-</div>
-<div class="ai-skill">
-  <div class="ai-skill__title"><b>Le skill officiel</b><a href="https://www.skills.sh/effect-ts/skills/effect-ts">skills.sh</a></div>
-  <div class="tech-prompt">npx skills add Effect-TS/skills</div>
-  <ul>
-    <li><code>effect-ts</code> : avant d'écrire du code Effect, l'agent lit <code>node_modules/effect/AGENTS.md</code>, puis les sources</li>
-    <li><code>effect-v3-to-v4</code> : migrer un projet d'Effect 3 à Effect 4</li>
-    <li>Claude Code, Cursor, Codex, GitHub Copilot… · <b>8,5 k</b> installations</li>
-  </ul>
-  <div class="ai-quote">« Effect feels insanely good to use with agents […] An outrageous advantage for any non-frontend TS code »<small>— Matt Pocock, oct. 2026</small></div>
-  <div class="ai-repo">📁 Dans ce dépôt : un skill Effect (<code>.github/skills/effect</code>), et <code>backend/AGENTS.md</code> qui y renvoie</div>
-</div>
-</div>
-
-<style>
-.ai-why {
-  display: grid;
-  gap: 0.7rem;
-}
-.ai-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.9rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--tech-border);
-  border-radius: 12px;
-  background: var(--tech-code-bg);
-}
-.ai-card > span {
-  font-size: 1.6rem;
-  line-height: 1.2;
-}
-.ai-card b {
-  color: var(--tech-fg-strong);
-}
-.ai-card p {
-  margin: 0.2rem 0 0;
-  font-size: 0.85rem;
-  color: var(--tech-muted);
-}
-.ai-skill {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  padding: 1rem 1.2rem;
-  border: 2px solid transparent;
-  border-radius: 14px;
-  background:
-    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
-    var(--tech-gradient) border-box;
-}
-.ai-skill__title {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  color: var(--tech-fg-strong);
-}
-.ai-skill__title a {
-  font-size: 0.8rem;
-}
-.ai-skill .tech-prompt {
-  align-self: flex-start;
-}
-.ai-skill ul {
-  margin: 0;
-  font-size: 0.88rem;
-}
-.ai-quote {
-  padding: 0.6rem 0.9rem;
-  border-left: 3px solid var(--tech-violet);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--tech-violet) 8%, transparent);
-  font-size: 0.85rem;
-  font-style: italic;
-}
-.ai-repo {
-  margin-top: auto;
-  padding-top: 0.7rem;
-  border-top: 1px dashed var(--tech-border);
-  font-size: 0.8rem;
-  color: var(--tech-muted);
-}
-.ai-quote small {
-  display: block;
-  margin-top: 0.3rem;
-  font-style: normal;
-  color: var(--tech-muted);
-}
-</style>
-
-<!--
-Message : Effect est un très bon terrain pour les agents de code, et l'équipe Effect l'outille officiellement.
-Pourquoi : un style unique (moins de « créativité » de l'agent), des erreurs et dépendances dans le type (le compilateur lui signale ce qu'il a oublié), tout est intégré (pas de dépendances au hasard), et la doc voyage avec le paquet.
-Le paquet effect 4.0.0 contient AGENTS.md (≈ 400 lignes, identique à CLAUDE.md), ai-docs/ (76 fichiers d'exemples par thème : services, schedule, streams, http, sql, cli, cluster…) et les sources src/.
-Le skill officiel (github.com/Effect-TS/skills) : effect-ts ajoute aux instructions de l'agent (AGENTS.md / CLAUDE.md) « lire node_modules/effect/AGENTS.md avant d'écrire du code Effect » ; effect-v3-to-v4 guide la migration.
-Dans ce dépôt : un skill Effect dans .github/skills/effect, et backend/AGENTS.md qui y renvoie ; le plugin @effect/tsgo ajoute des diagnostics Effect au compilateur (encore du feedback pour l'agent).
-Autres témoignages : Rhys Sullivan (mars 2026) : « in the long term it's much more token efficient than writing standard TS » ; T3 Code, « very large portions agent coded » ; Michael Arnaldi : donner le repo Effect à l'agent (git subtree).
-Sources : skills.sh/effect-ts/skills/effect-ts (8,5 k installations au 4 nov. 2026), effect.website (« LLMs ❤️ Effect »), tweet de Matt Pocock du 1er oct. 2026.
--->
----
-
-# Quand l'adopter ? (avec honnêteté)
-
-<div class="grid grid-cols-2 gap-6">
-<div class="px-4 pt-2 rounded-xl border border-green-500/30 bg-green-500/6">
-
-### ✅ Oui si…
-- Beaucoup d'I/O, d'erreurs et de dépendances
-- Besoin de résilience (retry, timeout, annulation)
-- Équipe prête à apprendre un nouveau paradigme
-
-</div>
-<div class="px-4 pt-2 rounded-xl border border-amber-500/30 bg-amber-500/6">
-
-### ⚠️ Attention si…
-- Petit script ou projet très simple
-- Courbe d'apprentissage non budgétée
-- Taille du bundle critique
-
-</div>
-</div>
-
-<v-click>
-
-👉 Adoption **progressive** possible : `Effect.runPromise` à la frontière de ton code existant.
-
-</v-click>
-
-<v-click>
-
-<div class="mt-3 px-4 py-1 rounded-lg border border-green-500/40 bg-green-500/8">
-
-**💼 Et côté emploi ?** Effect reste une compétence **de niche, mais recherchée** : le [job board officiel](https://effect.website/effect-jobs) liste une vingtaine d'entreprises qui recrutent, surtout dans **l'IA et les LLM** (OpenRouter, HumanLayer, Supermemory), **la fintech et l'assurance** (Gen, Reap, Tranched à Paris, Evalucar en France) et **les outils pour développeurs** (Warp, Solid). Des postes souvent seniors ou « founding engineer », affichés de **90–120 k€** à Munich à **plus de 200 k$** aux États-Unis.
-
-</div>
-
-</v-click>
-
-<!--
-Sources (vérifiées le 4 novembre 2026) :
-- effect.website/effect-jobs : 20 entreprises listées. IA/LLM : OpenRouter, HumanLayer, Supermemory, Datapizza, SynTwin, Joymore. Fintech/insurtech : Gen, Reap, Tranched (Paris), Evalucar (France). Dev tools : Warp, Solid. Aussi santé (Medblocks), legaltech (LEAP), broadcast (Bitfocus).
-- Salaires affichés : SynTwin 90–120 k€ (Munich), HumanLayer 180–250 k$ (SF), Gen 218–239 k$ (NYC).
-- En production (effect.website) : OpenCode, OpenRouter, MasterClass ; Effect Days 2026 cite aussi Cloudflare, Warp, Alchemy.
-- npm : ~74 M de téléchargements/semaine pour `effect`, mais gonflés par les dépendances indirectes (ex. @prisma/config dépend de effect) ; GitHub : ~17 500 étoiles.
-- Honnêteté : marché encore petit ; c'est un atout différenciant sur un CV TypeScript, pas encore un mot-clé de masse.
--->
----
 layout: center
 class: text-center
 ---
 
-# Merci ! <span class="tech-emoji">🙏</span>
+# Fin des bonus <span class="tech-emoji">🎉</span>
 
-Questions ?
+Merci d'être allé jusqu'au bout !
 
-<div class="grid grid-cols-[1fr_auto_1fr] gap-10 items-center text-left mt-8 text-sm">
-<div>
-
-### 🔗 Pour aller plus loin
-
-- [effect.website/docs](https://effect.website/docs/) : la documentation
-- [github.com/Effect-TS/effect](https://github.com/Effect-TS/effect) : le code source
-- [discord.gg/effect-ts](https://discord.gg/effect-ts) : la communauté (très active)
-- [Module of the Week](https://effect.website/module-of-the-week) : un module expliqué chaque semaine
-- [Effect Days](https://effect.website/effect-days) : la conférence
-- [Effect Jobs](https://effect.website/effect-jobs) : les offres d'emploi
-
-</div>
-<div class="text-center">
-  <div class="inline-block bg-white p-3 rounded-xl shadow-lg">
-    <img src="./images/qr-github-effect-ts.svg" alt="QR code vers github.com/Mimetis/effect-ts" class="w-44 h-44" style="image-rendering: pixelated" />
-  </div>
-  <div class="mt-2 font-mono text-xs">
-    <a href="https://github.com/Mimetis/effect-ts">github.com/Mimetis/effect-ts</a>
-  </div>
-  <div class="text-xs opacity-70">slides + démos</div>
-</div>
-<div>
-
-### 🐦 À suivre sur X
-
-- [@EffectTS_](https://x.com/EffectTS_) : le compte officiel
-- [@MichaelArnaldi](https://x.com/MichaelArnaldi) : créateur d'Effect
-- [@kitlangton](https://x.com/kitlangton) : OpenCode, talks Effect
-- [@mattiamanzati](https://x.com/mattiamanzati) : Effectful Technologies
-- [@schickling](https://x.com/schickling) : local-first, LiveStore
-- [@mattpocockuk](https://x.com/mattpocockuk) : TypeScript (et Effect)
-
-</div>
+<div class="mt-6 flex justify-center gap-6 text-sm">
+  <Link to="bonus">← Retour au sommaire des bonus</Link>
+  <a href="https://github.com/Mimetis/effect-ts">github.com/Mimetis/effect-ts</a>
+  <a href="https://effect.website/docs/">effect.website/docs</a>
 </div>
 
-<!--
-Le QR code pointe vers https://github.com/Mimetis/effect-ts (slides et démos du talk).
-Comptes X vérifiés : @EffectTS_ et @MichaelArnaldi cités par effect.website ; @kitlangton, @mattiamanzati, @schickling via leurs profils GitHub ; @mattpocockuk cité sur effect.website (« Why Effect was designed this way »).
--->
+<div class="mt-6 text-sm opacity-70">
+
+Le code des démos ▶ est modifiable : changez-le, relancez-le, cassez-le.
+
+</div>

@@ -1,33 +1,40 @@
 <script setup lang="ts">
 import { useNav, useSlideContext } from "@slidev/client";
 import { computed } from "vue";
+import { useBonus } from "../composables/useBonus";
 
 // Overrides the theme `section` layout: the chapter number and the progress
-// bar are computed from the position of the slide among all `layout: section` slides.
+// bar are computed from the position of the slide among the `layout: section` slides
+// of the same part (the talk, or the bonus slides).
 const { slides } = useNav();
 const { $page } = useSlideContext();
+const { bonusStart, isBonus } = useBonus();
 
 const sectionPages = computed(() =>
-    slides.value.filter(route => route.meta.slide.frontmatter?.layout === "section").map(route => route.no),
+    slides.value
+        .filter(route => route.meta.slide.frontmatter?.layout === "section")
+        .filter(route => (route.no >= bonusStart.value) === isBonus.value)
+        .map(route => route.no),
 );
 const index = computed(() => sectionPages.value.indexOf($page.value) + 1);
 const total = computed(() => sectionPages.value.length);
+const numbered = computed(() => index.value > 0 && total.value > 1);
 const pad = (value: number) => String(value).padStart(2, "0");
 </script>
 
 <template>
-  <div class="slidev-layout section tech-section">
-    <div v-if="index > 0" class="tech-section__number">{{ pad(index) }}</div>
+  <div class="slidev-layout section tech-section" :class="{ 'is-bonus': isBonus }">
+    <div v-if="numbered" class="tech-section__number">{{ pad(index) }}</div>
 
     <div class="tech-section__body">
-      <div v-if="index > 0" class="tech-section__label">
-        <span>Chapitre {{ pad(index) }}</span>
+      <div v-if="numbered" class="tech-section__label">
+        <span>{{ isBonus ? "📚 Bonus" : "Chapitre" }} {{ pad(index) }}</span>
         <span class="tech-section__total">/ {{ pad(total) }}</span>
       </div>
       <slot />
     </div>
 
-    <div v-if="index > 0" class="tech-section__progress">
+    <div v-if="numbered" class="tech-section__progress">
       <span v-for="n in total" :key="n" :class="{ 'is-done': n <= index }" />
     </div>
   </div>
@@ -90,6 +97,10 @@ const pad = (value: number) => String(value).padStart(2, "0");
 
 .tech-section__total {
   color: var(--tech-muted);
+}
+
+.tech-section.is-bonus .tech-section__label {
+  color: var(--tech-violet);
 }
 
 .slidev-layout.tech-section h1 {

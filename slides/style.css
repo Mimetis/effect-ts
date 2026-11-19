@@ -73,6 +73,15 @@ html.dark {
   color: var(--tech-fg, inherit);
 }
 
+.tech-statusbar__bonus {
+  margin-left: auto;
+  padding: 0.15em 0.8em;
+  border: 1px solid color-mix(in srgb, var(--tech-violet) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tech-violet) 10%, transparent);
+  color: var(--tech-violet);
+}
+
 .tech-statusbar__dot {
   width: 0.6em;
   height: 0.6em;
