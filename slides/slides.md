@@ -330,13 +330,219 @@ Sources :
 - Julius Marminge (@jullerino), 17 mars 2026 (474 likes) : « This Week in Effect 110 ».
 - Portraits : photos de profil X (via unavatar.io), stockées dans images/avatars. Comptes @RhysSullivan, @ThePrimeagen, @jullerino et @theo confirmés par leurs profils GitHub.
 -->
+
+
 ---
-zoom: 0.9
+class: aer-hero
 ---
 
-# Effect, c'est quoi ?
+<div class="aer-kicker">Toute la prez tient en un type</div>
 
-Une librairie TypeScript qui **regroupe la gestion des erreurs et des dépendances**<br>à travers les appels successifs de vos fonctions.
+<div class="aer-big">
+  <span class="aer-w">Effect</span><span class="aer-p">&lt;</span><span class="a">A</span><span class="aer-p">, </span><span class="e">E</span><span class="aer-p">, </span><span class="r">R</span><span class="aer-p">&gt;</span>
+</div>
+
+<div class="aer-cards">
+  <div v-click class="aer-card aer-a">
+    <div class="aer-letter">A</div>
+    <b>Le succès</b>
+    <small>ce que ça renvoie… vraiment</small>
+    <ul>
+      <li>des données <b>validées</b> : <code>Schema</code></li>
+      <li>une config vérifiée : <code>Config</code></li>
+    </ul>
+  </div>
+  <div v-click class="aer-card aer-e">
+    <div class="aer-letter">E</div>
+    <b>Les erreurs</b>
+    <small>comment ça peut échouer</small>
+    <ul>
+      <li><b>dans le type</b>, plus de <code>unknown</code></li>
+      <li>traitées par leur nom : <code>catchTag</code></li>
+      <li><code>retry</code>, <code>timeout</code></li>
+    </ul>
+  </div>
+  <div v-click class="aer-card aer-r">
+    <div class="aer-letter">R</div>
+    <b>Les dépendances</b>
+    <small>de quoi ça a besoin</small>
+    <ul>
+      <li>des <b>services</b> injectés : <code>Layer</code></li>
+      <li>oubli = erreur de <b>compilation</b></li>
+      <li>tests sans mock maison</li>
+    </ul>
+  </div>
+</div>
+
+<div v-click class="aer-punch">
+  Le compilateur sait <b>ce que ça renvoie</b>, <b>comment ça échoue</b> et <b>de quoi ça a besoin</b>.
+  <span>Le reste (concurrence, annulation, retry…) est <b>intégré</b>.</span>
+</div>
+
+<style>
+.slidev-layout.aer-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.aer-kicker {
+  font-family: var(--tech-font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tech-cyan);
+}
+.aer-big {
+  margin: 0.1rem 0 1.1rem;
+  font-family: var(--tech-font-mono);
+  font-size: 6.2rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.aer-w {
+  background: var(--tech-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.aer-p {
+  color: var(--tech-muted);
+  font-weight: 600;
+}
+.aer-big .a, .aer-a .aer-letter { color: var(--tech-green); }
+.aer-big .e, .aer-e .aer-letter { color: var(--tech-red); }
+.aer-big .r, .aer-r .aer-letter { color: var(--tech-blue); }
+.aer-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+}
+.aer-card {
+  position: relative;
+  padding: 0.7rem 1rem 0.6rem 3.4rem;
+  border: 1px solid var(--tech-border);
+  border-top: 4px solid;
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+}
+.aer-a { border-top-color: var(--tech-green); }
+.aer-e { border-top-color: var(--tech-red); }
+.aer-r { border-top-color: var(--tech-blue); }
+.aer-letter {
+  position: absolute;
+  left: 0.9rem;
+  top: 0.45rem;
+  font-family: var(--tech-font-mono);
+  font-size: 2rem;
+  font-weight: 800;
+}
+.aer-card > b {
+  display: block;
+  font-size: 1.05rem;
+  color: var(--tech-fg-strong);
+}
+.aer-card > small {
+  display: block;
+  color: var(--tech-muted);
+}
+.slidev-layout .aer-card ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.slidev-layout .aer-card li {
+  margin: 0;
+}
+.aer-punch {
+  margin-top: 1rem;
+  padding: 0.5rem 1.2rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+  font-size: 1rem;
+}
+.aer-punch span {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--tech-muted);
+}
+</style>
+
+<!--
+La slide « titre » du talk : tout ce qu'on va voir tient dans ce type.
+Laisser le type seul quelques secondes : Effect, puis trois paramètres. C'est tout ce qu'il faut retenir.
+Clic 1, A : ce que ça renvoie. Avec une Promise, on croit le savoir ; avec Effect, on le valide (Schema, Config).
+Clic 2, E : comment ça peut échouer. Les erreurs sont dans le type, on les traite par leur nom, et on résiste (retry, timeout).
+Clic 3, R : de quoi ça a besoin. Les dépendances sont dans le type : oublier de les fournir ne compile pas, et on les remplace facilement en test.
+Clic 4 : la promesse du talk. Le compilateur connaît les trois… et tout ce qui manque à une Promise est déjà dans la boîte.
+Transition : mais d'abord, pourquoi gérer les erreurs est un problème si vieux…
+-->
+
+---
+
+# Gérer les erreurs : un éternel recommencement
+
+Chaque solution corrige le défaut de la précédente… et en crée un nouveau
+
+<div class="tl">
+  <div class="tl-row tl-head">
+    <span>Approche</span><span>À quoi ça ressemble</span><span>✅ On gagne</span><span>❌ Mais…</span>
+  </div>
+  <div v-click class="tl-row">
+    <div class="tl-name">🔢 Codes d'erreur<small>C, POSIX</small></div>
+    <code>const fd = open(path) // -1 ?</code>
+    <span>Simple et explicite</span>
+    <span>Rien n'oblige à vérifier : on <b>oublie</b>, le bug passe en silence</span>
+  </div>
+  <div v-click class="tl-row">
+    <div class="tl-name">💥 Exceptions<small>C++, Java, JS, C#</small></div>
+    <code>throw new Error("boom")</code>
+    <span>Impossible d'ignorer l'erreur</span>
+    <span><b>Invisible</b> dans la signature : on le découvre en prod</span>
+  </div>
+  <div v-click class="tl-row">
+    <div class="tl-name">☕ Checked exceptions<small>Java</small></div>
+    <code>User load() throws IOException</code>
+    <span>L'erreur est dans la signature</span>
+    <span><code>throws</code> partout… alors on écrit <code>catch (e) {}</code></span>
+  </div>
+  <div v-click class="tl-row">
+    <div class="tl-name">📦 Result / Either<small>Rust, Go, neverthrow</small></div>
+    <code>Result&lt;User, NotFound&gt;</code>
+    <span>Erreur <b>typée</b>, retournée comme une valeur</span>
+    <span>Async, retry, timeout, dépendances : <b>tout à la main</b></span>
+  </div>
+  <div v-click class="tl-row tl-effect">
+    <div class="tl-name">✨ Effect<small>TypeScript</small></div>
+    <code>Effect&lt;User, NotFound, Db&gt;</code>
+    <span>Erreurs <b>et</b> dépendances typées</span>
+    <span>➕ Retry, timeout, concurrence… <b>intégrés</b></span>
+  </div>
+</div>
+
+<!--
+Lire chaque ligne de gauche à droite : le "Mais…" d'une ligne est exactement ce que la ligne suivante essaie de corriger.
+Codes d'erreur → on oublie de vérifier. Exceptions → on ne peut plus oublier, mais on ne sait plus ce qui peut échouer.
+Checked exceptions → on le sait, mais c'est si lourd qu'on finit par tout avaler. Result → typé et léger, mais tout le reste est à faire soi-même.
+Effect garde le "typé" de Result et ajoute ce qui manquait.
+-->
+
+---
+zoom: 0.75
+---
+
+# ▶ Effect, c'est quoi ?
+
+Une librairie TypeScript qui **regroupe la gestion des erreurs et des dépendances** à travers les appels successifs de vos fonctions.
 
 <div class="wie-head">
   <div class="wie-sig">Effect&lt;<span class="a">A</span>, <span class="e">E</span>, <span class="r">R</span>&gt;</div>
@@ -347,27 +553,50 @@ Une librairie TypeScript qui **regroupe la gestion des erreurs et des dépendanc
   </div>
 </div>
 
+<div class="grid grid-cols-[1fr_1.2fr] gap-6">
 <div class="wie-code">
 
-```ts {1-3|5-9}
-// Chaque fonction annonce son résultat, ses erreurs et ses dépendances
-declare const getUser: (id: number) => Effect<User, UserNotFound, UserRepository>
-declare const getOrders: (user: User) => Effect<Order[], DbError, OrderRepository>
+```ts 
+// Promise : le succès… les erreurs ? les dépendances ? 🤷
+declare const getUser: (id: number) => 
+   Promise<User>
+declare const getOrders: (user: User) => 
+   Promise<Order[]>
 
-// On les appelle à la suite, comme avec async / await
-const program = Effect.gen(function* () {
-  const user = yield* getUser(42)
-  return yield* getOrders(user)
-})
+// Effect : le succès, les erreurs ET les dépendances
+declare const getUser: (id: number) =>
+  Effect<User, UserNotFound, UserRepository>
+declare const getOrders: (user: User) =>
+  Effect<Order[], DbError, OrderRepository>
 ```
 
 </div>
+<div  v-click >
 
-<div v-click class="wie-compare">
-  <span class="wie-label">async / await</span>
-  <div><code>Promise&lt;Order[]&gt;</code> <span class="wie-shrug">les erreurs ? les dépendances ? 🤷</span></div>
-  <span class="wie-label wie-label-effect">Effect</span>
-  <div><code class="wie-type">Effect&lt;<span class="a">Order[]</span>, <span class="e">UserNotFound | DbError</span>, <span class="r">UserRepository | OrderRepository</span>&gt;</code></div>
+```ts {monaco-run} {autorun: false}
+import { Data, Effect } from "effect"
+
+// Un effect qui ne peut echouer
+const hello = Effect.succeed("Hello DevFest")
+
+// un effect qui échoue toujours et ne renvoie jamais de valeur
+const boom = Effect.fail("Oups")
+
+// Un résultat (number) ET une erreur possible (DivisionByZero)
+class DivisionByZero extends Data.TaggedError("DivisionByZero") {}
+
+const divide = (a: number, b: number): Effect.Effect<number, DivisionByZero> =>
+  b === 0 ? Effect.fail(new DivisionByZero()) : Effect.succeed(a / b)
+
+console.log("— rien n'a encore été exécuté —")
+
+console.log(Effect.runSync(hello))
+console.log(Effect.runSyncExit(boom))
+console.log(Effect.runSyncExit(divide(10, 2)))
+console.log(Effect.runSyncExit(divide(10, 0)))
+```
+
+</div>
 </div>
 
 <style>
@@ -406,61 +635,823 @@ const program = Effect.gen(function* () {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.wie-sig .a, .wie-type .a, .wie-a b { color: var(--tech-green); }
-.wie-sig .e, .wie-type .e, .wie-e b { color: var(--tech-red); }
-.wie-sig .r, .wie-type .r, .wie-r b { color: var(--tech-blue); }
+.wie-sig .a, .wie-a b { color: var(--tech-green); }
+.wie-sig .e, .wie-e b { color: var(--tech-red); }
+.wie-sig .r, .wie-r b { color: var(--tech-blue); }
 .wie-a { border-left-color: var(--tech-green) !important; }
 .wie-e { border-left-color: var(--tech-red) !important; }
 .wie-r { border-left-color: var(--tech-blue) !important; }
 .wie-code {
-  --slidev-code-font-size: 14px;
-  --slidev-code-line-height: 21px;
+  --slidev-code-font-size: 15px;
+  --slidev-code-line-height: 23px;
 }
-.wie-compare {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 0.45rem 1rem;
-  margin-top: 0.8rem;
-  padding: 0.6rem 1.1rem;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  background:
-    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
-    var(--tech-gradient) border-box;
-  font-size: 0.9rem;
+</style>
+
+<!--
+L'idée en une phrase : chaque fonction annonce ce qu'elle renvoie (A), comment elle peut échouer (E) et de quoi elle a besoin (R).
+À gauche, les deux mêmes fonctions déclarées deux fois. D'abord en Promise : le type ne parle que du succès. Les erreurs et les dépendances existent toujours… mais restent invisibles.
+Clic : la version Effect. Mêmes fonctions, mais le type dit tout : UserNotFound / DbError en E, UserRepository / OrderRepository en R. Sur le slide, Effect<…> est abrégé : dans le vrai code, c'est Effect.Effect<…>.
+À droite (▶), un premier Effect : Effect.succeed réussit, Effect.fail échoue. Survoler hello et boom : l'erreur est dans le type. E vaut never quand rien ne peut échouer ; A vaut never quand rien ne peut réussir.
+divide : la signature dit tout. Comparer avec `(a, b) => number`, qui peut renvoyer Infinity ou lever une exception sans prévenir.
+Un Effect est une description (la recette, pas le plat) : « rien n'a encore été exécuté » s'affiche avant les résultats, rien ne tourne avant run*. Donc on peut le rejouer (retry), l'interrompre, le limiter… sans toucher à son code. Une Promise, elle, est déjà lancée.
+Essayer Effect.runSync(boom) : ça lève une exception, d'où runSyncExit.
+Rebondir sur Matt Pocock (slide précédente) : « use TS, not JS » → « use Effect, not just TS ». Même promesse : attraper les bugs à la compilation plutôt qu'en prod.
+-->
+
+---
+zoom: 0.85
+---
+
+# ▶ ① Un premier Effect : `Effect.succeed`
+
+<div class="grid grid-cols-[1fr_1.6fr] gap-6">
+<div>
+
+On part d'un `getUser` classique :
+
+```ts
+async function getUser(id: number): Promise<User> {
+  return api.find((user) => user.id === id) as User // 🙈
 }
-.wie-compare code {
-  white-space: nowrap;
+```
+
+- `Promise<User>` **promet** un `User`… même s'il n'existe pas
+- `Effect.succeed` : un Effect qui **réussit** avec une valeur
+- `runSync` : on **exécute** l'Effect
+
+<div class="tuto-sig">
+  <small>getUser renvoie</small>
+  <b class="a">A</b><span class="is-new">User | undefined</span>
+  <b class="e">E</b><span>never</span>
+  <b class="r">R</b><span>never</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Effect } from "effect"
+type User = { id: number; name: string; createdAt: Date }
+
+// Ce que renvoie l'API : un tableau d'utilisateurs
+const api = [
+  { id: 1, name: "Ada", createdAt: new Date("1815-12-10") },
+  { id: 2, name: "Grace", createdAt: new Date("1906-12-09") },
+]
+
+const getUser = (id: number) =>
+  Effect.succeed(api.find((user) => user.id === id) as User)
+
+const userEffect = getUser(1)
+
+const user = Effect.runSync(userEffect) // ▶ on l'exécute
+console.log(user)
+```
+
+</div>
+</div>
+
+<!--
+On repart de zéro, avec un seul exemple qu'on va faire grandir sur 9 slides : un getUser qui cherche un utilisateur dans ce que renvoie une API (un tableau de User).
+À gauche, la version classique : Promise<User> promet un User, et le `as User` fait taire TypeScript… alors que find peut ne rien trouver.
+Effect.succeed : on met le résultat de la recherche dans un Effect. Survoler getUser : Effect<User | undefined, never, never>.
+A = User | undefined : c'est la vérité, l'utilisateur peut ne pas exister. E = never : rien ne peut échouer (pour l'instant). R = never : aucune dépendance.
+runSync exécute l'Effect et renvoie la valeur. On ne l'appelle qu'une fois, au bord du programme.
+Essayer getUser(3) : undefined, sans la moindre erreur. Un utilisateur absent n'est pas un succès : c'est ce qu'on règle au ②.
+-->
+
+---
+zoom: 0.8
+---
+
+# ▶ Et avec `try / catch` ?
+
+<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div>
+
+- `Promise<User>` ne dit **rien** des erreurs : rien n'oblige à écrire le `try`
+- Dans le `catch`, `e` est `unknown` : on trie **à la main** (`instanceof`)
+- Le `catch` attrape **tout** : nos erreurs… et nos **bugs**
+- On peut `throw` **n'importe quoi** : une `string`, un objet…
+
+<div v-click class="mt-6">
+  <div class="fake-alert">
+    <div class="fake-alert__title">localhost:3000 indique</div>
+    <div class="fake-alert__msg">Error: [object Object]</div>
+    <div class="fake-alert__actions"><span>OK</span></div>
+  </div>
+  <div class="mt-4 text-center text-sm opacity-70">🏆 Le message d'erreur le plus célèbre du web.<br>Cherchez l'erreur. <b>Littéralement.</b></div>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+type User = { id: number; name: string; createdAt: Date }
+class UserNotFound extends Error {}
+
+// Ce que renvoie l'API : un tableau d'utilisateurs
+const api = [
+  { id: 1, name: "Ada", createdAt: new Date("1815-12-10") },
+  { id: 2, name: "Grace", createdAt: new Date("1906-12-09") },
+]
+
+// La signature promet un User… et ne dit rien des erreurs
+async function getUser(id: number): Promise<User> {
+  if (id <= 0) throw { status: 400 } // on peut throw… n'importe quoi
+  const user = api.find((user) => user.id === id)
+  if (user === undefined) throw new UserNotFound(`User ${id} introuvable`)
+  return user
 }
-.wie-label {
-  font-family: var(--tech-font-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+
+for (const id of [1, 3]) {
+  try {
+    const user = await getUser(id)
+    console.log("✅", user.name.toUpperCase())
+  } catch (e) { // 👈 survolez e : unknown
+    if (e instanceof UserNotFound) console.log("🔍", e.message)
+    else console.log(`💥 Erreur non gérée : ${e}`) // 😬 le toast.error()
+  }
+}
+```
+
+</div>
+</div>
+
+<!--
+Le même getUser qu'au ①, avec la même API (un tableau de User), écrit en async / await avec un try / catch. Lancer : les 3 cas tombent dans le même catch.
+Ada (1) : ce n'est pas une erreur métier, c'est un bug. « Ada » n'a pas de nom de famille : split(" ")[1] vaut undefined, et toUpperCase lève un TypeError (TypeScript ne dit rien : un index de tableau est typé string). Le catch l'attrape comme le reste, et on l'affiche comme une erreur « non gérée ».
+3 : UserNotFound, mais il faut le trier avec instanceof, et rien dans la signature ne dit que getUser peut le lever.
+0 : un objet jeté tel quel (comme le JSON d'une API). `${e}` appelle String(e) : « [object Object] ». Une erreur, aucune information.
+Survoler e : unknown. Survoler getUser : Promise<User>, aucune trace des erreurs. Supprimer le try / catch : TypeScript ne dit rien.
+Transition : le slide suivant reprend chacun de ces problèmes… et le corrige grâce au type de l'erreur.
+-->
+
+---
+zoom: 0.72
+---
+
+# ▶ ③ L'erreur est un type : `catchTag`
+
+<div class="grid grid-cols-[1.1fr_1.5fr] gap-6">
+<div>
+
+Les problèmes du `try / catch`, corrigés **par le type** (`Effect.fail` + `Data.TaggedError`) :
+
+<div class="fix">
+    <span class="fix-ko">❌ <code>Promise&lt;User&gt;</code> : les erreurs ? 🤷</span>
+    <span class="fix-ok">✅ <code>Effect&lt;User, UserNotFound&gt;</code> : l'erreur est <b>dans la signature</b></span>
+    <span class="fix-ko">❌ <code>catch (e)</code> : <code>e</code> est <code>unknown</code>, trié avec <code>instanceof</code></span>
+    <span class="fix-ok">✅ <code>e</code> est un <code>UserNotFound</code>, traité <b>par son nom</b></span>
+    <span class="fix-ko">❌ le <code>catch</code> attrape <b>tout</b>, bugs compris</span>
+    <span class="fix-ok">✅ <code>catchTag</code> n'attrape <b>que</b> <code>UserNotFound</code></span>
+    <span class="fix-ko">❌ oublier le <code>try</code> : aucun avertissement</span>
+    <span class="fix-ok">✅ une erreur non traitée <b>reste dans <code>E</code></b></span>
+</div>
+
+<div class="tuto-sig">
+  <small>showUser renvoie</small>
+  <b class="a">A</b><span>User | string</span>
+  <b class="e">E</b><span class="is-new">never</span>
+  <b class="r">R</b><span>never</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Data, Effect } from "effect"
+type User = { id: number; name: string; createdAt: Date }
+
+// Ce que renvoie l'API : un tableau d'utilisateurs
+const api = [
+  { id: 1, name: "Ada", createdAt: new Date("1815-12-10") },
+  { id: 2, name: "Grace", createdAt: new Date("1906-12-09") },
+]
+
+// 🆕 Une erreur typée : une classe avec un _tag
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+
+// 🆕 L'erreur est dans la signature
+const getUser = (id: number): Effect.Effect<User, UserNotFound> => {
+  const user = api.find((user) => user.id === id)
+  return user === undefined
+    ? Effect.fail(new UserNotFound({ id })) // 🆕 un Effect qui échoue
+    : Effect.succeed(user)
+}
+
+// 🆕 On traite l'erreur par son nom (son _tag)
+const showUser = (id: number) =>
+  Effect.catchTag(getUser(id), "UserNotFound", (e) => // 👈 survolez e
+    Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
+  )
+// 👆 survolez showUser : E = never, plus rien à traiter
+
+for (const id of [1, 3]) console.log(Effect.runSync(showUser(id)))
+```
+
+</div>
+</div>
+
+<style>
+.fix {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0.2rem;
+}
+.fix-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid var(--tech-border);
+  border-left: 4px solid var(--tech-green);
+  border-radius: 10px;
+  background: var(--tech-code-bg);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.fix-ko {
   color: var(--tech-muted);
 }
-.wie-label-effect {
-  font-weight: 700;
-  color: var(--tech-violet);
-}
-.wie-shrug {
-  margin-left: 0.5rem;
-  color: var(--tech-muted);
-}
-.slidev-layout .wie-compare .wie-type {
-  font-weight: 700;
+.fix-ok {
   color: var(--tech-fg-strong);
 }
 </style>
 
 <!--
-L'idée en une phrase : chaque fonction annonce ce qu'elle renvoie (A), comment elle peut échouer (E) et de quoi elle a besoin (R). Quand on les appelle à la suite, Effect regroupe tout dans le type du résultat, sans rien écrire.
-Clic 1 : les deux appels successifs. Ne pas expliquer Effect.gen ici : c'est l'équivalent d'async / await, on y revient en section 2.
-Clic 2 : la même chose en async / await donne Promise<Order[]>. Les erreurs et les dépendances existent toujours… mais restent invisibles.
-Le type de program est vérifié avec tsc sur effect 4.0.0. Sur le slide, Effect<…> est abrégé : dans le vrai code, c'est Effect.Effect<…>.
-Un Effect est une description (la recette, pas le plat) : rien ne s'exécute tant qu'on ne le lance pas. On le verra avec le premier Effect.
-Rebondir sur Matt Pocock (slide précédente) : « use TS, not JS » → « use Effect, not just TS ». Même promesse : attraper les bugs à la compilation plutôt qu'en prod.
+La correction du slide précédent, point par point : un clic par ligne. Même API, même type User qu'aux slides précédents.
+Data.TaggedError : une classe d'erreur avec un _tag ("UserNotFound"), c'est par ce nom qu'on la traite.
+Effect.fail est l'inverse d'Effect.succeed : un Effect qui échoue avec une valeur. C'est le throw d'Effect… mais l'erreur est dans le type : Effect<User, UserNotFound>.
+La signature de getUser est annotée : sans annotation, TypeScript infère une union de deux Effects, illisible au survol. Avec Effect.gen (⑥), l'inférence se fera toute seule.
+Effect.catchTag(effect, "UserNotFound", handler) : on traite l'erreur par son nom, sans pipe.
+Survoler e : UserNotFound, avec son id. Ni unknown, ni instanceof, et pas de « [object Object] ».
+Survoler showUser : E = never. Le compilateur sait que tout est traité. A = User | string : le User trouvé, ou le message (on transformera le User en texte avec map, au ⑤).
+Changer "UserNotFound" en "UserNotFond" : erreur de compilation, ce tag n'existe pas dans E.
+catchTag n'attrape que UserNotFound. Un bug (un TypeError) n'est pas une erreur attendue : il reste un défaut, visible comme tel, au lieu de se faire passer pour une erreur métier.
+Demain, getUser ajoute une erreur à sa signature : elle apparaît dans le E de showUser, chez tous les appelants. Avec try / catch, personne n'est prévenu.
+Lancer : 1 → Ada (un vrai User), 3 → « utilisateur 3 introuvable ».
+-->
+
+---
+zoom: 0.66
+---
+
+# ▶ ④ Valider : `Schema`
+
+<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div>
+
+- L'API renvoie maintenant du **JSON** : des champs **inconnus**, et une date y est une `string`
+- `Schema` décrit ce qu'on attend et **valide** le JSON
+- `decodeUnknownEffect` **remplace** `Effect.succeed` : même forme, mais **vérifiée**
+- `SchemaError` rejoint `E`, avec le **chemin** du champ fautif
+- Le type `User` est **déduit** du schéma
+- `catchTags` : une branche **par erreur**
+
+<div class="tuto-sig">
+  <small>getUser renvoie</small>
+  <b class="a">A</b><span class="is-new">User</span>
+  <b class="e">E</b><span>UserNotFound | <span class="is-new">SchemaError</span></span>
+  <b class="r">R</b><span>never</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Data, Effect, Schema } from "effect"
+
+// 🆕 L'API renvoie du JSON : des objets dont on ne connaît pas les champs
+const api: Array<Record<string, unknown>> = [
+  { id: 1, name: "Ada", createdAt: "1815-12-10" }, // 👈 en JSON, une date est une string
+  { id: 2, name: "Grace", createdAt: "hier" }, // 👈 données invalides
+]
+
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+
+// 🆕 Le schéma décrit ce qu'on attend… et le type User en est déduit
+const User = Schema.Struct({
+  id: Schema.Number,
+  name: Schema.String,
+  createdAt: Schema.DateFromString, // "1815-12-10" → Date
+})
+type User = typeof User.Type
+
+const getUser = (id: number): Effect.Effect<User, UserNotFound | Schema.SchemaError> => {
+  const json = api.find((user) => user.id === id)
+  return json === undefined
+    ? Effect.fail(new UserNotFound({ id }))
+    : Schema.decodeUnknownEffect(User)(json) // 🆕 à la place de Effect.succeed
+}
+
+const showUser = (id: number) =>
+  Effect.catchTags(getUser(id), {
+    UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
+    SchemaError: (e) => Effect.succeed(`🧨 ${e.message}`), // 🆕
+  })
+
+for (const id of [1, 2, 3]) console.log(Effect.runSync(showUser(id)))
+```
+
+</div>
+</div>
+
+<!--
+Jusqu'ici, l'API renvoyait des User tout prêts. En vrai, elle renvoie du JSON : on ne connaît pas les champs (Record<string, unknown>), et une date y est une string, jamais une Date. Le `as User` des slides précédents mentirait.
+Schema.Struct décrit la forme attendue ; DateFromString transforme la string en vraie Date.
+type User = typeof User.Type : on n'écrit plus le type à la main, il est déduit du schéma.
+Une seule ligne change dans getUser : Effect.succeed(user) devient Schema.decodeUnknownEffect(User)(json). Même forme, mais la valeur est vérifiée.
+SchemaError rejoint E : on l'ajoute à la signature, et catchTags (une branche par erreur) le traite.
+Lancer : 1 → un vrai User (createdAt est devenu une Date), 2 → SchemaError avec le chemin du champ fautif (["createdAt"]), 3 → UserNotFound.
+Corriger "hier" en "1906-12-09" en direct : Grace passe. Mettre name: 42 : l'erreur pointe sur ["name"].
+Supprimer la branche SchemaError : SchemaError réapparaît dans le type de showUser (survoler), et runSync lève l'erreur pour l'id 2.
+-->
+
+---
+class: cmp-hero
+---
+
+<div class="cmp-kicker">Nouvelle partie</div>
+
+# Composer des Effects
+
+<div class="cmp-sub">Jusqu'ici, des <b>briques</b>. Maintenant, on les assemble en un <b>pipeline</b> :<br>c'est là qu'est <span class="cmp-power">la puissance d'Effect</span>.</div>
+
+<div class="cmp-pipe">
+  <div class="cmp-step"><code>getUser</code><small>chercher</small></div>
+  <span v-click="1" class="cmp-arrow">→</span>
+  <div v-click="1" class="cmp-step cmp-a"><code>Schema</code><small>valider</small></div>
+  <span v-click="2" class="cmp-arrow">→</span>
+  <div v-click="2" class="cmp-step cmp-e"><code>getCountry</code><small>enchaîner</small></div>
+  <span v-click="3" class="cmp-arrow">→</span>
+  <div v-click="3" class="cmp-step cmp-ok"><code>catchTags</code><small>traiter</small></div>
+</div>
+
+<div class="cmp-sig">
+  <span class="cmp-sig-label">le type suit chaque étape</span>
+  <div class="cmp-types">
+    <code v-click.hide="1">Effect&lt;<span class="a">unknown</span>, <span class="e">UserNotFound</span>, <span class="r">never</span>&gt;</code>
+    <code v-click="[1, 2]">Effect&lt;<span class="a">User</span>, <span class="e">UserNotFound | SchemaError</span>, <span class="r">never</span>&gt;</code>
+    <code v-click="[2, 3]">Effect&lt;<span class="a">Country</span>, <span class="e">UserNotFound | SchemaError | CountryNotFound</span>, <span class="r">never</span>&gt;</code>
+    <code v-click="3">Effect&lt;<span class="a">string</span>, <span class="e">never</span>, <span class="r">never</span>&gt; <span class="cmp-run">tout est traité ▶</span></code>
+  </div>
+</div>
+
+<div v-click="4" class="cmp-next">
+  <span>Pour assembler ces étapes, on va utiliser <code>pipe()</code></span>
+</div>
+
+<style>
+.slidev-layout.cmp-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.cmp-kicker {
+  font-family: var(--tech-font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--tech-cyan);
+}
+.slidev-layout.cmp-hero h1 {
+  margin: 0.2rem 0 0.3rem;
+  padding-bottom: 0.08em;
+  font-size: 3.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+  background: var(--tech-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.cmp-sub {
+  font-size: 1.15rem;
+  color: var(--tech-muted);
+}
+.cmp-sub b {
+  color: var(--tech-fg-strong);
+}
+.cmp-power {
+  font-weight: 700;
+  color: var(--tech-violet);
+}
+.cmp-pipe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin: 1.6rem 0 1.2rem;
+}
+.cmp-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 6.6rem;
+  padding: 0.55rem 0.7rem 0.45rem;
+  border: 1px solid var(--tech-border);
+  border-top: 4px solid var(--tech-muted);
+  border-radius: 10px;
+  background: var(--tech-code-bg);
+}
+.cmp-step code {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.cmp-step small {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--tech-muted);
+}
+.cmp-a { border-top-color: var(--tech-green); }
+.cmp-e { border-top-color: var(--tech-red); }
+.cmp-ok { border-top-color: var(--tech-violet); }
+.cmp-r { border-top-color: var(--tech-blue); }
+.cmp-arrow {
+  font-size: 1.5rem;
+  color: var(--tech-muted);
+}
+.cmp-sig {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.45rem 1.2rem 0.55rem;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+}
+.cmp-sig-label {
+  font-family: var(--tech-font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tech-muted);
+}
+/* All the signatures share one grid cell: only the visible one takes space */
+.cmp-types {
+  display: grid;
+  margin-top: 0.25rem;
+}
+.cmp-types > code {
+  grid-area: 1 / 1;
+  justify-self: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cmp-sig .a { color: var(--tech-green); }
+.cmp-sig .e { color: var(--tech-red); }
+.cmp-sig .r { color: var(--tech-blue); }
+.cmp-run {
+  margin-left: 0.6rem;
+  color: var(--tech-violet);
+}
+.cmp-next {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.4rem;
+  margin-top: 1.3rem;
+  font-size: 0.9rem;
+  color: var(--tech-muted);
+}
+</style>
+
+<!--
+Changement de rythme : jusqu'ici, on a vu des briques isolées (succeed, fail, catchTag, Schema). La force d'Effect, c'est de les assembler.
+Chaque brique est un Effect ; chaque étape du pipeline prend un Effect et en renvoie un autre. Et le type suit tout seul.
+Départ : getUser renvoie le JSON brut (unknown), ou échoue avec UserNotFound.
+Clic 1 : Schema valide. A devient User, SchemaError rejoint E.
+Clic 2 : getCountry, un autre Effect qui part du User. A devient Country, et CountryNotFound s'ajoute aux erreurs : elles s'additionnent toutes seules.
+Clic 3 : catchTags traite chaque erreur par son nom. E redevient never : le compilateur sait que tout est traité.
+Clic 4 : pour assembler ces étapes, on va utiliser pipe() : c'est le slide suivant.
+Avec des Promise, le type resterait Promise<Country> du début à la fin, sans trace des trois erreurs possibles.
+-->
+
+---
+zoom: 0.6
+---
+
+# ▶ ⑤ Composer : `pipe` et `flatMap`
+
+<div class="grid grid-cols-[1fr_2.6fr] gap-6">
+<div>
+
+- `pipe()`, c'est comme le `|` en bash, vous avez tous déjà utilisé cette syntaxe :<br>`curl -fsSL https://bun.sh/install | bash`
+- Chaque brique **annonce** ses erreurs : `getUser` → `UserNotFound | SchemaError`, `getCountry` → `CountryNotFound`
+- `flatMap` : enchaîne un autre Effect… et **ajoute** ses erreurs au type
+- Les erreurs sont **groupées** dans `E` : survolez `getUserCountry`
+- `catchTags` : une branche **par erreur**, et `E` redevient `never`
+
+<div class="tuto-sig">
+  <small>getUserCountryName renvoie</small>
+  <b class="a">A</b><span class="is-new">String</span>
+  <b class="e">E</b><span>UserNotFound | SchemaError | <span class="is-new">CountryNotFound</span></span>
+  <b class="r">R</b><span>never</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Data, Effect, Schema } from "effect"
+
+const api: Array<Record<string, unknown>> = [
+  { id: 1, name: "Ada", createdAt: "1815-12-10", country: "GB" },
+  { id: 2, name: "Grace", createdAt: "hier", country: "US" }, // 👈 données invalides
+  { id: 3, name: "Linus", createdAt: "1969-12-28", country: "FI" }, // 👈 pays inconnu
+]
+type Country = { code: string; name: string }
+const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US", name: "États-Unis" }]
+
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {} 
+const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
+type User = typeof UserSchema.Type
+
+const getUser = (id: number): Effect.Effect<User, UserNotFound | Schema.SchemaError> => {
+  const json = api.find((user) => user.id === id)
+  return json === undefined ? Effect.fail(new UserNotFound({ id })) : Schema.decodeUnknownEffect(UserSchema)(json)
+}
+const getCountry = (user: User): Effect.Effect<Country, CountryNotFound> => { 
+  const country = countries.find((country) => country.code === user.country)
+  return country === undefined ? Effect.fail(new CountryNotFound({ code: user.country })) : Effect.succeed(country)
+}
+
+const getUserCountryName = (id: number) =>
+  getUser(id).pipe(
+    Effect.flatMap((user) => getCountry(user)), // + CountryNotFound
+    Effect.map((country) => `✅ ${country.name}`),
+  )
+
+const showCountry = (id: number) =>
+  getUserCountryName(id).pipe(
+    Effect.catchTags({ // une branche par erreur
+      UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
+      SchemaError: (e) => Effect.succeed(`🧨 ${e.message}`),
+      CountryNotFound: (e) => Effect.succeed(`🌍 pays ${e.code} inconnu`),
+    }),
+  )
+
+for (const id of [1, 2, 3, 4]) console.log(Effect.runSync(showCountry(id)))
+```
+
+</div>
+</div>
+
+<!--
+Le pipeline du slide précédent, en vrai : getUser → Schema → getCountry → catchTags.
+L'API a maintenant un champ country, et un troisième utilisateur, Linus, dont le pays n'est pas dans la liste.
+Chaque brique annonce ses erreurs dans sa signature : getUser peut échouer avec UserNotFound, getCountry avec CountryNotFound.
+pipe enchaîne les étapes de haut en bas, comme le | du terminal. flatMap enchaîne un autre Effect : son erreur s'ajoute à celles d'avant.
+Survoler getUserCountry : Effect<Country, UserNotFound | SchemaError | CountryNotFound, never>. Personne n'a écrit cette union : elle est déduite étape par étape.
+catchTags : une branche par erreur. Survoler showCountry : Effect<string, never, never>.
+Lancer : 1 → Royaume-Uni, 2 → SchemaError (["createdAt"]), 3 → pays FI inconnu, 4 → utilisateur introuvable.
+Supprimer la branche CountryNotFound : CountryNotFound réapparaît dans le type de showCountry. Ajouter { code: "FI", name: "Finlande" } : Linus passe.
+Avec des Promise : Promise<Country>, et un catch (e: unknown) pour trier trois erreurs à la main.
+-->
+
+---
+zoom: 0.72
+---
+
+# ▶ ⑥ Comme async / await : `Effect.gen`
+
+<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div>
+
+Avec `pipe`, il faut **un opérateur par cas** :
+
+```ts
+const getUser = (id: number) =>
+  Effect.succeed(api[id]).pipe(
+    Effect.filterOrFail(
+      (json) => json !== undefined,
+      () => new UserNotFound({ id }),
+    ),
+    Effect.flatMap((json) =>
+      Schema.decodeUnknownEffect(User)(json)),
+  )
+```
+
+- L'appel à l'API est un **Effect** (bientôt une vraie requête) : il faut **attendre** sa réponse avant de la tester
+- `Effect.gen` : du TypeScript **normal** (`if`, `const`…), et `yield*` ≈ `await`
+- Plus d'annotation : la signature est **inférée**
+
+<div class="tuto-sig">
+  <small>getUser renvoie (inféré)</small>
+  <b class="a">A</b><span>User</span>
+  <b class="e">E</b><span>UserNotFound | SchemaError</span>
+  <b class="r">R</b><span>never</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Data, Effect, Schema } from "effect"
+
+const api: Record<number, unknown> = {
+  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
+  2: { id: "2", name: "Grace", createdAt: "hier" }, // 👈 données invalides
+}
+
+const User = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString })
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+
+// 🆕 Effect.gen se lit comme async / await : yield* ≈ await
+const getUser = (id: number) =>
+  Effect.gen(function* () {
+    const json = yield* Effect.succeed(api[id]) // l'appel à l'API : l'Effect du ①
+    if (json === undefined) return yield* Effect.fail(new UserNotFound({ id }))
+    return yield* Schema.decodeUnknownEffect(User)(json)
+  })
+// 👆 survolez getUser : plus besoin d'annoter
+
+const showUser = (id: number) =>
+  getUser(id).pipe(
+    Effect.map((user) => `✅ ${user.name}, née en ${user.createdAt.getFullYear()}`),
+    Effect.catchTags({
+      UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
+      SchemaError: (e) => Effect.succeed(`🧨 ${e.message}`),
+    }),
+  )
+
+for (const id of [1, 2, 3]) console.log(Effect.runSync(showUser(id)))
+```
+
+</div>
+</div>
+
+<!--
+Jusqu'ici, la réponse de l'API était sous la main (api[id]) : un ternaire suffisait. Mais l'appel à l'API est un Effect (c'est le getUser du ①), et au ⑦ ce sera une vraie requête réseau : il faut d'abord attendre sa réponse, puis la tester, puis la valider.
+À gauche avec pipe : il faut connaître filterOrFail et flatMap. À droite avec gen : un simple if, comme avec async / await.
+Les deux ont exactement le même type : Effect<User, UserNotFound | SchemaError, never> (vérifié avec tsc).
+Le réflexe « un ternaire dans flatMap » ne compile même pas : TypeScript n'unifie pas les deux branches. Avec gen, la question ne se pose pas.
+yield* ≈ await : on récupère la valeur d'un Effect. return yield* Effect.fail(…) ≈ throw, mais typé.
+Plus d'annotation de retour : gen infère la signature (survoler getUser). showUser ne change pas d'une ligne.
+pipe et gen se combinent : gen pour la logique, pipe pour ce qui l'entoure (catchTags ici, retry et timeout au ⑦).
+-->
+
+---
+zoom: 0.68
+---
+
+# ▶ ⑦ Résister : `tryPromise`, `timeout` et `retry`
+
+<div class="grid grid-cols-[1fr_2fr] gap-6">
+<div>
+
+- L'API est maintenant **distante**… et capricieuse
+- `tryPromise` : une `Promise` devient un Effect, avec une erreur **typée**
+- `timeout` + `retry` : deux lignes dans le `pipe`, **aucun helper**
+- Un Effect est une **description** : `retry` peut donc le **relancer**
+- Asynchrone : `runSync` → `runPromise`
+
+<div class="tuto-sig">
+  <small>getUser renvoie</small>
+  <b class="a">A</b><span>User</span>
+  <b class="e">E</b><span><span class="is-new">NetworkError | TimeoutError</span> | UserNotFound | SchemaError</span>
+  <b class="r">R</b><span>never</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Data, Effect, Schedule, Schema } from "effect"
+
+const api: Record<number, unknown> = {
+  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
+  2: { id: "2", name: "Grace", createdAt: "hier" }, // 👈 données invalides
+}
+
+// 🆕 L'API est maintenant distante… et capricieuse : les 2 premiers appels échouent
+let calls = 0
+const fetchUser = (id: number) => new Promise<unknown>((resolve, reject) => {
+  console.log(`🌐 GET /users/${id} (tentative ${++calls})`)
+  setTimeout(() => (calls < 3 ? reject(new Error("ECONNRESET")) : resolve(api[id])), 100)
+})
+
+const User = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString })
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {} // 🆕
+
+const getUser = (id: number) =>
+  Effect.gen(function* () {
+    const json = yield* Effect.tryPromise({ // 🆕 Promise → Effect
+      try: () => fetchUser(id),
+      catch: (cause) => new NetworkError({ cause }),
+    }).pipe(
+      Effect.timeout("1 second"), // 🆕
+      Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }), // 🆕
+    )
+    if (json === undefined) return yield* Effect.fail(new UserNotFound({ id }))
+    return yield* Schema.decodeUnknownEffect(User)(json)
+  })
+
+const user = await Effect.runPromise(getUser(1)) // 🆕 asynchrone : runSync → runPromise
+console.log("✅", user.name)
+```
+
+</div>
+</div>
+
+<!--
+fetchUser simule une API distante : les 2 premiers appels échouent (ECONNRESET), le 3e réussit.
+Dans getUser, une seule ligne change : l'appel à l'API. Effect.succeed(api[id]) devient Effect.tryPromise(…). Le if et le Schema ne bougent pas.
+tryPromise : catch transforme l'erreur de la Promise (unknown) en NetworkError, typée.
+timeout s'applique à chaque tentative ; retry relance avec un backoff exponentiel (100 ms, puis 200 ms…), 3 fois au maximum.
+Lancer : 3 tentatives dans les logs, puis ✅ Ada.
+Changer calls < 3 en calls < 10 : après 4 tentatives (1 + 3 retries), NetworkError remonte.
+Passer le setTimeout à 2000 : chaque tentative dépasse la seconde, TimeoutError remonte après les retries.
+Pourquoi retry fonctionne : un Effect est une description. Une Promise est déjà lancée, on ne peut pas la rejouer ; un Effect, si.
+-->
+
+---
+zoom: 0.68
+---
+
+# ▶ ⑧ Découpler : `Context.Service` et `Layer`
+
+<div class="grid grid-cols-[1fr_2fr] gap-6">
+<div>
+
+- `UserApi` : le **contrat**, ce dont `getUser` a besoin
+- La dépendance est **dans le type** : `R = UserApi`
+- `Layer` : une implémentation… ici, le `Effect.succeed` du ① !
+- Oublier `Effect.provide` = **erreur de compilation**
+- Bonus : `Effect.forEach` traite les 3 ids, **2 à la fois**
+
+<div class="tuto-sig">
+  <small>getUser renvoie</small>
+  <b class="a">A</b><span>User</span>
+  <b class="e">E</b><span>NetworkError | TimeoutError | UserNotFound | SchemaError</span>
+  <b class="r">R</b><span class="is-new">UserApi</span>
+</div>
+
+</div>
+<div>
+
+```ts {monaco-run} {autorun: false}
+import { Context, Data, Effect, Layer, Schedule, Schema } from "effect"
+
+const User = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString }) // ④
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {} // ②
+class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {} // ⑦
+
+class UserApi extends Context.Service<UserApi, { // 🆕 le contrat
+  readonly fetch: (id: number) => Effect.Effect<unknown, NetworkError>
+}>()("UserApi") {}
+
+const getUser = (id: number) =>
+  Effect.gen(function* () { // ⑥
+    const userApi = yield* UserApi // 🆕
+    const json = yield* userApi.fetch(id).pipe(
+      Effect.timeout("1 second"), // ⑦
+      Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }),
+    )
+    if (json === undefined) return yield* Effect.fail(new UserNotFound({ id }))
+    return yield* Schema.decodeUnknownEffect(User)(json) // ④
+  })
+
+const showUser = (id: number) =>
+  getUser(id).pipe( // ⑤
+    Effect.map((user) => `✅ ${user.name} (${user.createdAt.getFullYear()})`),
+    Effect.catchTags({ // ③
+      UserNotFound: (e) => Effect.succeed(`🔍 ${e.id} introuvable`),
+      SchemaError: () => Effect.succeed(`🧨 ${id} : données invalides`),
+    }),
+  )
+
+// 🆕 une implémentation = un Layer… avec le Effect.succeed du ①
+const api: Record<number, unknown> = {
+  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
+  2: { id: "2", name: "Grace", createdAt: "hier" },
+}
+const InMemoryUserApi = Layer.succeed(UserApi, { fetch: (id) => Effect.succeed(api[id]) })
+
+const program = Effect.forEach([1, 2, 3], showUser, { concurrency: 2 }) // bonus
+console.log(await Effect.runPromise(program.pipe(Effect.provide(InMemoryUserApi))))
+```
+
+</div>
+</div>
+
+<!--
+L'exemple complet : chaque concept vu dans les étapes ① à ⑦ est là, les numéros en commentaire rappellent où il est apparu.
+Context.Service déclare le contrat (la forme du service) et sa clé ("UserApi"). getUser le récupère avec yield* UserApi, sans savoir qui l'implémente.
+Survoler getUser : R = UserApi. Pour l'exécuter, il faut fournir une implémentation : Effect.provide(InMemoryUserApi).
+Supprimer Effect.provide : erreur de compilation « Type 'UserApi' is not assignable to type 'never' ». Pas de « service not found » en prod.
+La boucle est bouclée : l'implémentation en mémoire, c'est le Effect.succeed(api[id]) du ①. En prod, un autre Layer appellerait fetch avec tryPromise ; en test, on garde celui-ci.
+Effect.forEach avec { concurrency: 2 } : les 3 ids sont traités 2 à la fois. Les erreurs métier sont traitées ; il ne reste que NetworkError | TimeoutError dans le type de program.
+Dans un vrai projet, on écrit Effect.fn("getUser")(function* (id) { … }) plutôt que (id) => Effect.gen(…) : même code, avec une trace (span) par appel.
 -->
 
 ---
@@ -525,62 +1516,6 @@ Les types Effect sont chargés dans l'éditeur : on peut survoler et voir les er
 -->
 
 ---
-layout: section
----
-
-# Les erreurs
-### Une longue histoire de mensonges
-
----
-
-# Gérer les erreurs : un éternel recommencement
-
-Chaque solution corrige le défaut de la précédente… et en crée un nouveau
-
-<div class="tl">
-  <div class="tl-row tl-head">
-    <span>Approche</span><span>À quoi ça ressemble</span><span>✅ On gagne</span><span>❌ Mais…</span>
-  </div>
-  <div v-click class="tl-row">
-    <div class="tl-name">🔢 Codes d'erreur<small>C, POSIX</small></div>
-    <code>const fd = open(path) // -1 ?</code>
-    <span>Simple et explicite</span>
-    <span>Rien n'oblige à vérifier : on <b>oublie</b>, le bug passe en silence</span>
-  </div>
-  <div v-click class="tl-row">
-    <div class="tl-name">💥 Exceptions<small>C++, Java, JS, C#</small></div>
-    <code>throw new Error("boom")</code>
-    <span>Impossible d'ignorer l'erreur</span>
-    <span><b>Invisible</b> dans la signature : on le découvre en prod</span>
-  </div>
-  <div v-click class="tl-row">
-    <div class="tl-name">☕ Checked exceptions<small>Java</small></div>
-    <code>User load() throws IOException</code>
-    <span>L'erreur est dans la signature</span>
-    <span><code>throws</code> partout… alors on écrit <code>catch (e) {}</code></span>
-  </div>
-  <div v-click class="tl-row">
-    <div class="tl-name">📦 Result / Either<small>Rust, Go, neverthrow</small></div>
-    <code>Result&lt;User, NotFound&gt;</code>
-    <span>Erreur <b>typée</b>, retournée comme une valeur</span>
-    <span>Async, retry, timeout, dépendances : <b>tout à la main</b></span>
-  </div>
-  <div v-click class="tl-row tl-effect">
-    <div class="tl-name">✨ Effect<small>TypeScript</small></div>
-    <code>Effect&lt;User, NotFound, Db&gt;</code>
-    <span>Erreurs <b>et</b> dépendances typées</span>
-    <span>➕ Retry, timeout, concurrence… <b>intégrés</b></span>
-  </div>
-</div>
-
-<!--
-Lire chaque ligne de gauche à droite : le "Mais…" d'une ligne est exactement ce que la ligne suivante essaie de corriger.
-Codes d'erreur → on oublie de vérifier. Exceptions → on ne peut plus oublier, mais on ne sait plus ce qui peut échouer.
-Checked exceptions → on le sait, mais c'est si lourd qu'on finit par tout avaler. Result → typé et léger, mais tout le reste est à faire soi-même.
-Effect garde le "typé" de Result et ajoute ce qui manquait.
--->
-
----
 zoom: 0.85
 ---
 
@@ -629,59 +1564,6 @@ try {
 
 </div>
 </div>
-
-<style>
-.fake-alert {
-  width: 17rem;
-  margin: 0 auto;
-  padding: 1.1rem 1.2rem 0.9rem;
-  border-radius: 10px;
-  background: #fff;
-  color: #1f1f1f;
-  font-family: system-ui, sans-serif;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  transform: rotate(-2deg);
-}
-.slidev-vclick-target:not(.slidev-vclick-hidden) .fake-alert {
-  animation: fake-alert-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-.fake-alert__title {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-.fake-alert__msg {
-  margin-top: 0.6rem;
-  font-size: 0.9rem;
-}
-.fake-alert__actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
-}
-.fake-alert__actions span {
-  padding: 0.3rem 1.3rem;
-  border-radius: 999px;
-  background: #0b57d0;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-.dark .fake-alert {
-  background: #2d2e31;
-  color: #e3e3e3;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
-}
-.dark .fake-alert__actions span {
-  background: #a8c7fa;
-  color: #062e6f;
-}
-@keyframes fake-alert-pop {
-  from {
-    opacity: 0;
-    transform: rotate(-2deg) scale(0.6);
-  }
-}
-</style>
 
 <!--
 Avec 0 : la string "id invalide" tombe dans le cas "inattendu". Personne ne l'avait prévue.

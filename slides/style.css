@@ -194,3 +194,105 @@ html.dark {
   color: var(--tech-green, #2e7d32);
 }
 
+
+/* getUser tutorial (slides ① to ⑥): what getUser returns after each step */
+.tuto-sig {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.7rem;
+  margin-top: 1rem;
+  padding: 0.55rem 0.9rem;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+  font-family: var(--tech-font-mono);
+  font-size: 0.78rem;
+  color: var(--tech-muted);
+}
+
+.tuto-sig > small {
+  grid-column: 1 / -1;
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tuto-sig > b {
+  font-weight: 800;
+}
+
+.tuto-sig .a { color: var(--tech-green); }
+.tuto-sig .e { color: var(--tech-red); }
+.tuto-sig .r { color: var(--tech-blue); }
+
+/* The part of the signature that changed at this step */
+.tuto-sig .is-new {
+  font-weight: 700;
+  color: var(--tech-fg-strong);
+}
+
+.tuto-sig .is-new::after {
+  content: " 🆕";
+}
+
+/* A fake browser alert (`alert()` dialog), shown on the try / catch slides */
+.fake-alert {
+  width: 17rem;
+  margin: 0 auto;
+  padding: 1.1rem 1.2rem 0.9rem;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f1f1f;
+  font-family: system-ui, sans-serif;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  transform: rotate(-2deg);
+}
+
+.slidev-vclick-target:not(.slidev-vclick-hidden) .fake-alert {
+  animation: fake-alert-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.fake-alert__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.fake-alert__msg {
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+}
+
+.fake-alert__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.fake-alert__actions span {
+  padding: 0.3rem 1.3rem;
+  border-radius: 999px;
+  background: #0b57d0;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.dark .fake-alert {
+  background: #2d2e31;
+  color: #e3e3e3;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.dark .fake-alert__actions span {
+  background: #a8c7fa;
+  color: #062e6f;
+}
+
+@keyframes fake-alert-pop {
+  from {
+    opacity: 0;
+    transform: rotate(-2deg) scale(0.6);
+  }
+}
