@@ -74,7 +74,7 @@ Le tutorial se termine par **Classique vs Effect** (slide 17) : le tableau réca
 
 ## 📚 Bonus : pour approfondir (slides 24 à 43)
 
-Ces slides ne sont **pas présentées en live** : elles restent dans le deck pour ceux qui le récupèrent. La slide 24 en donne le sommaire cliquable, et chaque slide bonus porte un badge « 📚 bonus · pour approfondir » dans sa barre d'état. Les chapitres bonus sont numérotés à part (« Bonus 01 / 05 »). La slide 43 clôt les bonus.
+Ces slides ne sont **pas présentées en live** : elles restent dans le deck pour ceux qui le récupèrent. La slide 24 en donne le sommaire cliquable, et chaque slide bonus porte un badge « 📚 bonus · pour approfondir » dans sa barre d'état. Les chapitres bonus sont numérotés à part (« Bonus 01 / 05 »). La slide 43 clôt le deck : « Merci ! », le QR code du dépôt et un retour au sommaire des bonus.
 
 ### Bonus 1. Les erreurs avant Effect (slides 25 à 28)
 

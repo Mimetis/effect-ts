@@ -587,11 +587,13 @@ class DivisionByZero extends Data.TaggedError("DivisionByZero") {}
 const divide = (a: number, b: number): Effect.Effect<number, DivisionByZero> =>
   b === 0 ? Effect.fail(new DivisionByZero()) : Effect.succeed(a / b)
 
+const resultat = divide(10, 2)
+
 console.log("— rien n'a encore été exécuté —")
 
 console.log(Effect.runSync(hello))
 console.log(Effect.runSyncExit(boom))
-console.log(Effect.runSyncExit(divide(10, 2)))
+console.log(Effect.runSyncExit(resultat))
 console.log(Effect.runSyncExit(divide(10, 0)))
 ```
 
@@ -690,12 +692,12 @@ async function getUser(id: number): Promise<User> {
 
 ```ts {monaco-run} {autorun: false}
 import { Effect } from "effect"
-type User = { id: number; name: string; createdAt: Date }
+type User = { id: number; name: string; createdAt: string}
 
 // Ce que renvoie l'API : un tableau d'utilisateurs
 const api = [
-  { id: 1, name: "Ada", createdAt: new Date("1815-12-10") },
-  { id: 2, name: "Grace", createdAt: new Date("1906-12-09") },
+  { id: 1, name: "Ada", createdAt: "1815-12-10" },
+  { id: 2, name: "Grace", createdAt: "1906-12-09" },
 ]
 
 const getUser = (id: number) =>
@@ -760,18 +762,19 @@ const api = [
 // La signature promet un User… et ne dit rien des erreurs
 async function getUser(id: number): Promise<User> {
   if (id <= 0) throw { status: 400 } // on peut throw… n'importe quoi
+  if (id > 99) throw `User ${id} invalide`
   const user = api.find((user) => user.id === id)
   if (user === undefined) throw new UserNotFound(`User ${id} introuvable`)
   return user
 }
 
-for (const id of [1, 3]) {
+for (const id of [0]) {
   try {
     const user = await getUser(id)
     console.log("✅", user.name.toUpperCase())
   } catch (e) { // 👈 survolez e : unknown
     if (e instanceof UserNotFound) console.log("🔍", e.message)
-    else console.log(`💥 Erreur non gérée : ${e}`) // 😬 le toast.error()
+    else console.log(String(e)) 
   }
 }
 ```
@@ -1185,7 +1188,7 @@ const getUserCountryName = (id: number) =>
     Effect.map((country) => `✅ ${country.name}`),
   )
 
-const showCountry = (id: number) =>
+const showCountry = (id: number) : Effect.Effect<string> =>
   getUserCountryName(id).pipe(
     Effect.catchTags({ // une branche par erreur
       UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
@@ -1251,14 +1254,6 @@ const getName = (id: number) => Effect.gen(function* () {
 ```
 
 </div>
-</div>
-
-<div class="gen-compare__label mt-4">Le mémo : <code>pipe</code> (étape 5) et <code>async</code> → <code>Effect.gen</code> (étape 6)</div>
-<div class="gen-rules">
-  <div><code>.pipe(…)</code><i>·</i><code>async function</code><span>→</span><code>Effect.gen(function* () { … })</code></div>
-  <div><code>Effect.flatMap</code><i>·</i><code>await</code><span>→</span><code>yield*</code></div>
-  <div><code>Effect.map</code><span>→</span><code>return</code></div>
-  <div><code>Effect.fail</code><i>·</i><code>throw</code><span>→</span><code>return yield*</code><small>typé</small></div>
 </div>
 
 <div class="gen-reassure">
@@ -3193,18 +3188,21 @@ layout: center
 class: text-center
 ---
 
-# Fin des bonus <span class="tech-emoji">🎉</span>
+# Merci ! <span class="tech-emoji">🙏</span>
 
-Merci d'être allé jusqu'au bout !
+Merci d'être allé jusqu'au bout des bonus.
 
-<div class="mt-6 flex justify-center gap-6 text-sm">
-  <Link to="bonus">← Retour au sommaire des bonus</Link>
+<div class="mt-6 inline-block bg-white p-3 rounded-xl shadow-lg">
+  <img src="./images/qr-github-effect-ts.svg" alt="QR code vers github.com/Mimetis/effect-ts" class="w-36 h-36" style="image-rendering: pixelated" />
+</div>
+<div class="mt-2 font-mono text-xs">
   <a href="https://github.com/Mimetis/effect-ts">github.com/Mimetis/effect-ts</a>
-  <a href="https://effect.website/docs/">effect.website/docs</a>
 </div>
 
-<div class="mt-6 text-sm opacity-70">
-
-Le code des démos ▶ est modifiable : changez-le, relancez-le, cassez-le.
-
+<div class="mt-6 text-sm">
+  <Link to="bonus">← Retour au sommaire des bonus</Link>
 </div>
+
+<!--
+Dernière slide du deck partagé : pas de liens en double avec le « Merci ! » du talk, juste le dépôt et un retour au sommaire des bonus.
+-->
