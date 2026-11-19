@@ -117,6 +117,7 @@ Les démos tournent **dans le navigateur**, sans réseau ni terminal : on peut m
 - Les types d'Effect sont chargés dans l'éditeur : on peut **survoler** une variable pour voir son type, et les erreurs de compilation sont **soulignées en rouge** dès qu'on modifie le code.
 - Les logs d'Effect (`Effect.log`, `Console.log`) et les erreurs typées s'affichent proprement sous l'éditeur.
 - La première slide ▶ met quelques secondes à charger les types d'Effect ; les suivantes sont immédiates.
+- Dans le tutorial, le code commun d'une étape à l'autre (données, erreurs, `Schema`) est rangé entre `// #region` et `// #endregion` : il est replié à l'ouverture, pour que le code de l'étape soit plus grand, et se déplie d'un clic.
 
 ## Organisation du dépôt
 
@@ -124,13 +125,13 @@ Les démos tournent **dans le navigateur**, sans réseau ni terminal : on peut m
 |---|---|
 | [slides/slides.md](./slides/slides.md) | Le deck |
 | [slides/setup/code-runners.ts](./slides/setup/code-runners.ts) | Affiche les logs Effect et formate les erreurs sous les démos ▶ |
-| [slides/setup/monaco.ts](./slides/setup/monaco.ts) | Charge les types d'Effect 4 dans les éditeurs live |
+| [slides/setup/monaco.ts](./slides/setup/monaco.ts) | Charge les types d'Effect 4 dans les éditeurs live, et replie automatiquement les blocs `// #region` |
 | [slides/setup/shiki.ts](./slides/setup/shiki.ts) | Thème de coloration du code |
 | [slides/setup/main.ts](./slides/setup/main.ts) | Rend le focus aux slides après un clic, pour que les flèches continuent de fonctionner |
 | [slides/global-top.vue](./slides/global-top.vue) | Bouton clair / sombre |
 | [slides/slide-bottom.vue](./slides/slide-bottom.vue) | Fond commun à tous les slides (dégradés + grille) et barre d'état (numéro de slide, badge « bonus ») |
 | [slides/layouts/section.vue](./slides/layouts/section.vue) | Layout des slides de chapitre (`layout: section`) : numéro et progression calculés automatiquement, séparément pour le talk et pour les bonus |
-| [slides/composables/useBonus.ts](./slides/composables/useBonus.ts) | Repère les slides bonus : toutes celles qui suivent la première slide marquée `bonus: true` dans son frontmatter |
+| [slides/composables/bonus.ts](./slides/composables/bonus.ts) | Repère les slides bonus : toutes celles qui suivent la première slide marquée `bonus: true` dans son frontmatter |
 | [slides/style.css](./slides/style.css) | Polices et styles partagés |
 | [slides/images/](./slides/images) | Photo, logos et QR code |
 | [backend/](./backend) | Petite app Next.js 16 (App Router) dont le backend utilise Effect : `pnpm backend` (dev), `pnpm backend:build` |

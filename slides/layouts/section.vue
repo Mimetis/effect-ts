@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useNav, useSlideContext } from "@slidev/client";
 import { computed } from "vue";
-import { useBonus } from "../composables/useBonus";
+import { findBonusStart } from "../composables/bonus";
 
 // Overrides the theme `section` layout: the chapter number and the progress
 // bar are computed from the position of the slide among the `layout: section` slides
@@ -9,7 +9,8 @@ import { useBonus } from "../composables/useBonus";
 // makes an unnumbered interlude, which also gets the full width.
 const { slides } = useNav();
 const { $page } = useSlideContext();
-const { bonusStart, isBonus } = useBonus();
+const bonusStart = computed(() => findBonusStart(slides.value));
+const isBonus = computed(() => $page.value >= bonusStart.value);
 
 const sectionPages = computed(() =>
     slides.value

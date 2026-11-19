@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { useSlideContext } from "@slidev/client";
+import { useNav, useSlideContext } from "@slidev/client";
 import { computed } from "vue";
-import { useBonus } from "./composables/useBonus";
+import { findBonusStart } from "./composables/bonus";
 
 // Rendered under every slide: the shared background (gradients + grid)
 // and a terminal-like status bar with the page number (and a badge on bonus slides).
 const { $page, $nav, $frontmatter, $slidev } = useSlideContext();
-const { isBonus } = useBonus();
+const { slides } = useNav();
+const isBonus = computed(() => $page.value >= findBonusStart(slides.value));
 
 const HIDDEN_LAYOUTS = new Set(["cover", "section", "center", "end", "intro"]);
 

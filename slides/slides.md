@@ -1137,7 +1137,7 @@ Avec des Promise, le type resterait Promise<Country> du début à la fin, sans t
 -->
 
 ---
-zoom: 0.6
+zoom: 0.67
 ---
 
 # ▶ ⑤ Composer : `pipe` et `flatMap`
@@ -1161,9 +1161,10 @@ zoom: 0.6
 </div>
 <div>
 
-```ts {monaco-run} {autorun: false}
+```ts {monaco-run} {autorun: false, height: 'auto'}
 import { Data, Effect, Schema } from "effect"
 
+// #region 📦 Données (avec un pays), erreurs et Schema (cliquer pour déplier)
 const api: Array<Record<string, unknown>> = [
   { id: 1, name: "Ada", createdAt: "1815-12-10", country: "GB" },
   { id: 2, name: "Grace", createdAt: "hier", country: "US" }, // 👈 données invalides
@@ -1171,10 +1172,10 @@ const api: Array<Record<string, unknown>> = [
 ]
 type Country = { code: string; name: string }
 const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US", name: "États-Unis" }]
-
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {} 
+class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {}
 const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
+// #endregion
 
 // 🆕 Tout le pipeline dans un seul pipe : chaque étape ajoute ses erreurs
 const getUserCountryName = (id: number) =>
@@ -1351,12 +1352,12 @@ Astuce mémo : « yield étoile, c'est await ».
 -->
 
 ---
-zoom: 0.62
+zoom: 0.72
 ---
 
 # ▶ ⑥ Comme async / await : `Effect.gen`
 
-<div class="grid grid-cols-[1fr_2.6fr] gap-6">
+<div class="grid grid-cols-[1.25fr_2.6fr] gap-6">
 <div>
 
 Le pipeline du ⑤, avec `pipe` :
@@ -1377,9 +1378,7 @@ Effect.succeed(api.find(…)).pipe(
 )
 ```
 
-- `Effect.gen` : du TypeScript **normal** (`if`, `const`…), et `yield*` ≈ `await`
 - Plus de `flatMap` ni de ternaires : **tout** se lit de haut en bas
-- `return yield* Effect.fail(…)` ≈ `throw`… mais **typé**
 - Plus d'annotation : la signature est **inférée**
 - `pipe` et `gen` se combinent : `gen` pour la logique, `pipe` pour `catchTags`
 
@@ -1393,9 +1392,10 @@ Effect.succeed(api.find(…)).pipe(
 </div>
 <div>
 
-```ts {monaco-run} {autorun: false}
+```ts {monaco-run} {autorun: false, height: 'auto'}
 import { Data, Effect, Schema } from "effect"
 
+// #region 📦 Données, pays, erreurs et Schema : comme au ⑤ (cliquer pour déplier)
 const api: Array<Record<string, unknown>> = [
   { id: 1, name: "Ada", createdAt: "1815-12-10", country: "GB" },
   { id: 2, name: "Grace", createdAt: "hier", country: "US" }, // 👈 données invalides
@@ -1403,10 +1403,10 @@ const api: Array<Record<string, unknown>> = [
 ]
 type Country = { code: string; name: string }
 const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US", name: "États-Unis" }]
-
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {}
 const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
+// #endregion
 
 // 🆕 Tout le pipeline dans un seul Effect.gen : un simple if, yield* ≈ await… et plus d'annotation
 const getUserCountryName = (id: number) =>
@@ -1449,7 +1449,7 @@ Lancer : la même sortie qu'au ⑤.
 -->
 
 ---
-zoom: 0.53
+zoom: 0.66
 ---
 
 # ▶ ⑦ Résister : `tryPromise` et `retry`
@@ -1474,9 +1474,10 @@ zoom: 0.53
 </div>
 <div>
 
-```ts {monaco-run} {autorun: false}
+```ts {monaco-run} {autorun: false, height: 'auto'}
 import { Data, Effect, Schedule, Schema } from "effect"
 
+// #region 📦 Données, pays, erreurs et Schema : comme au ⑥ (cliquer pour déplier)
 const api: Array<Record<string, unknown>> = [
   { id: 1, name: "Ada", createdAt: "1815-12-10", country: "GB" },
   { id: 2, name: "Grace", createdAt: "hier", country: "US" }, // 👈 données invalides
@@ -1484,6 +1485,10 @@ const api: Array<Record<string, unknown>> = [
 ]
 type Country = { code: string; name: string }
 const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US", name: "États-Unis" }]
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {}
+const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
+// #endregion
 
 // 🆕 Un semblant de fetch : asynchrone… et capricieux (les 2 premiers appels échouent)
 let calls = 0
@@ -1491,11 +1496,7 @@ const fetchUser = (id: number) => new Promise<unknown>((resolve, reject) => setT
   if (++calls > 2) return resolve(api.find((user) => user.id === id))
   reject(new Error("ECONNRESET"))
 }, 100))
-
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
-class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {}
 class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {} // 🆕
-const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
 
 const getUserCountryName = (id: number) =>
   Effect.gen(function* () {
@@ -1539,7 +1540,7 @@ Pourquoi retry fonctionne : un Effect est une description. Une Promise est déj�
 -->
 
 ---
-zoom: 0.55
+zoom: 0.67
 ---
 
 # ▶ ⑧ Découpler : un contrat et des `Layer`
@@ -1564,18 +1565,19 @@ zoom: 0.55
 </div>
 <div>
 
-```ts {monaco-run} {autorun: false}
+```ts {monaco-run} {autorun: false, height: 'auto'}
 import { Context, Data, Effect, Layer, Schema } from "effect"
 
+// #region 📦 Données, erreurs, Schema et fetchUser : comme au ⑦, sans les pays (cliquer pour déplier)
 const api: Array<Record<string, unknown>> = [
   { id: 1, name: "Ada", createdAt: "1815-12-10" },
   { id: 2, name: "Grace", createdAt: "hier" }, // 👈 données invalides
 ]
-
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {}
 const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString })
 const fetchUser = (id: number) => new Promise((resolve) => setTimeout(() => resolve(api.find((user) => user.id === id)), 100))
+// #endregion
 
 // 🆕 1. Le contrat (à la mode .NET)
 interface IUserRepository {
