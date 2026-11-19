@@ -152,7 +152,7 @@ Annonce : « Microsoft Frontier Company: AI engineering that amplifies and prote
 zoom: 0.9
 ---
 
-# Ils en parlent
+# Effect<A, E, R> : Ils en parlent
 
 Quelques voix de la communauté TypeScript, sur X
 
@@ -330,7 +330,6 @@ Sources :
 - Julius Marminge (@jullerino), 17 mars 2026 (474 likes) : « This Week in Effect 110 ».
 - Portraits : photos de profil X (via unavatar.io), stockées dans images/avatars. Comptes @RhysSullivan, @ThePrimeagen, @jullerino et @theo confirmés par leurs profils GitHub.
 -->
-
 
 ---
 class: aer-hero
@@ -704,6 +703,8 @@ const getUser = (id: number) =>
 
 const userEffect = getUser(1)
 
+console.log("— rien n'a encore été exécuté —")
+
 const user = Effect.runSync(userEffect) // ▶ on l'exécute
 console.log(user)
 ```
@@ -822,15 +823,14 @@ Les problèmes du `try / catch`, corrigés **par le type** (`Effect.fail` + `Dat
 ```ts {monaco-run} {autorun: false}
 import { Data, Effect } from "effect"
 type User = { id: number; name: string; createdAt: Date }
+// 🆕 Une erreur typée : une classe avec un _tag
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 
 // Ce que renvoie l'API : un tableau d'utilisateurs
 const api = [
   { id: 1, name: "Ada", createdAt: new Date("1815-12-10") },
   { id: 2, name: "Grace", createdAt: new Date("1906-12-09") },
 ]
-
-// 🆕 Une erreur typée : une classe avec un _tag
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 
 // 🆕 L'erreur est dans la signature
 const getUser = (id: number): Effect.Effect<User, UserNotFound> => {
@@ -845,7 +845,6 @@ const showUser = (id: number) =>
   Effect.catchTag(getUser(id), "UserNotFound", (e) => // 👈 survolez e
     Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
   )
-// 👆 survolez showUser : E = never, plus rien à traiter
 
 for (const id of [1, 3]) console.log(Effect.runSync(showUser(id)))
 ```
@@ -1144,14 +1143,14 @@ zoom: 0.6
 <div>
 
 - `pipe()`, c'est comme le `|` en bash, vous avez tous déjà utilisé cette syntaxe :<br>`curl -fsSL https://bun.sh/install | bash`
-- Chaque brique **annonce** ses erreurs : `getUser` → `UserNotFound | SchemaError`, `getCountry` → `CountryNotFound`
-- `flatMap` : enchaîne un autre Effect… et **ajoute** ses erreurs au type
-- Les erreurs sont **groupées** dans `E` : survolez `getUserCountry`
+- Une seule fonction : `flatMap` pour enchaîner un Effect (qui **réussit** ou **échoue**), `map` pour transformer
+- Chaque étape **ajoute** ses erreurs au type : `UserNotFound`, `SchemaError`, `CountryNotFound`
+- Les erreurs sont **groupées** dans `E` : survolez `getUserCountryName`
 - `catchTags` : une branche **par erreur**, et `E` redevient `never`
 
 <div class="tuto-sig">
   <small>getUserCountryName renvoie</small>
-  <b class="a">A</b><span class="is-new">String</span>
+  <b class="a">A</b><span class="is-new">string</span>
   <b class="e">E</b><span>UserNotFound | SchemaError | <span class="is-new">CountryNotFound</span></span>
   <b class="r">R</b><span>never</span>
 </div>
@@ -1173,20 +1172,16 @@ const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US",
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
 class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {} 
 const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
-type User = typeof UserSchema.Type
 
-const getUser = (id: number): Effect.Effect<User, UserNotFound | Schema.SchemaError> => {
-  const json = api.find((user) => user.id === id)
-  return json === undefined ? Effect.fail(new UserNotFound({ id })) : Schema.decodeUnknownEffect(UserSchema)(json)
-}
-const getCountry = (user: User): Effect.Effect<Country, CountryNotFound> => { 
-  const country = countries.find((country) => country.code === user.country)
-  return country === undefined ? Effect.fail(new CountryNotFound({ code: user.country })) : Effect.succeed(country)
-}
-
+// 🆕 Tout le pipeline dans un seul pipe : chaque étape ajoute ses erreurs
 const getUserCountryName = (id: number) =>
-  getUser(id).pipe(
-    Effect.flatMap((user) => getCountry(user)), // + CountryNotFound
+  Effect.succeed(api.find((user) => user.id === id)).pipe(
+    Effect.flatMap((json) => json === undefined ? Effect.fail(new UserNotFound({ id })) : Effect.succeed(json)), // + UserNotFound
+    Effect.flatMap((json) => Schema.decodeUnknownEffect(UserSchema)(json)), // + SchemaError
+    Effect.flatMap((user) => {
+      const country = countries.find((country) => country.code === user.country)
+      return country === undefined ? Effect.fail(new CountryNotFound({ code: user.country })) : Effect.succeed(country)
+    }), // + CountryNotFound
     Effect.map((country) => `✅ ${country.name}`),
   )
 
@@ -1206,11 +1201,12 @@ for (const id of [1, 2, 3, 4]) console.log(Effect.runSync(showCountry(id)))
 </div>
 
 <!--
-Le pipeline du slide précédent, en vrai : getUser → Schema → getCountry → catchTags.
+Le pipeline du slide précédent, en vrai, dans une seule fonction : chercher → tester → valider (Schema) → chercher le pays → tester → transformer, puis catchTags.
 L'API a maintenant un champ country, et un troisième utilisateur, Linus, dont le pays n'est pas dans la liste.
-Chaque brique annonce ses erreurs dans sa signature : getUser peut échouer avec UserNotFound, getCountry avec CountryNotFound.
-pipe enchaîne les étapes de haut en bas, comme le | du terminal. flatMap enchaîne un autre Effect : son erreur s'ajoute à celles d'avant.
-Survoler getUserCountry : Effect<Country, UserNotFound | SchemaError | CountryNotFound, never>. Personne n'a écrit cette union : elle est déduite étape par étape.
+pipe enchaîne les étapes de haut en bas, comme le | du terminal. flatMap enchaîne un autre Effect : ici, un ternaire qui renvoie Effect.fail ou Effect.succeed ; map transforme la valeur.
+Chaque étape ajoute son erreur au type, voir les commentaires « + UserNotFound », « + SchemaError », « + CountryNotFound ».
+Pour le pays, le flatMap a besoin d'un bloc { … } avec une variable intermédiaire : chaque étape est une fonction à part, et on jongle avec les ternaires. Le slide suivant écrit la même chose avec Effect.gen.
+Survoler getUserCountryName : Effect<string, UserNotFound | SchemaError | CountryNotFound, never>. Personne n'a écrit cette union : elle est déduite étape par étape.
 catchTags : une branche par erreur. Survoler showCountry : Effect<string, never, never>.
 Lancer : 1 → Royaume-Uni, 2 → SchemaError (["createdAt"]), 3 → pays FI inconnu, 4 → utilisateur introuvable.
 Supprimer la branche CountryNotFound : CountryNotFound réapparaît dans le type de showCountry. Ajouter { code: "FI", name: "Finlande" } : Linus passe.
@@ -1218,36 +1214,42 @@ Avec des Promise : Promise<Country>, et un catch (e: unknown) pour trier trois e
 -->
 
 ---
-zoom: 0.72
+zoom: 0.62
 ---
 
 # ▶ ⑥ Comme async / await : `Effect.gen`
 
-<div class="grid grid-cols-[1fr_2.2fr] gap-6">
+<div class="grid grid-cols-[1fr_2.6fr] gap-6">
 <div>
 
-Avec `pipe`, il faut **un opérateur par cas** :
+Le pipeline du ⑤, avec `pipe` :
 
 ```ts
-const getUser = (id: number) =>
-  Effect.succeed(api[id]).pipe(
-    Effect.filterOrFail(
-      (json) => json !== undefined,
-      () => new UserNotFound({ id }),
-    ),
-    Effect.flatMap((json) =>
-      Schema.decodeUnknownEffect(User)(json)),
-  )
+Effect.succeed(api.find(…)).pipe(
+  Effect.flatMap((json) => json === undefined
+    ? Effect.fail(new UserNotFound(…))
+    : Effect.succeed(json)),
+  Effect.flatMap((json) => Schema.decodeUnknownEffect(…)),
+  Effect.flatMap((user) => {
+    const country = countries.find(…)
+    return country === undefined
+      ? Effect.fail(new CountryNotFound(…))
+      : Effect.succeed(country)
+  }),
+  Effect.map((country) => `✅ ${country.name}`),
+)
 ```
 
-- L'appel à l'API est un **Effect** (bientôt une vraie requête) : il faut **attendre** sa réponse avant de la tester
 - `Effect.gen` : du TypeScript **normal** (`if`, `const`…), et `yield*` ≈ `await`
+- Plus de `flatMap` ni de ternaires : **tout** se lit de haut en bas
+- `return yield* Effect.fail(…)` ≈ `throw`… mais **typé**
 - Plus d'annotation : la signature est **inférée**
+- `pipe` et `gen` se combinent : `gen` pour la logique, `pipe` pour `catchTags`
 
 <div class="tuto-sig">
-  <small>getUser renvoie (inféré)</small>
-  <b class="a">A</b><span>User</span>
-  <b class="e">E</b><span>UserNotFound | SchemaError</span>
+  <small>getUserCountryName renvoie (inféré)</small>
+  <b class="a">A</b><span>string</span>
+  <b class="e">E</b><span>UserNotFound | SchemaError | CountryNotFound</span>
   <b class="r">R</b><span>never</span>
 </div>
 
@@ -1257,67 +1259,78 @@ const getUser = (id: number) =>
 ```ts {monaco-run} {autorun: false}
 import { Data, Effect, Schema } from "effect"
 
-const api: Record<number, unknown> = {
-  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
-  2: { id: "2", name: "Grace", createdAt: "hier" }, // 👈 données invalides
-}
+const api: Array<Record<string, unknown>> = [
+  { id: 1, name: "Ada", createdAt: "1815-12-10", country: "GB" },
+  { id: 2, name: "Grace", createdAt: "hier", country: "US" }, // 👈 données invalides
+  { id: 3, name: "Linus", createdAt: "1969-12-28", country: "FI" }, // 👈 pays inconnu
+]
+type Country = { code: string; name: string }
+const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US", name: "États-Unis" }]
 
-const User = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString })
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {}
+const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
 
-// 🆕 Effect.gen se lit comme async / await : yield* ≈ await
-const getUser = (id: number) =>
+// 🆕 Tout le pipeline dans un seul Effect.gen : un simple if, yield* ≈ await… et plus d'annotation
+const getUserCountryName = (id: number) =>
   Effect.gen(function* () {
-    const json = yield* Effect.succeed(api[id]) // l'appel à l'API : l'Effect du ①
-    if (json === undefined) return yield* Effect.fail(new UserNotFound({ id }))
-    return yield* Schema.decodeUnknownEffect(User)(json)
-  })
-// 👆 survolez getUser : plus besoin d'annoter
+    
+    const json = api.find((user) => user.id === id)
+    if (json === undefined) return yield* new UserNotFound({ id })
 
-const showUser = (id: number) =>
-  getUser(id).pipe(
-    Effect.map((user) => `✅ ${user.name}, née en ${user.createdAt.getFullYear()}`),
-    Effect.catchTags({
+    const user = yield* Schema.decodeUnknownEffect(UserSchema)(json)
+    
+    const country = countries.find((country) => country.code === user.country)
+    if (country === undefined) return yield* new CountryNotFound({ code: user.country })
+    
+    return `✅ ${country.name}`
+  })
+
+const showCountry = (id: number) =>
+  getUserCountryName(id).pipe(
+    Effect.catchTags({ // une branche par erreur
       UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
       SchemaError: (e) => Effect.succeed(`🧨 ${e.message}`),
+      CountryNotFound: (e) => Effect.succeed(`🌍 pays ${e.code} inconnu`),
     }),
   )
 
-for (const id of [1, 2, 3]) console.log(Effect.runSync(showUser(id)))
+for (const id of [1, 2, 3, 4]) console.log(Effect.runSync(showCountry(id)))
 ```
 
 </div>
 </div>
 
 <!--
-Jusqu'ici, la réponse de l'API était sous la main (api[id]) : un ternaire suffisait. Mais l'appel à l'API est un Effect (c'est le getUser du ①), et au ⑦ ce sera une vraie requête réseau : il faut d'abord attendre sa réponse, puis la tester, puis la valider.
-À gauche avec pipe : il faut connaître filterOrFail et flatMap. À droite avec gen : un simple if, comme avec async / await.
-Les deux ont exactement le même type : Effect<User, UserNotFound | SchemaError, never> (vérifié avec tsc).
-Le réflexe « un ternaire dans flatMap » ne compile même pas : TypeScript n'unifie pas les deux branches. Avec gen, la question ne se pose pas.
-yield* ≈ await : on récupère la valeur d'un Effect. return yield* Effect.fail(…) ≈ throw, mais typé.
-Plus d'annotation de retour : gen infère la signature (survoler getUser). showUser ne change pas d'une ligne.
-pipe et gen se combinent : gen pour la logique, pipe pour ce qui l'entoure (catchTags ici, retry et timeout au ⑦).
+Exactement le programme du ⑤, migré vers Effect.gen. Mêmes données, mêmes erreurs, même résultat.
+À gauche, le pipeline en pipe : des flatMap et des ternaires (Effect.fail ou Effect.succeed). À droite, la même fonction : chercher, tester, valider, chercher le pays, tester, renvoyer. Elle se lit de haut en bas, comme avec async / await.
+yield* ≈ await : on récupère la valeur d'un Effect (ici, le User validé par Schema). Si l'Effect échoue, la suite ne s'exécute pas, comme un throw.
+Le ternaire devient un simple if : return yield* Effect.fail(…) ≈ throw, mais l'erreur est dans le type.
+Plus d'annotation de retour : survoler getUserCountryName. La signature est inférée, et c'est exactement le type du ⑤ : Effect<string, UserNotFound | SchemaError | CountryNotFound, never> (vérifié avec tsc).
+showCountry ne change pas d'une ligne : pipe et gen se combinent. gen pour la logique, pipe pour ce qui l'entoure (catchTags ici, retry et timeout au ⑦).
+Lancer : la même sortie qu'au ⑤.
 -->
 
 ---
-zoom: 0.68
+zoom: 0.53
 ---
 
-# ▶ ⑦ Résister : `tryPromise`, `timeout` et `retry`
+# ▶ ⑦ Résister : `tryPromise` et `retry`
 
-<div class="grid grid-cols-[1fr_2fr] gap-6">
+<div class="grid grid-cols-[1fr_2.6fr] gap-6">
 <div>
 
-- L'API est maintenant **distante**… et capricieuse
-- `tryPromise` : une `Promise` devient un Effect, avec une erreur **typée**
-- `timeout` + `retry` : deux lignes dans le `pipe`, **aucun helper**
+- L'API devient **asynchrone**… et **capricieuse** : un semblant de `fetch`, qui renvoie une `Promise`
+- `tryPromise` : la `Promise` devient un Effect, et son erreur devient **typée** : `NetworkError`
+- `retry` : **une ligne** dans le `pipe`, avec un backoff exponentiel, **aucun helper**
 - Un Effect est une **description** : `retry` peut donc le **relancer**
+- Le reste du `gen` ne change pas ; `catchTags` gagne une branche
 - Asynchrone : `runSync` → `runPromise`
 
 <div class="tuto-sig">
-  <small>getUser renvoie</small>
-  <b class="a">A</b><span>User</span>
-  <b class="e">E</b><span><span class="is-new">NetworkError | TimeoutError</span> | UserNotFound | SchemaError</span>
+  <small>getUserCountryName renvoie</small>
+  <b class="a">A</b><span>string</span>
+  <b class="e">E</b><span><span class="is-new">NetworkError</span> | UserNotFound | SchemaError | CountryNotFound</span>
   <b class="r">R</b><span>never</span>
 </div>
 
@@ -1327,131 +1340,554 @@ zoom: 0.68
 ```ts {monaco-run} {autorun: false}
 import { Data, Effect, Schedule, Schema } from "effect"
 
-const api: Record<number, unknown> = {
-  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
-  2: { id: "2", name: "Grace", createdAt: "hier" }, // 👈 données invalides
-}
+const api: Array<Record<string, unknown>> = [
+  { id: 1, name: "Ada", createdAt: "1815-12-10", country: "GB" },
+  { id: 2, name: "Grace", createdAt: "hier", country: "US" }, // 👈 données invalides
+  { id: 3, name: "Linus", createdAt: "1969-12-28", country: "FI" }, // 👈 pays inconnu
+]
+type Country = { code: string; name: string }
+const countries: Country[] = [{ code: "GB", name: "Royaume-Uni" }, { code: "US", name: "États-Unis" }]
 
-// 🆕 L'API est maintenant distante… et capricieuse : les 2 premiers appels échouent
+// 🆕 Un semblant de fetch : asynchrone… et capricieux (les 2 premiers appels échouent)
 let calls = 0
-const fetchUser = (id: number) => new Promise<unknown>((resolve, reject) => {
-  console.log(`🌐 GET /users/${id} (tentative ${++calls})`)
-  setTimeout(() => (calls < 3 ? reject(new Error("ECONNRESET")) : resolve(api[id])), 100)
-})
+const fetchUser = (id: number) => new Promise<unknown>((resolve, reject) => setTimeout(() => {
+  if (++calls > 2) return resolve(api.find((user) => user.id === id))
+  reject(new Error("ECONNRESET"))
+}, 100))
 
-const User = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString })
 class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class CountryNotFound extends Data.TaggedError("CountryNotFound")<{ code: string }> {}
 class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {} // 🆕
+const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString, country: Schema.String })
 
-const getUser = (id: number) =>
+const getUserCountryName = (id: number) =>
   Effect.gen(function* () {
-    const json = yield* Effect.tryPromise({ // 🆕 Promise → Effect
-      try: () => fetchUser(id),
-      catch: (cause) => new NetworkError({ cause }),
-    }).pipe(
-      Effect.timeout("1 second"), // 🆕
-      Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }), // 🆕
+    // 🆕 la Promise devient un Effect, son erreur devient typée… et on réessaie
+    const json = yield* Effect.tryPromise({ try: () => fetchUser(id), catch: (cause) => new NetworkError({ cause }) }).pipe(
+      Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }),
     )
-    if (json === undefined) return yield* Effect.fail(new UserNotFound({ id }))
-    return yield* Schema.decodeUnknownEffect(User)(json)
+    if (json === undefined) return yield* new UserNotFound({ id })
+    const user = yield* Schema.decodeUnknownEffect(UserSchema)(json)
+    const country = countries.find((country) => country.code === user.country)
+    if (country === undefined) return yield* new CountryNotFound({ code: user.country })
+    return `✅ ${country.name}`
   })
 
-const user = await Effect.runPromise(getUser(1)) // 🆕 asynchrone : runSync → runPromise
-console.log("✅", user.name)
+const showCountry = (id: number) : Effect.Effect<string> =>
+  getUserCountryName(id).pipe(
+    Effect.catchTags({ // une branche par erreur
+      NetworkError: () => Effect.succeed(`📡 API injoignable`), // 🆕
+      UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
+      SchemaError: (e) => Effect.succeed(`🧨 ${e.message}`),
+      CountryNotFound: (e) => Effect.succeed(`🌍 pays ${e.code} inconnu`),
+    }),
+  )
+
+for (const id of [1, 2, 3, 4]) console.log(await Effect.runPromise(showCountry(id))) // 🆕 runSync → runPromise
 ```
 
 </div>
 </div>
 
 <!--
-fetchUser simule une API distante : les 2 premiers appels échouent (ECONNRESET), le 3e réussit.
-Dans getUser, une seule ligne change : l'appel à l'API. Effect.succeed(api[id]) devient Effect.tryPromise(…). Le if et le Schema ne bougent pas.
-tryPromise : catch transforme l'erreur de la Promise (unknown) en NetworkError, typée.
-timeout s'applique à chaque tentative ; retry relance avec un backoff exponentiel (100 ms, puis 200 ms…), 3 fois au maximum.
-Lancer : 3 tentatives dans les logs, puis ✅ Ada.
-Changer calls < 3 en calls < 10 : après 4 tentatives (1 + 3 retries), NetworkError remonte.
-Passer le setTimeout à 2000 : chaque tentative dépasse la seconde, TimeoutError remonte après les retries.
+Le programme du ⑥, avec une API plus réaliste : les données sont sur un serveur, et fetchUser simule un fetch (une Promise, 100 ms de latence). Les 2 premiers appels échouent (ECONNRESET).
+Dans getUserCountryName, une seule ligne change : api.find(…) devient Effect.tryPromise(…). Le if, le Schema et le pays ne bougent pas.
+tryPromise : catch transforme l'erreur de la Promise (unknown) en NetworkError, typée. Survoler getUserCountryName : NetworkError a rejoint E.
+retry relance avec un backoff exponentiel (100 ms, puis 200 ms…), 3 fois au maximum. Une ligne, pas de helper, pas de boucle, pas de sleep.
+catchTags gagne une branche NetworkError : sinon, le compilateur la laisse dans E (la supprimer pour le montrer).
+Asynchrone : runSync devient runPromise.
+Lancer : 2 échecs dans les logs, puis ✅ Royaume-Uni, et les 3 autres cas comme avant.
+Changer `++calls > 2` en `++calls > 10` : après 4 tentatives (1 + 3 retries), « API injoignable ».
 Pourquoi retry fonctionne : un Effect est une description. Une Promise est déjà lancée, on ne peut pas la rejouer ; un Effect, si.
 -->
 
 ---
-zoom: 0.68
+zoom: 0.55
 ---
 
-# ▶ ⑧ Découpler : `Context.Service` et `Layer`
+# ▶ ⑧ Découpler : un contrat et des `Layer`
 
-<div class="grid grid-cols-[1fr_2fr] gap-6">
+<div class="grid grid-cols-[1fr_2.4fr] gap-6">
 <div>
 
-- `UserApi` : le **contrat**, ce dont `getUser` a besoin
-- La dépendance est **dans le type** : `R = UserApi`
-- `Layer` : une implémentation… ici, le `Effect.succeed` du ① !
+- `IUserRepository` : le **contrat**, une simple interface (à la mode .NET)
+- `Context.Service` : sa **clé** dans le `Context`, pensez `Map<ServiceKey, Service>`
+- Le métier ne connaît **que le contrat** : `yield* UserRepository`
+- La dépendance est **dans le type** : `R = IUserRepository`
+- Un `Layer` par implémentation (API, mémoire, PostgreSQL…) : `Effect.provide` choisit
 - Oublier `Effect.provide` = **erreur de compilation**
-- Bonus : `Effect.forEach` traite les 3 ids, **2 à la fois**
 
 <div class="tuto-sig">
   <small>getUser renvoie</small>
   <b class="a">A</b><span>User</span>
-  <b class="e">E</b><span>NetworkError | TimeoutError | UserNotFound | SchemaError</span>
-  <b class="r">R</b><span class="is-new">UserApi</span>
+  <b class="e">E</b><span>NetworkError | UserNotFound | SchemaError</span>
+  <b class="r">R</b><span class="is-new">IUserRepository</span>
 </div>
 
 </div>
 <div>
 
 ```ts {monaco-run} {autorun: false}
-import { Context, Data, Effect, Layer, Schedule, Schema } from "effect"
+import { Context, Data, Effect, Layer, Schema } from "effect"
 
-const User = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString }) // ④
-class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {} // ②
-class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {} // ⑦
+const api: Array<Record<string, unknown>> = [
+  { id: 1, name: "Ada", createdAt: "1815-12-10" },
+  { id: 2, name: "Grace", createdAt: "hier" }, // 👈 données invalides
+]
 
-class UserApi extends Context.Service<UserApi, { // 🆕 le contrat
-  readonly fetch: (id: number) => Effect.Effect<unknown, NetworkError>
-}>()("UserApi") {}
+class UserNotFound extends Data.TaggedError("UserNotFound")<{ id: number }> {}
+class NetworkError extends Data.TaggedError("NetworkError")<{ cause: unknown }> {}
+const UserSchema = Schema.Struct({ id: Schema.Number, name: Schema.String, createdAt: Schema.DateFromString })
+const fetchUser = (id: number) => new Promise((resolve) => setTimeout(() => resolve(api.find((user) => user.id === id)), 100))
 
+// 🆕 1. Le contrat (à la mode .NET)
+interface IUserRepository {
+  findById: (id: number) => Effect.Effect<unknown, NetworkError>
+}
+// 🆕 2. Sa clé dans le Context : pensez Map<ServiceKey, Service>
+const UserRepository = Context.Service<IUserRepository>("app/UserRepository")
+
+// 3. Le métier ne connaît que le contrat
 const getUser = (id: number) =>
-  Effect.gen(function* () { // ⑥
-    const userApi = yield* UserApi // 🆕
-    const json = yield* userApi.fetch(id).pipe(
-      Effect.timeout("1 second"), // ⑦
-      Effect.retry({ schedule: Schedule.exponential("100 millis"), times: 3 }),
-    )
-    if (json === undefined) return yield* Effect.fail(new UserNotFound({ id }))
-    return yield* Schema.decodeUnknownEffect(User)(json) // ④
+  Effect.gen(function* () {
+    const repository = yield* UserRepository // 🆕
+    const json = yield* repository.findById(id)
+    if (json === undefined) return yield* new UserNotFound({ id })
+    return yield* Schema.decodeUnknownEffect(UserSchema)(json)
   })
 
 const showUser = (id: number) =>
-  getUser(id).pipe( // ⑤
-    Effect.map((user) => `✅ ${user.name} (${user.createdAt.getFullYear()})`),
-    Effect.catchTags({ // ③
-      UserNotFound: (e) => Effect.succeed(`🔍 ${e.id} introuvable`),
-      SchemaError: () => Effect.succeed(`🧨 ${id} : données invalides`),
+  getUser(id).pipe(
+    Effect.map((user) => `✅ ${user.name}`),
+    Effect.catchTags({
+      NetworkError: () => Effect.succeed(`📡 API injoignable`),
+      UserNotFound: (e) => Effect.succeed(`🔍 utilisateur ${e.id} introuvable`),
+      SchemaError: (e) => Effect.succeed(`🧨 ${e.message}`),
     }),
   )
 
-// 🆕 une implémentation = un Layer… avec le Effect.succeed du ①
-const api: Record<number, unknown> = {
-  1: { id: 1, name: "Ada", createdAt: "1815-12-10" },
-  2: { id: "2", name: "Grace", createdAt: "hier" },
-}
-const InMemoryUserApi = Layer.succeed(UserApi, { fetch: (id) => Effect.succeed(api[id]) })
+// 🆕 4. Une implémentation = un Layer
+const ApiUserRepository = Layer.succeed(UserRepository, { // un semblant de fetch
+  findById: (id) => Effect.tryPromise({ try: () => fetchUser(id), catch: (cause) => new NetworkError({ cause }) }),
+})
 
-const program = Effect.forEach([1, 2, 3], showUser, { concurrency: 2 }) // bonus
-console.log(await Effect.runPromise(program.pipe(Effect.provide(InMemoryUserApi))))
+for (const id of [1, 2, 3]) console.log(await Effect.runPromise(showUser(id).pipe(Effect.provide(ApiUserRepository))))
 ```
 
 </div>
 </div>
 
 <!--
-L'exemple complet : chaque concept vu dans les étapes ① à ⑦ est là, les numéros en commentaire rappellent où il est apparu.
-Context.Service déclare le contrat (la forme du service) et sa clé ("UserApi"). getUser le récupère avec yield* UserApi, sans savoir qui l'implémente.
-Survoler getUser : R = UserApi. Pour l'exécuter, il faut fournir une implémentation : Effect.provide(InMemoryUserApi).
-Supprimer Effect.provide : erreur de compilation « Type 'UserApi' is not assignable to type 'never' ». Pas de « service not found » en prod.
-La boucle est bouclée : l'implémentation en mémoire, c'est le Effect.succeed(api[id]) du ①. En prod, un autre Layer appellerait fetch avec tryPromise ; en test, on garde celui-ci.
-Effect.forEach avec { concurrency: 2 } : les 3 ids sont traités 2 à la fois. Les erreurs métier sont traitées ; il ne reste que NetworkError | TimeoutError dans le type de program.
-Dans un vrai projet, on écrit Effect.fn("getUser")(function* (id) { … }) plutôt que (id) => Effect.gen(…) : même code, avec une trace (span) par appel.
+On simplifie : plus de pays, juste getUser. Le sujet ici, ce sont les dépendances.
+1. IUserRepository : le contrat, une simple interface, comme en .NET. findById renvoie le JSON, ou échoue avec NetworkError.
+2. Context.Service<IUserRepository>("app/UserRepository") : la clé du service. Le Context, c'est une Map<ServiceKey, Service> typée.
+3. Le métier récupère le service avec yield* UserRepository, et appelle findById. Il ne sait pas d'où viennent les utilisateurs.
+Survoler getUser : R = IUserRepository. La dépendance est dans le type, comme les erreurs.
+4. Un Layer par implémentation : ApiUserRepository (un semblant de fetch, avec tryPromise), InMemoryUserRepository (pour les tests). Effect.provide choisit laquelle brancher.
+Remplacer ApiUserRepository par InMemoryUserRepository : même résultat, sans réseau. Le métier n'a pas bougé d'une ligne.
+Supprimer Effect.provide : erreur de compilation « Type 'IUserRepository' is not assignable to type 'never' ». Pas de « service not found » en prod.
+-->
+
+---
+zoom: 0.75
+---
+
+# Classique vs Effect
+
+<div class="vs-table">
+
+| | Étape | ❌ TypeScript classique | ✅ Effect |
+|---|---|---|---|
+| ⏳ | async / await | `async` / `await` | `Effect.gen` / `yield*` |
+| 🔀 | Parallélisme | `Promise.all` | `Effect.all` / `Effect.forEach` |
+| 🚦 | Concurrence limitée | helper maison | `{ concurrency: 5 }` |
+| 🛑 | Interruption | `AbortSignal` dans chaque signature | automatique (fibers) |
+| 🔁 | Retry | `retry` + `sleep` annulable | `Effect.retry` + `Schedule` |
+| 🧯 | Erreurs | `unknown` + `instanceof` | union typée dans `E` |
+| ⏱️ | Timeout | `AbortSignal.any` + `AbortSignal.timeout` | `Effect.timeout` |
+| 🔍 | Traces | à brancher à la main | `Effect.withSpan` |
+| 🛡️ | Validation | `as User` (ou zod à brancher) | `Schema` + `SchemaError` typée |
+| 🧩 | Dépendances | singletons, conteneur DI ou mocks de modules | `Layer`, vérifié à la compilation (`R`) |
+
+</div>
+
+<style>
+.vs-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -12px rgba(0, 0, 0, 0.35);
+  font-size: 1.05rem;
+}
+.vs-table th {
+  padding: 0.7rem 1rem;
+  text-align: left;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: white;
+  background: #475569;
+}
+.vs-table th:nth-child(3) { background: #b91c1c; }
+.vs-table th:nth-child(4) { background: #15803d; }
+.vs-table td {
+  padding: 0.55rem 1rem;
+  border-top: 1px solid rgba(128, 128, 128, 0.18);
+  vertical-align: middle;
+}
+.vs-table td:first-child { width: 2.5rem; text-align: center; font-size: 1.25rem; }
+.vs-table td:nth-child(2) { font-weight: 650; white-space: nowrap; }
+.vs-table td:nth-child(3) { background: rgba(239, 68, 68, 0.07); opacity: 0.85; }
+.vs-table td:nth-child(4) { background: rgba(34, 197, 94, 0.1); font-weight: 600; }
+.vs-table tr:hover td { filter: brightness(1.08); }
+</style>
+
+<!--
+Le récapitulatif de tout le fil rouge : chaque ligne = un helper ou une convention maison d'un côté, une option ou un type de l'autre.
+-->
+
+
+---
+layout: section
+---
+
+# Et maintenant ?
+### L'écosystème, le frontend, et quand l'adopter
+
+---
+
+# L'écosystème
+
+Depuis Effect 4 : **un seul paquet `effect`**, sans dépendance, et toutes les briques partagent le même numéro de version.
+
+<div class="eco">
+  <div class="eco-card eco-core"><div class="i-carbon-cube" /><div><code>effect</code><p>Le cœur : Effect, Layer, Schedule, Stream, Schema, Config…</p></div></div>
+  <div class="eco-card"><div class="i-carbon-application" /><div><code>effect/http</code> <code>effect/sql</code> <code>effect/rpc</code> <code>effect/cli</code>…<p>Intégrés au package principal</p></div></div>
+  <div class="eco-card"><div class="i-carbon-bare-metal-server" /><div><code>@effect/platform-node</code> / <code>-bun</code> / <code>-deno</code> / <code>-browser</code><p>Les implémentations par plateforme</p></div></div>
+  <div class="eco-card"><div class="i-carbon-data-base" /><div><code>@effect/sql-pg</code>, <code>@effect/sql-sqlite-node</code>…<p>Les drivers de base de données</p></div></div>
+  <div class="eco-card"><div class="i-carbon-chart-network" /><div><code>@effect/opentelemetry</code><p>Exporter les traces de <code>withSpan</code></p></div></div>
+  <div class="eco-card"><div class="i-carbon-test-tool" /><div><code>@effect/vitest</code><p>Les tests</p></div></div>
+</div>
+
+<style>
+.eco {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem 1.2rem;
+  margin-top: 1.2rem;
+}
+.eco-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+  font-size: 0.85rem;
+}
+.eco-card > [class^="i-carbon"] {
+  flex: none;
+  margin-top: 0.15rem;
+  font-size: 1.5rem;
+  color: var(--tech-cyan);
+}
+.eco-card code {
+  white-space: nowrap;
+}
+.eco-card p {
+  margin: 0.3rem 0 0;
+  color: var(--tech-muted);
+}
+.eco-core {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+}
+</style>
+
+---
+zoom: 0.8
+---
+
+# Et côté frontend ? **Foldkit**
+
+<div class="grid grid-cols-[1fr_1.25fr] gap-8">
+<div>
+
+Un **framework frontend** TypeScript **construit sur Effect**, architecturé comme Elm.
+
+- **Un seul `Model`**, décrit par un `Schema` : tout l'état de l'app
+- **Des `Message`** typés, une fonction **`update`** pure : chaque changement est visible
+- **Les effets de bord sont des valeurs** (`Command`) : le runtime Effect gère concurrence, interruption, ressources
+- Routing typé, SSR, composants UI accessibles, **DevTools** (et MCP pour les agents IA)
+- Tests sans DOM ni mocks : *Story* et *Scene*
+
+```bash
+npx create-foldkit-app@latest
+```
+
+<div class="text-sm opacity-70 mt-2">
+  <a href="https://foldkit.dev">foldkit.dev</a> · projet communautaire, encore en 0.x
+</div>
+
+</div>
+<div>
+
+```ts
+import { Schema } from "effect"
+import { Runtime, Update } from "foldkit"
+import { Document, HtmlBuilder } from "foldkit/html"
+import { defineMessageUnion } from "foldkit/message"
+import { modifyFields } from "foldkit/struct"
+
+// MODEL : l'état, décrit par un Schema
+const Model = Schema.Struct({ count: Schema.Number })
+type Model = typeof Model.Type
+
+// MESSAGES : tout ce qui peut arriver
+const Message = defineMessageUnion({ ClickedIncrement: {}, ClickedDecrement: {} })
+type Message = typeof Message.Type
+
+// UPDATE : (model, message) → nouveau model
+const update = (model: Model, message: Message) =>
+  Message.match<Update.Return<Model, Message>>(message, {
+    ClickedIncrement: () => ({ model: modifyFields(model, { count: (n) => n + 1 }) }),
+    ClickedDecrement: () => ({ model: modifyFields(model, { count: (n) => n - 1 }) }),
+  })
+
+// VIEW : model → HTML
+const view = (model: Model, h: HtmlBuilder<Message>): Document => ({
+  title: `Counter: ${model.count}`,
+  body: h.div([], [
+    h.button([h.OnClick(Message.ClickedDecrement())], ["-"]),
+    h.p([], [model.count.toString()]),
+    h.button([h.OnClick(Message.ClickedIncrement())], ["+"]),
+  ]),
+})
+```
+
+</div>
+</div>
+
+<!--
+Foldkit (foldkit.dev, github.com/foldkit/foldkit) : « React, Vue, Svelte et Solid règlent le rendu et vous laissent l'architecture ; Foldkit vous donne l'architecture. »
+Toute application Foldkit est un Effect ; le Model entier est un Schema ; les Commands utilisent les services, l'interruption, les ressources et la concurrence d'Effect.
+Si le backend est déjà en Effect, on retrouve les mêmes outils et les mêmes patterns dans le navigateur.
+Exemple : le Counter officiel, légèrement raccourci (sans Reset, init et entry.ts).
+Honnêteté : pré-1.0, des breaking changes restent possibles. Dépend de effect ~4.1.
+Alternative officielle si on veut garder React / Vue / Solid : Effect Atom (@effect/atom-react, -vue, -solid).
+-->
+---
+zoom: 0.85
+---
+
+# Effect 🤝 les agents IA
+
+Un code Effect est plus facile à écrire et à vérifier… pour un agent aussi
+
+<div class="grid grid-cols-[1.1fr_1fr] gap-6 mt-4">
+<div class="ai-why">
+  <div class="ai-card"><span>🧭</span><div><b>Une structure prévisible</b><p><code>Effect.gen</code>, <code>Effect.fn</code>, services, layers : un seul style, rien à inventer</p></div></div>
+  <div class="ai-card"><span>🔁</span><div><b>Le compilateur corrige l'agent</b><p>Une erreur non traitée, un service non fourni : visible dans le type (<code>E</code>, <code>R</code>), avant d'exécuter</p></div></div>
+  <div class="ai-card"><span>🧰</span><div><b>Tout est déjà là</b><p>Retry, timeout, concurrence, validation, config : pas de librairie choisie au hasard</p></div></div>
+  <div class="ai-card"><span>📚</span><div><b>La doc est dans le paquet</b><p><code>node_modules/effect/AGENTS.md</code>, <code>ai-docs/</code> et les sources, alignés sur la version installée</p></div></div>
+</div>
+<div class="ai-skill">
+  <div class="ai-skill__title"><b>Le skill officiel</b><a href="https://www.skills.sh/effect-ts/skills/effect-ts">skills.sh</a></div>
+  <div class="tech-prompt">npx skills add Effect-TS/skills</div>
+  <ul>
+    <li><code>effect-ts</code> : avant d'écrire du code Effect, l'agent lit <code>node_modules/effect/AGENTS.md</code>, puis les sources</li>
+    <li><code>effect-v3-to-v4</code> : migrer un projet d'Effect 3 à Effect 4</li>
+    <li>Claude Code, Cursor, Codex, GitHub Copilot… · <b>8,5 k</b> installations</li>
+  </ul>
+  <div class="ai-quote">« Effect feels insanely good to use with agents […] An outrageous advantage for any non-frontend TS code »<small>— Matt Pocock, oct. 2026</small></div>
+  <div class="ai-repo">📁 Dans ce dépôt : un skill Effect (<code>.github/skills/effect</code>), et <code>backend/AGENTS.md</code> qui y renvoie</div>
+</div>
+</div>
+
+<style>
+.ai-why {
+  display: grid;
+  gap: 0.7rem;
+}
+.ai-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--tech-border);
+  border-radius: 12px;
+  background: var(--tech-code-bg);
+}
+.ai-card > span {
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.ai-card b {
+  color: var(--tech-fg-strong);
+}
+.ai-card p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--tech-muted);
+}
+.ai-skill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  background:
+    linear-gradient(var(--tech-code-bg), var(--tech-code-bg)) padding-box,
+    var(--tech-gradient) border-box;
+}
+.ai-skill__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--tech-fg-strong);
+}
+.ai-skill__title a {
+  font-size: 0.8rem;
+}
+.ai-skill .tech-prompt {
+  align-self: flex-start;
+}
+.ai-skill ul {
+  margin: 0;
+  font-size: 0.88rem;
+}
+.ai-quote {
+  padding: 0.6rem 0.9rem;
+  border-left: 3px solid var(--tech-violet);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tech-violet) 8%, transparent);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+.ai-repo {
+  margin-top: auto;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--tech-border);
+  font-size: 0.8rem;
+  color: var(--tech-muted);
+}
+.ai-quote small {
+  display: block;
+  margin-top: 0.3rem;
+  font-style: normal;
+  color: var(--tech-muted);
+}
+</style>
+
+<!--
+Message : Effect est un très bon terrain pour les agents de code, et l'équipe Effect l'outille officiellement.
+Pourquoi : un style unique (moins de « créativité » de l'agent), des erreurs et dépendances dans le type (le compilateur lui signale ce qu'il a oublié), tout est intégré (pas de dépendances au hasard), et la doc voyage avec le paquet.
+Le paquet effect 4.0.0 contient AGENTS.md (≈ 400 lignes, identique à CLAUDE.md), ai-docs/ (76 fichiers d'exemples par thème : services, schedule, streams, http, sql, cli, cluster…) et les sources src/.
+Le skill officiel (github.com/Effect-TS/skills) : effect-ts ajoute aux instructions de l'agent (AGENTS.md / CLAUDE.md) « lire node_modules/effect/AGENTS.md avant d'écrire du code Effect » ; effect-v3-to-v4 guide la migration.
+Dans ce dépôt : un skill Effect dans .github/skills/effect, et backend/AGENTS.md qui y renvoie ; le plugin @effect/tsgo ajoute des diagnostics Effect au compilateur (encore du feedback pour l'agent).
+Autres témoignages : Rhys Sullivan (mars 2026) : « in the long term it's much more token efficient than writing standard TS » ; T3 Code, « very large portions agent coded » ; Michael Arnaldi : donner le repo Effect à l'agent (git subtree).
+Sources : skills.sh/effect-ts/skills/effect-ts (8,5 k installations au 4 nov. 2026), effect.website (« LLMs ❤️ Effect »), tweet de Matt Pocock du 1er oct. 2026.
+-->
+---
+
+# Quand l'adopter ? (avec honnêteté)
+
+<div class="grid grid-cols-2 gap-6">
+<div class="px-4 pt-2 rounded-xl border border-green-500/30 bg-green-500/6">
+
+### ✅ Oui si…
+- Beaucoup d'I/O, d'erreurs et de dépendances
+- Besoin de résilience (retry, timeout, annulation)
+- Équipe prête à apprendre un nouveau paradigme
+
+</div>
+<div class="px-4 pt-2 rounded-xl border border-amber-500/30 bg-amber-500/6">
+
+### ⚠️ Attention si…
+- Petit script ou projet très simple
+- Courbe d'apprentissage non budgétée
+- Taille du bundle critique
+
+</div>
+</div>
+
+<v-click>
+
+👉 Adoption **progressive** possible : `Effect.runPromise` à la frontière de ton code existant.
+
+</v-click>
+
+<v-click>
+
+<div class="mt-3 px-4 py-1 rounded-lg border border-green-500/40 bg-green-500/8">
+
+**💼 Et côté emploi ?** Effect reste une compétence **de niche, mais recherchée** : le [job board officiel](https://effect.website/effect-jobs) liste une vingtaine d'entreprises qui recrutent, surtout dans **l'IA et les LLM** (OpenRouter, HumanLayer, Supermemory), **la fintech et l'assurance** (Gen, Reap, Tranched à Paris, Evalucar en France) et **les outils pour développeurs** (Warp, Solid). Des postes souvent seniors ou « founding engineer », affichés de **90–120 k€** à Munich à **plus de 200 k$** aux États-Unis.
+
+</div>
+
+</v-click>
+
+<!--
+Sources (vérifiées le 4 novembre 2026) :
+- effect.website/effect-jobs : 20 entreprises listées. IA/LLM : OpenRouter, HumanLayer, Supermemory, Datapizza, SynTwin, Joymore. Fintech/insurtech : Gen, Reap, Tranched (Paris), Evalucar (France). Dev tools : Warp, Solid. Aussi santé (Medblocks), legaltech (LEAP), broadcast (Bitfocus).
+- Salaires affichés : SynTwin 90–120 k€ (Munich), HumanLayer 180–250 k$ (SF), Gen 218–239 k$ (NYC).
+- En production (effect.website) : OpenCode, OpenRouter, MasterClass ; Effect Days 2026 cite aussi Cloudflare, Warp, Alchemy.
+- npm : ~74 M de téléchargements/semaine pour `effect`, mais gonflés par les dépendances indirectes (ex. @prisma/config dépend de effect) ; GitHub : ~17 500 étoiles.
+- Honnêteté : marché encore petit ; c'est un atout différenciant sur un CV TypeScript, pas encore un mot-clé de masse.
+-->
+---
+layout: center
+class: text-center
+---
+
+# Merci ! <span class="tech-emoji">🙏</span>
+
+Questions ?
+
+<div class="grid grid-cols-[1fr_auto_1fr] gap-10 items-center text-left mt-8 text-sm">
+<div>
+
+### 🔗 Pour aller plus loin
+
+- [effect.website/docs](https://effect.website/docs/) : la documentation
+- [github.com/Effect-TS/effect](https://github.com/Effect-TS/effect) : le code source
+- [discord.gg/effect-ts](https://discord.gg/effect-ts) : la communauté (très active)
+- [Module of the Week](https://effect.website/module-of-the-week) : un module expliqué chaque semaine
+- [Effect Days](https://effect.website/effect-days) : la conférence
+- [Effect Jobs](https://effect.website/effect-jobs) : les offres d'emploi
+
+</div>
+<div class="text-center">
+  <div class="inline-block bg-white p-3 rounded-xl shadow-lg">
+    <img src="./images/qr-github-effect-ts.svg" alt="QR code vers github.com/Mimetis/effect-ts" class="w-44 h-44" style="image-rendering: pixelated" />
+  </div>
+  <div class="mt-2 font-mono text-xs">
+    <a href="https://github.com/Mimetis/effect-ts">github.com/Mimetis/effect-ts</a>
+  </div>
+  <div class="text-xs opacity-70">slides + démos</div>
+</div>
+<div>
+
+### 🐦 À suivre sur X
+
+- [@EffectTS_](https://x.com/EffectTS_) : le compte officiel
+- [@MichaelArnaldi](https://x.com/MichaelArnaldi) : créateur d'Effect
+- [@kitlangton](https://x.com/kitlangton) : OpenCode, talks Effect
+- [@mattiamanzati](https://x.com/mattiamanzati) : Effectful Technologies
+- [@schickling](https://x.com/schickling) : local-first, LiveStore
+- [@mattpocockuk](https://x.com/mattpocockuk) : TypeScript (et Effect)
+
+</div>
+</div>
+
+<!--
+Le QR code pointe vers https://github.com/Mimetis/effect-ts (slides et démos du talk).
+Comptes X vérifiés : @EffectTS_ et @MichaelArnaldi cités par effect.website ; @kitlangton, @mattiamanzati, @schickling via leurs profils GitHub ; @mattpocockuk cité sur effect.website (« Why Effect was designed this way »).
 -->
 
 ---
